@@ -16,7 +16,6 @@ node_js:
 
 before_install:
   - npm i -g npm@^5.5.1
-  - npm i -g lerna@^2.5.1
   - mysql -e 'CREATE DATABASE IF NOT EXISTS RAP2_DELOS_APP DEFAULT CHARSET utf8 COLLATE utf8_general_ci'
 
 script:

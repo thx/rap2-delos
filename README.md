@@ -1,28 +1,67 @@
-# rap2-delos CE
+# RAP2-DELOS CE version (back-end data API server)
 
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Build Status](https://travis-ci.org/thx/rap2-delos.svg?branch=master)](https://travis-ci.org/thx/rap2-delos)
 
-RAP2 服务端。
 
-http://rap2api.taobao.org
+RAP2 is a new project based on [RAP1](https://github.com/thx/RAP). It has two components:
 
-## 本地开发
+* rap2-delos: back-end data API server based on Koa + MySQL [link](http://github.com/thx/rap2-delos)
+* rap2-dolores: front-end static build based on React [link](http://github.com/thx/rap2-dolores)
 
-```
+### Resources
+
+* [Official Site: rap2.taobao.org](http://rap2.taobao.org)
+* DingDing Group ID: 11789704
+
+## Deployment
+
+### development
+
+```sh
+
+# create database
+mysql -e 'CREATE DATABASE IF NOT EXISTS RAP2_DELOS_APP DEFAULT CHARSET utf8 COLLATE utf8_general_ci'
+
+# initialize database
+npm install
+npm run create-db
+
+# execute mocha test cases & js code check
+npm run check
+
+# start server in development mode
 npm run dev
-```
-
-## 测试
 
 ```
-npm run test
+
+### production
+
+```sh
+
+# start server in production mode
+npm start
+
 ```
 
-或者
+## Author
 
-```
-# 在任意文件变化后自动运行测试用例
-npm run watch-test
-# 在任意文件变化后自动运行指定的测试用例
-npm run watch-test test/test.repository.js
-```
+* Owner: Alimama FE Team
+* Author:
+  * Before v2.3: all by [@Nuysoft](https://github.com/nuysoft/), creator of [mockjs](mockjs.com).
+  * v2.4+ / CE version: [Bosn](http://github.com/bosn/)(creator of [RAP1](https://github.com/thx/RAP)) [Nuysoft](https://github.com/nuysoft/)
+  * We are looking for more and more contributors :)
+
+
+### Tech Arch
+
+* Front-end (rap2-dolores)
+    * React / Redux / Saga / Router
+    * Mock.js
+    * SASS / Bootstrap 4 beta
+    * server: nginx
+* Back-end (rap2-delos)
+    * Koa
+    * Sequelize
+    * MySQL
+    * Server
+    * server: node
