@@ -1,0 +1,65 @@
+{
+  "name": "rap2-delos",
+  "version": "1.0.0",
+  "repository": {
+    "url": ""
+  },
+  "description": "",
+  "main": "dispatch.js",
+  "scripts": {
+    "create-db": "node scripts/init",
+    "dev": "NODE_ENV=development nodemon --watch scripts --watch src scripts/dev.js",
+    "dev-local": "NODE_ENV=local nodemon --watch scripts --watch src scripts/dev.js",
+    "start": "NODE_ENV=production node dispatch.js",
+    "check": "npm run linter && mocha",
+    "test": "NODE_ENV=development mocha",
+    "linter": "standard --fix",
+    "watch-test": "NODE_ENV=development nodemon --watch scripts --watch src --watch test ./node_modules/.bin/mocha --timeout 5000",
+    "watch-test-local": "NODE_ENV=local nodemon --watch scripts --watch src --watch test ./node_modules/.bin/mocha --timeout 5000"
+  },
+  "author": "mozhi.gyy@alibaba-inc.com, bosn@outlook.com",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "graceful": "^1.0.1",
+    "js-beautify": "^1.6.9",
+    "kcors": "^2.2.1",
+    "koa": "^2.2.0",
+    "koa-body": "^2.0.0",
+    "koa-logger": "^2.0.1",
+    "koa-router": "^7.1.1",
+    "koa-send": "^4.0.0",
+    "koa-session": "^5.0.0",
+    "koa-static": "^3.0.0",
+    "mockjs": "^1.0.1-beta3",
+    "moment": "^2.17.1",
+    "mysql": "^2.11.1",
+    "node-fetch": "^1.7.1",
+    "node-print": "0.0.4",
+    "sequelize": "^3.30.4",
+    "sequelize-cli": "^3.1.0",
+    "underscore": "^1.8.3",
+    "urllib": "^2.22.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "chai": "^3.5.0",
+    "mocha": "^3.3.0",
+    "nodemon": "^1.11.0",
+    "npm-run-all": "^4.0.2",
+    "pre-commit": "^1.2.2",
+    "standard": "^10.0.2",
+    "supertest": "^3.0.0"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "globals": [],
+    "ignore": []
+  },
+  "pre-commit": [
+    "linter"
+  ],
+  "engines": {
+    "install-node": "9.2.0"
+  }
+}

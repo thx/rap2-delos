@@ -1,0 +1,14 @@
+<script src="//g.alicdn.com/thx/brix-deps/jquery@jquery/1.12.4/dist/jquery.js"></script>
+<script src="//g.alicdn.com/thx/brix-deps/nuysoft@Mock/1.0.1-beta3/dist/mock.js"></script>
+<div id="result"></div>
+<script src="./test.request.js"></script>
+<script>
+  const id = /id=(\d+)/.exec(location.search) || ['', 1]
+  if (id) {
+    $.getScript(`/app/plugin/${id[1]}`).then(() => {
+      $.getScript(`/libs/fetch.rap.js`).then(() => {
+        doRequest(window.RAP, window.fetch)
+      })
+    })
+  }
+</script>
