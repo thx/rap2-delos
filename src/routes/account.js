@@ -42,7 +42,7 @@ router.get('/account/list', async(ctx, next) => {
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 10)
   ctx.body = {
     data: await User.findAll(Object.assign(options, {
-      attributes: QueryInclude.User.attributes,
+      attributes: ['id', 'fullname'],
       offset: pagination.start,
       limit: pagination.limit,
       order: [
@@ -89,9 +89,6 @@ router.get('/account/logout', async(ctx, next) => {
 router.post('/account/register', async(ctx, next) => {
   // TODO 2.4 empId 可能为空，需要重新梳理用户注册流程
   let { fullname, email, password } = ctx.request.body
-  console.log(fullname)
-  console.log(email)
-  console.log(password)
   let exists = await User.findAll({
     where: { email }
   })
@@ -125,10 +122,19 @@ router.post('/account/register', async(ctx, next) => {
 })
 
 router.get('/account/remove', async(ctx, next) => {
-  ctx.body = {
-    data: await User.destroy({
-      where: { id: ctx.query.id }
-    })
+  if (process.env.TEST_MODE === 'true') {
+    ctx.body = {
+      data: await User.destroy({
+        where: { id: ctx.query.id }
+      })
+    }
+  } else {
+    ctx.body = {
+      data: {
+        isOk: false,
+        errMsg: 'access forbidden'
+      }
+    }
   }
 })
 

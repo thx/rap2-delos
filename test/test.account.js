@@ -9,6 +9,9 @@ describe('Account', () => {
   let validUser = (user) => {
     user.should.be.a('object').have.all.keys(['id', 'fullname', 'email'])
   }
+  let validUserForSearch = (user) => {
+    user.should.be.a('object').have.all.keys(['id', 'fullname'])
+  }
   let validPagination = (pagination) => {
     pagination.should.be.a('object').contain.all.keys(['cursor', 'limit', 'total'])
   }
@@ -44,7 +47,7 @@ describe('Account', () => {
         let { data, pagination } = res.body
         data.should.be.a('array').have.length.above(0)
         data.forEach(item => {
-          validUser(item)
+          validUserForSearch(item)
         })
         validPagination(pagination)
         done()

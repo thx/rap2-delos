@@ -76,7 +76,7 @@ router.get('/app/plugin/:repositories', async (ctx, next) => {
         repositoryIds.add(item.id)
       })
     }
-    console.log(repositoryIds)
+    // console.log(repositoryIds)
     repository.interfaces = await Interface.findAll({
       attributes: { exclude: [] },
       where: {

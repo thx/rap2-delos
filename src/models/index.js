@@ -56,6 +56,7 @@ Logger.Interface = Logger.belongsTo(Interface, { foreignKey: 'interfaceId', as: 
 
 const QueryInclude = {
   User: { model: User, as: 'user', attributes: { exclude: ['password', ...Helper.exclude.generalities] }, required: true },
+  UserForSearch: { model: User, as: 'user', attributes: { include: ['id', 'fullname'] }, required: true },
   Creator: { model: User, as: 'creator', attributes: { exclude: ['password', ...Helper.exclude.generalities] }, required: true },
   Owner: { model: User, as: 'owner', attributes: { exclude: ['password', ...Helper.exclude.generalities] }, required: true },
   Locker: { model: User, as: 'locker', attributes: { exclude: ['password', ...Helper.exclude.generalities] }, required: false },

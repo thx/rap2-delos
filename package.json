@@ -11,8 +11,8 @@
     "dev": "NODE_ENV=development nodemon --watch scripts --watch src scripts/dev.js",
     "dev-local": "NODE_ENV=local nodemon --watch scripts --watch src scripts/dev.js",
     "start": "NODE_ENV=production node dispatch.js",
-    "check": "npm run linter && mocha",
-    "test": "NODE_ENV=development mocha",
+    "check": "npm run linter && test",
+    "test": "NODE_ENV=development TEST_MODE=true mocha --exit --reporter nyan",
     "linter": "standard --fix",
     "watch-test": "NODE_ENV=development nodemon --watch scripts --watch src --watch test ./node_modules/.bin/mocha --timeout 5000",
     "watch-test-local": "NODE_ENV=local nodemon --watch scripts --watch src --watch test ./node_modules/.bin/mocha --timeout 5000"
@@ -44,7 +44,7 @@
   "devDependencies": {
     "babel-eslint": "^7.2.3",
     "chai": "^3.5.0",
-    "mocha": "^3.3.0",
+    "mocha": "^4.0.1",
     "nodemon": "^1.11.0",
     "npm-run-all": "^4.0.2",
     "pre-commit": "^1.2.2",
