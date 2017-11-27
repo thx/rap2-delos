@@ -21,6 +21,7 @@ before_install:
 script:
   - npm install
   - npm run create-db
-  - npm run check
+  - npm run test
+  - npm run linter
 
 after_success:
