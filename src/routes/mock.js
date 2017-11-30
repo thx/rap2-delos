@@ -5,6 +5,7 @@ const attributes = { exclude: [] }
 const Tree = require('./utils/tree')
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
+const urlUtils = require('./utils/url')
 
 // 检测是否存在重复接口，会在返回的插件 JS 中提示。同时也会在编辑器中提示。
 const parseDuplicatedInterfaces = (repository) => {
@@ -125,7 +126,13 @@ router.all('/app/mock/(\\d+)/(\\w+)/(.+)', async (ctx, next) => {
   let repository = await Repository.findById(repositoryId)
   let collaborators = await repository.getCollaborators()
 
-  let itf = await Interface.findOne({
+  console.log(repositoryId)
+  console.log(method)
+  console.log(url)
+
+  let itf
+
+  itf = await Interface.findOne({
     attributes,
     where: {
       repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
@@ -135,8 +142,30 @@ router.all('/app/mock/(\\d+)/(\\w+)/(.+)', async (ctx, next) => {
   })
 
   if (!itf) {
-    ctx.body = {}
-    return
+    // try RESTFul API search...
+    let list = await Interface.findAll({
+      attributes: ['id', 'url', 'method'],
+      where: {
+        repositoryId: [repositoryId, ...collaborators.map(item => item.id)]
+      }
+    })
+
+    let listMatched = []
+    for (let item of list) {
+      if (urlUtils.urlMatchesPattern(url, item.url)) {
+        listMatched.push(item)
+      }
+    }
+
+    if (listMatched.length > 1) {
+      ctx.body = { isOk: false, errMsg: '匹配到多个接口，请修改规则确保接口规则唯一性。 Matched duplicate interfaces, please ensure pattern to be unique.' }
+      return
+    } else if (listMatched.length === 0) {
+      ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
+      return
+    } else {
+      itf = await Interface.findById(listMatched[0].id)
+    }
   }
 
   let interfaceId = itf.id

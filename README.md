@@ -37,9 +37,8 @@ npm run dev
 ### production
 
 ```sh
-# 1. change server config in /config/config.prod.js
 
-# 2. start server in production mode
+# start server in production mode
 npm start
 
 ```
