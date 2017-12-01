@@ -125,11 +125,6 @@ router.all('/app/mock/(\\d+)/(\\w+)/(.+)', async (ctx, next) => {
 
   let repository = await Repository.findById(repositoryId)
   let collaborators = await repository.getCollaborators()
-
-  console.log(repositoryId)
-  console.log(method)
-  console.log(url)
-
   let itf
 
   itf = await Interface.findOne({

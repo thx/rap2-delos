@@ -1,7 +1,8 @@
 const start = () => {
   let execSync = require('child_process').execSync
   let app = require('./app')
-  let port = 8080
+  const config = require('../config')
+  let port = config.serve.port
   let url = `http://localhost:${port}` // /api.html
   let open = false
   console.log('----------------------------------------')

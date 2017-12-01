@@ -24,9 +24,6 @@ pkg.getRelative = url => {
 }
 
 pkg.urlMatchesPattern = (url, pattern) => {
-  console.log('matching')
-  console.log(url)
-  console.log(pattern)
   url = pkg.getRelative(url)
   pattern = pkg.getRelative(pattern)
   let re = pathToRegexp(pattern)
