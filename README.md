@@ -33,6 +33,10 @@ npm install
 # confirm configurations in /config/config.dev.js (used in development mode)
 # 确认/config/config.dev.js中的配置(.dev.js后缀表示用于开发模式)
 
+# TypeScript compile TS编译
+# Installing TypeScript Compiler Docs 安装TypeScript编译器文档: [https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
+tsc
+
 # initialize database 初始化数据库
 npm run create-db
 
