@@ -291,7 +291,8 @@ router.post('/repository/unlock', async (ctx) => {
     return
   }
   let { id } = ctx.request.body
-  let result = await Repository.update({ lockerId: undefined }, {
+  // tslint:disable-next-line:no-null-keyword
+  let result = await Repository.update({ lockerId: null }, {
     where: { id }
   })
   ctx.body = { data: result[0] }
@@ -547,7 +548,8 @@ router.post('/interface/unlock', async (ctx, next) => {
     return
   }
 
-  let result = await Interface.update({ lockerId: undefined }, {
+  // tslint:disable-next-line:no-null-keyword
+  let result = await Interface.update({ lockerId: null }, {
     where: { id }
   })
   ctx.body = {

@@ -7,15 +7,13 @@
   "description": "",
   "main": "dist/dispatch.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
-    "start": "cross-env NODE_ENV=production node dist/dispatch.js",
     "build": "rm -rf dist/ && tsc",
     "test": "npm run build && cross-env NODE_ENV=development cross-env TEST_MODE=true nyc mocha --exit --reporter nyan",
     "check": "npm run tslint",
-    "dev": "npm run build && cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
+    "dev": "cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
     "create-db": "node dist/scripts/init",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "start": "npm run build && cross-env NODE_ENV=production node dist/dispatch.js"
+    "start": "cross-env NODE_ENV=production node dist/dispatch.js"
   },
   "author": "bosn, nuysoft",
   "license": "ISC",

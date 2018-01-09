@@ -23,28 +23,28 @@ export  class Logger extends Model<Logger> {
   type: string
 
   @ForeignKey(() => User)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   creatorId: number
 
   @AllowNull(false)
   @ForeignKey(() => User)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   userId: number
 
   @ForeignKey(() => Organization)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   organizationId: number
 
   @ForeignKey(() => Repository)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   repositoryId: number
 
   @ForeignKey(() => Module)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   moduleId: number
 
   @ForeignKey(() => Interface)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   interfaceId: number
 
   @BelongsTo(() => User, 'creatorId')

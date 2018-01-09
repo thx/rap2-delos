@@ -20,7 +20,7 @@ export class Module extends Model<Module> {
 
   @AllowNull(false)
   @Default(1)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   priority: number
 
   @ForeignKey(() => User)

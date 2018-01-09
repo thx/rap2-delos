@@ -33,7 +33,7 @@ export class Interface extends Model<Interface> {
 
   @AllowNull(false)
   @Default(1)
-  @Column({ type: DataType.BIGINT(11).UNSIGNED, comment: 'Priority used for ordering' })
+  @Column({ comment: 'Priority used for ordering' })
   priority: number
 
   @ForeignKey(() => User)

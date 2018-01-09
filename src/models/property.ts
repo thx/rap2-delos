@@ -47,12 +47,12 @@ export class Property extends Model<Property> {
 
   @AllowNull(false)
   @Default(-1)
-  @Column({ type: DataType.BIGINT(11), comment: 'parent property ID' })
+  @Column({ comment: 'parent property ID' })
   parentId: number
 
   @AllowNull(false)
   @Default(1)
-  @Column(DataType.BIGINT(11).UNSIGNED)
+  @Column
   priority: number
 
   @ForeignKey(() => Interface)

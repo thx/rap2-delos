@@ -8,11 +8,11 @@ export class Notification extends Model<Notification> {
   @Column
   id: number
 
-  @Column({ type: DataType.BIGINT(11).UNSIGNED, comment: 'sender' })
+  @Column({ comment: 'sender' })
   fromId: number
 
   @AllowNull(false)
-  @Column({ type: DataType.BIGINT(11).UNSIGNED, comment: 'receiver' })
+  @Column({ comment: 'receiver' })
   toId: number
 
   @AllowNull(false)

@@ -38,7 +38,7 @@ export class Organization extends Model<Organization> {
   @BelongsTo(() => User, 'ownerId')
   owner: User
 
-  @BelongsToMany(() => User, 'organizations_members', 'organizationId', 'userId')
+  @BelongsToMany(() => User, 'organizations_members', 'userId', 'organizationId')
   members: User[]
 
   @HasMany(() => Repository, 'organizationId')
