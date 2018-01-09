@@ -27,7 +27,7 @@ sequelize.authenticate()
   .then((/* err */) => {
 
     // initialize hooks
-    Organization.hook('afterCreate', async(instance, options) => {
+    Organization.hook('afterCreate', async(instance) => {
       await Logger.create({
         userId: instance.creatorId,
         type: 'create',

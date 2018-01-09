@@ -1,9 +1,9 @@
 /* global describe, it, before */
-let app = require('../scripts/app')
+let app = require('../dist/scripts/app').default
 let request = require('supertest').agent(app.listen())
 let should = require('chai').should()
 let Random = require('mockjs').Random
-const { Property } = require('../src/models')
+const { Property } = require('../dist/models')
 const { mockUsers, mockRepository, prepare } = require('./helper')
 
 describe('Property', () => {

@@ -1,4 +1,4 @@
-import { Sequelize, Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey } from 'sequelize-typescript'
 import { User, Repository } from './index'
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })

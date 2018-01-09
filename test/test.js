@@ -1,5 +1,5 @@
 /* global describe, it */
-let app = require('../scripts/app')
+let app = require('../dist/scripts/app').default
 let request = require('supertest').agent(app.listen())
 let should = require('chai').should()
 

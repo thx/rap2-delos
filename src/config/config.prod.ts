@@ -1,5 +1,6 @@
 import { IConfigOptions } from "../types";
-let config:IConfigOptions =  {
+
+let config: IConfigOptions =  {
   version: '2.3',
   serve: {
     port: 8080

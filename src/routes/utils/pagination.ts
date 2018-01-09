@@ -168,7 +168,7 @@ export class Pagination {
   }
 
   public toString() {
-    return JSON.stringify(this, null, 4)
+    return JSON.stringify(this, undefined, 4)
   }
 
   public to = this.moveTo

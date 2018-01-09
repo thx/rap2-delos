@@ -1,5 +1,5 @@
 /* global describe, it */
-const app = require('../scripts/app')
+const app = require('../dist/scripts/app').default
 const request = require('supertest').agent(app.listen())
 const should = require('chai').should()
 const { mockUsers, prepare } = require('./helper')

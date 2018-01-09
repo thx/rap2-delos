@@ -1,5 +1,5 @@
-import { Sequelize, Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
-import {User, Repository, Interface} from './index'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
+import { User, Repository, Interface } from './index'
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export class Module extends Model<Module> {

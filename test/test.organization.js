@@ -1,9 +1,9 @@
 /* global describe, it, before */
-const app = require('../scripts/app')
+const app = require('../dist/scripts/app').default
 const request = require('supertest').agent(app.listen())
 const should = require('chai').should()
 const Random = require('mockjs').Random
-const { Organization } = require('../src/models')
+const { Organization } = require('../dist/models')
 const { mockUsers, prepare, keys } = require('./helper')
 
 describe('Organization', () => {

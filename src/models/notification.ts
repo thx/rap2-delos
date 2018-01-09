@@ -1,4 +1,4 @@
-import { Sequelize, Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default } from 'sequelize-typescript'
+import { Table, Column, Model, AutoIncrement, PrimaryKey, AllowNull, DataType, Default } from 'sequelize-typescript'
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export class Notification extends Model<Notification> {

@@ -1,4 +1,4 @@
-import { Sequelize, Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-TYPEScript'
+import { Table, Column, Model, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
 import { User, Interface, Module, Repository } from './index'
 
 enum SCOPES { REQUEST = 'request', RESPONSE = 'response' }

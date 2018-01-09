@@ -39,8 +39,8 @@ const generatePlugin = (protocol, host, repository) => {
   let repositoryId = ${repository.id}
   let interfaces = [
     ${repository.interfaces.map(itf =>
-      `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}', 
-      request: ${JSON.stringify(itf.request)}, 
+      `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
+      request: ${JSON.stringify(itf.request)},
       response: ${JSON.stringify(itf.response)} }`
     ).join(',\n    ')}
   ]
@@ -56,7 +56,7 @@ const generatePlugin = (protocol, host, repository) => {
   return beautify(result, { indent_size: 2 })
 }
 
-router.get('/app/plugin/:repositories', async (ctx, next) => {
+router.get('/app/plugin/:repositories', async (ctx) => {
   let repositoryIds = new Set<number>(ctx.params.repositories.split(',').map(item => +item).filter(item => item)) // _.uniq() => Set
   let result = []
   for (let id of repositoryIds) {
@@ -105,8 +105,9 @@ router.get('/app/plugin/:repositories', async (ctx, next) => {
 // X DONE 2.2 支持 GET POST PUT DELETE 请求
 // DONE 2.2 忽略请求地址中的前缀斜杠
 // DONE 2.3 支持所有类型的请求，这样从浏览器中发送跨越请求时不需要修改 method
-router.all('/app/mock/(\\d+)/(.+)', async (ctx, next) => {
-  ctx.app.counter.mock++
+router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
+  let app: any = ctx.app
+  app.counter.mock++
 
   let [ repositoryId, method, url ] = [ctx.params[0], ctx.request.method, ctx.params[1]]
 
@@ -182,12 +183,13 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx, next) => {
 
   let data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
-  ctx.body = JSON.stringify(data, null, 2)
+  ctx.body = JSON.stringify(data, undefined, 2)
 })
 
 // DONE 2.2 支持获取请求参数的模板、数据、Schema
-router.get('/app/mock/template/:interfaceId', async (ctx, next) => {
-  ctx.app.counter.mock++
+router.get('/app/mock/template/:interfaceId', async (ctx) => {
+  let app: any = ctx.app
+  app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
@@ -202,8 +204,9 @@ router.get('/app/mock/template/:interfaceId', async (ctx, next) => {
   // ctx.body = JSON.stringify(template, null, 2)
 })
 
-router.get('/app/mock/data/:interfaceId', async (ctx, next) => {
-  ctx.app.counter.mock++
+router.get('/app/mock/data/:interfaceId', async (ctx) => {
+  let app: any = ctx.app
+  app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
@@ -224,11 +227,12 @@ router.get('/app/mock/data/:interfaceId', async (ctx, next) => {
 
   let data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
-  ctx.body = JSON.stringify(data, null, 2)
+  ctx.body = JSON.stringify(data, undefined, 2)
 })
 
-router.get('/app/mock/schema/:interfaceId', async (ctx, next) => {
-  ctx.app.counter.mock++
+router.get('/app/mock/schema/:interfaceId', async (ctx) => {
+  let app: any = ctx.app
+  app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
@@ -242,8 +246,9 @@ router.get('/app/mock/schema/:interfaceId', async (ctx, next) => {
   ctx.body = Tree.stringifyWithFunctonAndRegExp(schema)
 })
 
-router.get('/app/mock/tree/:interfaceId', async (ctx, next) => {
-  ctx.app.counter.mock++
+router.get('/app/mock/tree/:interfaceId', async (ctx) => {
+  let app: any = ctx.app
+  app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({

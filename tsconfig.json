@@ -11,6 +11,8 @@
     "sourceMap": true,
     "watch": false,
     "baseUrl": "./src",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "rootDir": "./src",
     "paths": {
       "*": [

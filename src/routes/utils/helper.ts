@@ -1,4 +1,4 @@
-let { Module, Interface, Property } = require('../../models')
+import { Module, Interface, Property } from '../../models'
 
 const genExampleModule = (extra) => Object.assign({
   name: '示例模块',
@@ -12,7 +12,7 @@ const genExampleInterface = (extra) => Object.assign({
   method: 'GET',
   description: '示例接口描述',
   creatorId: undefined,
-  lockerId: null,
+  lockerId: undefined,
   moduleId: undefined,
   repositoryId: undefined
 }, extra)

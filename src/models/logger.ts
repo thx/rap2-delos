@@ -1,4 +1,4 @@
-import { Sequelize, Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
+import {  Table, Column, Model,  AutoIncrement, PrimaryKey, AllowNull, DataType, BelongsTo, ForeignKey } from 'sequelize-typescript'
 import { User, Repository, Organization, Module, Interface } from './index'
 
 enum types {

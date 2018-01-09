@@ -1,6 +1,6 @@
 import { IConfigOptions } from "../types";
 
-let config:IConfigOptions =  {
+let config: IConfigOptions = {
   version: '2.3',
   serve: {
     port: 8080
@@ -14,7 +14,7 @@ let config:IConfigOptions =  {
     host: 'localhost',
     port: 3306,
     username: 'root',
-    password: '', 
+    password: '',
     database: 'RAP2_DELOS_APP',
     pool: {
       max: 5,

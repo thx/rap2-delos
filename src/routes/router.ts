@@ -1,30 +1,29 @@
 import * as Router from 'koa-router'
-import fetch from 'node-fetch'
 let router = new Router()
 
 // index
-router.get('/', (ctx, next) => {
+router.get('/', (ctx) => {
   ctx.body = 'Hello RAP!'
 })
 
 // env
-router.get('/env', (ctx, next) => {
+router.get('/env', (ctx) => {
   ctx.body = process.env.NODE_ENV
 })
 
 // fix preload
-router.get('/check.node', (ctx, next) => {
+router.get('/check.node', (ctx) => {
   ctx.body = 'success'
 })
-router.get('/status.taobao', (ctx, next) => {
+router.get('/status.taobao', (ctx) => {
   ctx.body = 'success'
 })
-router.get('/test/test.status', (ctx, next) => {
+router.get('/test/test.status', (ctx) => {
   ctx.body = 'success'
 })
 
 // proxy
-router.get('/proxy', async(ctx, next) => {
+router.get('/proxy', async(ctx) => {
   let { target } = ctx.query
   console.log(`      <=> ${target}`)
   let json = await fetch(target).then(res => res.json())

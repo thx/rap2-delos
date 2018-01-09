@@ -1,4 +1,4 @@
-const debug = true
+// const debug = true
 import * as Koa from 'koa'
 import * as session from 'koa-session'
 import * as logger from 'koa-logger'
@@ -8,12 +8,12 @@ import * as cors from 'kcors'
 import router from '../routes'
 import config from '../config'
 
-const app = new Koa()
+const app: any = new Koa()
 app.counter = { users: {}, mock: 0 }
 
 app.keys = config.keys
 app.use(session(config.session, app))
-if (debug) app.use(logger())
+if (process.env.NODE_ENV === 'development') app.use(logger())
 app.use(async(ctx, next) => {
   await next()
   if (ctx.path === '/favicon.ico') return
@@ -28,13 +28,13 @@ app.use(async(ctx, next) => {
   if (typeof ctx.body === 'object' && ctx.body.data !== undefined) {
     ctx.type = 'json'
     // ctx.body.path = ctx.path
-    ctx.body = JSON.stringify(ctx.body, null, 2)
+    ctx.body = JSON.stringify(ctx.body, undefined, 2)
   }
 })
 app.use(async(ctx, next) => {
   await next()
   if (ctx.request.query.callback) {
-    let body = typeof ctx.body === 'object' ? JSON.stringify(ctx.body, null, 2) : ctx.body
+    let body = typeof ctx.body === 'object' ? JSON.stringify(ctx.body, undefined, 2) : ctx.body
     ctx.body = ctx.request.query.callback + '(' + body + ')'
     ctx.type = 'application/x-javascript'
   }

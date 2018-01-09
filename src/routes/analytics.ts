@@ -6,12 +6,12 @@ const sequelize = require('../models/sequelize')
 const YYYY_MM_DD = 'YYYY-MM-DD'
 
 // 最近 30 天新建仓库数
-router.get('/app/analytics/repositories/created', async (ctx, next) => {
+router.get('/app/analytics/repositories/created', async (ctx) => {
   let start = moment().startOf('day').subtract(30, 'days').format(YYYY_MM_DD)
   let end = moment().startOf('day').format(YYYY_MM_DD)
   let sql = `
-    SELECT 
-        DATE(createdAt) AS label, 
+    SELECT
+        DATE(createdAt) AS label,
         COUNT(*) as value
     FROM
         RAP2_DELOS_APP.repositories
@@ -31,12 +31,12 @@ router.get('/app/analytics/repositories/created', async (ctx, next) => {
 })
 
 // 最近 30 天活跃仓库数
-router.get('/app/analytics/repositories/updated', async (ctx, next) => {
+router.get('/app/analytics/repositories/updated', async (ctx) => {
   let start = moment().startOf('day').subtract(30, 'days').format(YYYY_MM_DD)
   let end = moment().startOf('day').format(YYYY_MM_DD)
   let sql = `
-    SELECT 
-        DATE(updatedAt) AS label, 
+    SELECT
+        DATE(updatedAt) AS label,
         COUNT(*) as value
     FROM
         RAP2_DELOS_APP.repositories
@@ -56,11 +56,11 @@ router.get('/app/analytics/repositories/updated', async (ctx, next) => {
 })
 
 // 最近 30 天活跃用户
-router.get('/app/analytics/users/activation', async (ctx, next) => {
+router.get('/app/analytics/users/activation', async (ctx) => {
   let start = moment().startOf('day').subtract(30, 'days').format(YYYY_MM_DD)
   let end = moment().startOf('day').format(YYYY_MM_DD)
   let sql = `
-    SELECT 
+    SELECT
         loggers.userId AS userId,
         users.fullname AS fullname,
         COUNT(*) AS value
@@ -81,11 +81,11 @@ router.get('/app/analytics/users/activation', async (ctx, next) => {
 })
 
 // 最近 30 天活跃仓库
-router.get('/app/analytics/repositories/activation', async (ctx, next) => {
+router.get('/app/analytics/repositories/activation', async (ctx) => {
   let start = moment().startOf('day').subtract(30, 'days').format(YYYY_MM_DD)
   let end = moment().startOf('day').format(YYYY_MM_DD)
   let sql = `
-    SELECT 
+    SELECT
         loggers.repositoryId AS repositoryId,
         repositories.name,
         COUNT(*) AS value

@@ -8,7 +8,7 @@ cluster.setupMaster({
 })
 
 if (cluster.isMaster) {
-  require('os').cpus().forEach((cpu, index) => {
+  require('os').cpus().forEach(() => {
     cluster.fork()
   })
   cluster.on('listening', (worker, address) => {

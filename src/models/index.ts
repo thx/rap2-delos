@@ -1,5 +1,3 @@
-import { User } from '.';
-
 export { QueryInclude } from './queryInclude'
 export { Interface } from './interface'
 export { Logger } from './logger'

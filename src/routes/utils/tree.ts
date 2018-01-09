@@ -117,7 +117,7 @@ export default class Tree {
     try {
       script.runInContext(context, { timeout: 1000 }) // 每次 Mock.mock() 最多执行 1s
       // DONE 2.1 __root__
-      let data:any = sandbox.data
+      let data: any = sandbox.data
       let keys = Object.keys(data)
       if (keys.length === 1 && keys[0] === '__root__') data = data.__root__
       return data
@@ -133,7 +133,7 @@ export default class Tree {
     return template
   }
 
-  public static ArrayToTreeToTemplateToData(list, extra?:any) {
+  public static ArrayToTreeToTemplateToData(list, extra?: any) {
     let tree = Tree.ArrayToTree(list)
     let template = Tree.TreeToTemplate(tree)
     let data
@@ -164,7 +164,8 @@ export default class Tree {
   // X Function.protytype.toJSON = Function.protytype.toString
   // X RegExp.protytype.toJSON = RegExp.protytype.toString
   public static stringifyWithFunctonAndRegExp(json) {
-    return JSON.stringify(json, (k, v) => {
+    return JSON.stringify(json, () => {
+      let v = arguments[1]
       if (typeof v === 'function') return v.toString()
       if (v !== undefined && v !== null && v.exec) return v.toString()
       else return v

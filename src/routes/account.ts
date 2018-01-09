@@ -2,13 +2,8 @@ import * as svgCaptcha from 'svg-captcha'
 import { User, Notification, Logger, Organization, Repository } from '../models'
 import router from './router'
 import { Model } from 'sequelize-typescript';
-import { WhereOptions } from 'sequelize';
 import { Pagination } from './utils/pagination'
 import { QueryInclude } from '../models'
-
-interface Application {
-  counter: any
-}
 
 router.get('/app/get', async (ctx, next) => {
   let data = {}
@@ -29,13 +24,13 @@ router.get('/app/get', async (ctx, next) => {
   return next()
 })
 
-router.get('/account/count', async(ctx, next) => {
+router.get('/account/count', async(ctx) => {
   ctx.body = {
     data: await User.count()
   }
 })
 
-router.get('/account/list', async(ctx, next) => {
+router.get('/account/list', async(ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -61,38 +56,43 @@ router.get('/account/list', async(ctx, next) => {
   }
 })
 
-router.get('/account/info', async(ctx, next) => {
+router.get('/account/info', async(ctx) => {
   ctx.body = {
     data: ctx.session.id ? await User.findById(ctx.session.id, {
       attributes: QueryInclude.User.attributes
-    }) : null
+    }) : undefined
   }
 })
 
-router.post('/account/login', async(ctx, next) => {
+router.post('/account/login', async(ctx) => {
   let { email, password, captcha } = ctx.request.body
   let result, errMsg
 
   if (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase()) {
     errMsg = '错误的验证码'
-  }
- result = await User.findOne({
-    attributes: QueryInclude.User.attributes,
-    where: { email, password }
-  })
-  if (result) {
-    ctx.session.id = result.id
-    ctx.session.fullname = result.fullname
-    ctx.session.email = result.email
-    ctx.app.counter.users[result.fullname] = true
+  } else {
+    result = await User.findOne({
+      attributes: QueryInclude.User.attributes,
+      where: { email, password }
+    })
+    if (result) {
+      ctx.session.id = result.id
+      ctx.session.fullname = result.fullname
+      ctx.session.email = result.email
+      let app: any = ctx.app
+      app.counter.users[result.fullname] = true
+    } else {
+      errMsg = '账号或密码错误'
+    }
   }
   ctx.body = {
-    data: result
+    data: result ? result : { errMsg }
   }
 })
 
-router.get('/account/logout', async(ctx, next) => {
-  delete ctx.app.counter.users[ctx.session.email]
+router.get('/account/logout', async(ctx) => {
+  let app: any = ctx.app
+  delete app.counter.users[ctx.session.email]
   let id = ctx.session.id
   Object.assign(ctx.session, { id: undefined, fullname: undefined, email: undefined })
   ctx.body = {
@@ -100,7 +100,7 @@ router.get('/account/logout', async(ctx, next) => {
   }
 })
 
-router.post('/account/register', async(ctx, next) => {
+router.post('/account/register', async(ctx) => {
   let { fullname, email, password } = ctx.request.body
   let exists = await User.findAll({
     where: { email }
@@ -122,7 +122,8 @@ router.post('/account/register', async(ctx, next) => {
     ctx.session.id = result.id
     ctx.session.fullname = result.fullname
     ctx.session.email = result.email
-    ctx.app.counter.users[result.fullname] = true
+    let app: any = ctx.app
+    app.counter.users[result.fullname] = true
   }
 
   ctx.body = {
@@ -134,7 +135,7 @@ router.post('/account/register', async(ctx, next) => {
   }
 })
 
-router.get('/account/remove', async(ctx, next) => {
+router.get('/account/remove', async(ctx) => {
   if (process.env.TEST_MODE === 'true') {
     ctx.body = {
       data: await User.destroy({
@@ -152,13 +153,13 @@ router.get('/account/remove', async(ctx, next) => {
 })
 
 // TODO 2.3 账户设置
-router.get('/account/setting', async(ctx, next) => {
+router.get('/account/setting', async(ctx) => {
   ctx.body = {
     data: {}
   }
 })
 
-router.post('/account/setting', async(ctx, next) => {
+router.post('/account/setting', async(ctx) => {
   ctx.body = {
     data: {}
   }
@@ -166,7 +167,7 @@ router.post('/account/setting', async(ctx, next) => {
 
 // TODO 2.3 账户通知
 let NOTIFICATION_EXCLUDE_ATTRIBUTES = []
-router.get('/account/notification/list', async(ctx, next) => {
+router.get('/account/notification/list', async(ctx) => {
   let total = await Notification.count()
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 10)
   ctx.body = {
@@ -182,31 +183,31 @@ router.get('/account/notification/list', async(ctx, next) => {
   }
 })
 
-router.get('/account/notification/unreaded', async(ctx, next) => {
+router.get('/account/notification/unreaded', async(ctx) => {
   ctx.body = {
     data: []
   }
 })
 
-router.post('/account/notification/unreaded', async(ctx, next) => {
+router.post('/account/notification/unreaded', async(ctx) => {
   ctx.body = {
     data: 0
   }
 })
 
-router.post('/account/notification/read', async(ctx, next) => {
+router.post('/account/notification/read', async(ctx) => {
   ctx.body = {
     data: 0
   }
 })
 
 // TODO 2.3 账户日志
-router.get('/account/logger', async(ctx, next) => {
+router.get('/account/logger', async(ctx) => {
   let auth = await User.findById(ctx.session.id)
-  let repositories:Model<Repository>[] = [...(<Model<Repository>[]>await auth.$get('ownedRepositories')), ...(<Model<Repository>[]> await auth.$get('joinedRepositories'))]
-  let organizations:Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]> await auth.$get('joinedOrganizations'))]
+  let repositories: Model<Repository>[] = [...(<Model<Repository>[]>await auth.$get('ownedRepositories')), ...(<Model<Repository>[]> await auth.$get('joinedRepositories'))]
+  let organizations: Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]> await auth.$get('joinedOrganizations'))]
 
-  let where:any = {
+  let where: any = {
     $or: [
       { userId: ctx.session.id },
       { repositoryId: repositories.map(item => item.id) },
@@ -241,8 +242,8 @@ router.get('/account/logger', async(ctx, next) => {
   }
 })
 
-router.get('/captcha', async(ctx, next) => {
-  var captcha = svgCaptcha.create()
+router.get('/captcha', async(ctx) => {
+  const captcha = svgCaptcha.create()
   ctx.session.captcha = captcha.text
   ctx.set('Content-Type', 'image/svg+xml')
   ctx.body = captcha.data

@@ -1,4 +1,4 @@
-import { Sequelize, Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
 import { User, Module, Repository, Property } from './index';
 
 enum methods { GET= 'GET', POST= 'POST', PUT= 'PUT', DELETE= 'DELETE' }
@@ -8,8 +8,8 @@ export class Interface extends Model<Interface> {
 
   public static METHODS= methods
 
-  public request?:object
-  public response?:object
+  public request?: object
+  public response?: object
 
   @AutoIncrement
   @PrimaryKey

@@ -23,12 +23,12 @@ router.get('/app/get', async (ctx, next) => {
   return next()
 })
 
-router.get('/organization/count', async(ctx, next) => {
+router.get('/organization/count', async(ctx) => {
   ctx.body = {
     data: await Organization.count()
   }
 })
-router.get('/organization/list', async(ctx, next) => {
+router.get('/organization/list', async(ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -64,7 +64,7 @@ router.get('/organization/list', async(ctx, next) => {
     pagination: pagination
   }
 })
-router.get('/organization/owned', async(ctx, next) => {
+router.get('/organization/owned', async(ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -77,7 +77,7 @@ router.get('/organization/owned', async(ctx, next) => {
   }
 
   let auth = await User.findById(ctx.session.id)
-  let options:any = {
+  let options: any = {
     where,
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
@@ -86,10 +86,10 @@ router.get('/organization/owned', async(ctx, next) => {
   let owned = await auth.$get('ownedOrganizations', options)
   ctx.body = {
     data: owned,
-    pagination: null
+    pagination: undefined
   }
 })
-router.get('/organization/joined', async(ctx, next) => {
+router.get('/organization/joined', async(ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -102,7 +102,7 @@ router.get('/organization/joined', async(ctx, next) => {
   }
 
   let auth = await User.findById(ctx.session.id)
-  let options:object = {
+  let options: object = {
     where,
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
@@ -113,10 +113,10 @@ router.get('/organization/joined', async(ctx, next) => {
   // await auth.getJoinedOrganizations()
   ctx.body = {
     data: joined,
-    pagination: null
+    pagination: undefined
   }
 })
-router.get('/organization/get', async(ctx, next) => {
+router.get('/organization/get', async(ctx) => {
   let organization = await Organization.findById(ctx.query.id, {
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members]
@@ -125,7 +125,7 @@ router.get('/organization/get', async(ctx, next) => {
     data: organization
   }
 })
-router.post('/organization/create', async(ctx, next) => {
+router.post('/organization/create', async(ctx) => {
   let creatorId = ctx.session.id
   let body = Object.assign({}, ctx.request.body, { creatorId, ownerId: creatorId })
   let created = await Organization.create(body)
@@ -158,7 +158,7 @@ router.post('/organization/update', async(ctx, next) => {
     data: updated[0]
   }
   return next()
-}, async(ctx, next) => {
+}, async(ctx) => {
   let { id } = ctx.request.body
   // 团队改
   await Logger.create({
@@ -180,7 +180,7 @@ router.post('/organization/update', async(ctx, next) => {
     await Logger.create({ creatorId, userId, type: 'exit', organizationId: id })
   }
 })
-router.post('/organization/transfer', async(ctx, next) => {
+router.post('/organization/transfer', async(ctx) => {
   let { id, ownerId } = ctx.request.body
   let body = { ownerId }
   let result = await Organization.update(body, { where: { id } })
@@ -205,7 +205,7 @@ router.get('/organization/remove', async(ctx, next) => {
     data: result
   }
   return next()
-}, async(ctx, next) => {
+}, async(ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
   await Logger.create({
