@@ -8,7 +8,7 @@
   "main": "dist/dispatch.js",
   "scripts": {
     "build": "rm -rf dist/ && tsc",
-    "test": "npm run build && cross-env NODE_ENV=development cross-env TEST_MODE=true nyc mocha --exit --reporter nyan",
+    "test": "cross-env NODE_ENV=development cross-env TEST_MODE=true nyc mocha --exit --reporter nyan",
     "check": "npm run tslint",
     "dev": "cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
     "create-db": "node dist/scripts/init",

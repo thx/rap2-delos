@@ -2,7 +2,7 @@ import * as svgCaptcha from 'svg-captcha'
 import { User, Notification, Logger, Organization, Repository } from '../models'
 import router from './router'
 import { Model } from 'sequelize-typescript';
-import { Pagination } from './utils/pagination'
+import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
 
 router.get('/app/get', async (ctx, next) => {
@@ -68,7 +68,8 @@ router.post('/account/login', async(ctx) => {
   let { email, password, captcha } = ctx.request.body
   let result, errMsg
 
-  if (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase()) {
+  if (process.env.TEST_MODE !== 'true' &&
+    (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase())) {
     errMsg = '错误的验证码'
   } else {
     result = await User.findOne({
@@ -216,7 +217,6 @@ router.get('/account/logger', async(ctx) => {
   }
   let total = await Logger.count({ where })
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
-  console.log(QueryInclude.User)
   let logs = await Logger.findAll({
     where,
     attributes: {},

@@ -1,6 +1,6 @@
 let pathToRegexp = require('path-to-regexp')
 
-export default class Pkg {
+export default class UrlUtils {
 
   public static getRelative = url => {
     if (!url || typeof url !== 'string') return
@@ -24,8 +24,8 @@ export default class Pkg {
   }
 
   public static urlMatchesPattern = (url, pattern) => {
-    url = Pkg.getRelative(url)
-    pattern = Pkg.getRelative(pattern)
+    url = UrlUtils.getRelative(url)
+    pattern = UrlUtils.getRelative(pattern)
     let re = pathToRegexp(pattern)
     return re.test(url)
   }

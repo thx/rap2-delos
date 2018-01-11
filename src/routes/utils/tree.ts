@@ -164,8 +164,8 @@ export default class Tree {
   // X Function.protytype.toJSON = Function.protytype.toString
   // X RegExp.protytype.toJSON = RegExp.protytype.toString
   public static stringifyWithFunctonAndRegExp(json) {
-    return JSON.stringify(json, () => {
-      let v = arguments[1]
+    return JSON.stringify(json, (k, v) => {
+      k
       if (typeof v === 'function') return v.toString()
       if (v !== undefined && v !== null && v.exec) return v.toString()
       else return v

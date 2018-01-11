@@ -1,9 +1,9 @@
 // TODO 2.1 大数据测试，含有大量模块、接口、属性的仓库
 import router from './router'
 const _ = require('underscore')
-const Pagination = require('./utils/pagination')
+import Pagination from './utils/pagination'
 import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
-const Tree = require('./utils/tree')
+import Tree from './utils/tree'
 const { initRepository, initModule } = require('./utils/helper')
 
 router.get('/app/get', async (ctx, next) => {
@@ -448,9 +448,10 @@ router.get('/interface/get', async (ctx) => {
   }
 
   ctx.type = 'json'
-  ctx.body = Tree.stringifyWithFunctonAndRegExp({
-    data: itf
-  })
+  let result = Tree.stringifyWithFunctonAndRegExp({ data: itf })
+  console.log('result:')
+  console.log(result)
+  ctx.body = result
 })
 router.post('/interface/create', async (ctx, next) => {
   let creatorId = ctx.session.id

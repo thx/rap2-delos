@@ -1,5 +1,5 @@
 import router from './router'
-const config = require('../config')
+import config from '../config'
 
 router.get('/app/counter', async(ctx) => {
   let app: any = ctx.app

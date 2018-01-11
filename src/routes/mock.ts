@@ -2,10 +2,10 @@ import router from './router'
 import { Repository, Interface, Property } from '../models'
 import { QueryInclude } from '../models';
 import Tree from './utils/tree'
+import urlUtils from './utils/url'
 const attributes = { exclude: [] }
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
-const urlUtils = require('./utils/url')
 
 // 检测是否存在重复接口，会在返回的插件 JS 中提示。同时也会在编辑器中提示。
 const parseDuplicatedInterfaces = (repository) => {
@@ -77,7 +77,6 @@ router.get('/app/plugin/:repositories', async (ctx) => {
         repositoryIds.add(item.id)
       })
     }
-    // console.log(repositoryIds)
     repository.interfaces = await Interface.findAll<Interface>({
       attributes: { exclude: [] },
       where: {
@@ -109,7 +108,7 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
   let app: any = ctx.app
   app.counter.mock++
 
-  let [ repositoryId, method, url ] = [ctx.params[0], ctx.request.method, ctx.params[1]]
+  let [ repositoryId, method, url ] = [+ctx.params[0], ctx.request.method, ctx.params[1]]
 
   let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
   let urlWithoutSearch
@@ -119,13 +118,12 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
   } catch (e) {
     urlWithoutSearch = url
   }
-  // console.log([urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch])
   // DONE 2.3 腐烂的 KISSY
   // KISSY 1.3.2 会把路径中的 // 替换为 /。在浏览器端拦截跨域请求时，需要 encodeURIComponent(url) 以防止 http:// 被替换为 http:/。但是同时也会把参数一起编码，导致 route 的 url 部分包含了参数。
   // 所以这里重新解析一遍！！！
 
   let repository = await Repository.findById(repositoryId)
-  let collaborators = await repository.collaborators
+  let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
   let itf
 
   itf = await Interface.findOne({
@@ -170,7 +168,6 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
     where: { interfaceId, scope: 'response' }
   })
   properties = properties.map(item => item.toJSON())
-  // pt(properties)
 
   // DONE 2.2 支持引用请求参数
   let requestProperties = await Property.findAll({

@@ -35,7 +35,7 @@ npm install
 
 # TypeScript compile TS编译
 # Installing TypeScript Compiler Docs 安装TypeScript编译器文档: [https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
-tsc
+npm run build
 
 # initialize database 初始化数据库
 npm run create-db

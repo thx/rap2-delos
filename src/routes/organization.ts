@@ -2,7 +2,7 @@ import router from './router'
 import { Organization, User, Logger, Repository, Module, Interface, Property } from '../models'
 import { QueryInclude } from '../models';
 import * as _ from 'lodash'
-import { Pagination } from './utils/pagination'
+import Pagination from './utils/pagination'
 
 router.get('/app/get', async (ctx, next) => {
   let data = {}

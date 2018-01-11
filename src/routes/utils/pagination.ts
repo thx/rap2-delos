@@ -45,7 +45,7 @@
     new Pagination( total, cursor, limit )
 */
 
-export class Pagination {
+export default class Pagination {
   public data: any
   public total: any
   public cursor: number
