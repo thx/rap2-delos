@@ -1,11 +1,11 @@
 import { Table, Column, Model, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
-import { User, Interface, Module, Repository } from './index'
+import { User, Interface, Module, Repository } from '../'
 
 enum SCOPES { REQUEST = 'request', RESPONSE = 'response' }
 enum TYPES { STRING = 'String', NUMBER = 'Number', BOOLEAN = 'Boolean', OBJECT = 'Object', ARRAY = 'Array', FUNCTION = 'Function', REGEXP = 'RegExp' }
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
-export class Property extends Model<Property> {
+export default class Property extends Model<Property> {
   public static TYPES = TYPES
   public static SCOPES = SCOPES
 

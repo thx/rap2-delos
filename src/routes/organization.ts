@@ -5,9 +5,9 @@ import * as _ from 'lodash'
 import Pagination from './utils/pagination'
 
 router.get('/app/get', async (ctx, next) => {
-  let data = {}
+  let data: any = {}
   let query = ctx.query
-  let hooks = {
+  let hooks: any = {
     organization: Organization
   }
   for (let name in hooks) {
@@ -45,7 +45,7 @@ router.get('/organization/list', async(ctx) => {
       QueryInclude.Creator,
       QueryInclude.Owner
     ]
-  })
+  } as any)
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let organizations = await Organization.findAll({
     where,
@@ -58,7 +58,7 @@ router.get('/organization/list', async(ctx) => {
     offset: pagination.start,
     limit: pagination.limit,
     order: [['updatedAt', 'DESC']]
-  })
+  } as any)
   ctx.body = {
     data: organizations,
     pagination: pagination
@@ -120,7 +120,7 @@ router.get('/organization/get', async(ctx) => {
   let organization = await Organization.findById(ctx.query.id, {
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members]
-  })
+  } as any)
   ctx.body = {
     data: organization
   }
@@ -136,7 +136,7 @@ router.post('/organization/create', async(ctx) => {
   let filled = await Organization.findById(created.id, {
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members]
-  })
+  } as any)
   ctx.body = {
     data: filled
   }
@@ -168,8 +168,8 @@ router.post('/organization/update', async(ctx, next) => {
   })
   // 加入 & 退出
   if (!ctx.prevAssociations || !ctx.nextAssociations) return
-  let prevIds = ctx.prevAssociations.map(item => item.id)
-  let nextIds = ctx.nextAssociations.map(item => item.id)
+  let prevIds = ctx.prevAssociations.map((item: any) => item.id)
+  let nextIds = ctx.nextAssociations.map((item: any) => item.id)
   let joined = _.difference(nextIds, prevIds)
   let exited = _.difference(prevIds, nextIds)
   let creatorId = ctx.session.id

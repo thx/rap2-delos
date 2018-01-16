@@ -1,10 +1,10 @@
 import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
-import { User, Module, Repository, Property } from './index';
+import { User, Module, Repository, Property } from '../';
 
 enum methods { GET= 'GET', POST= 'POST', PUT= 'PUT', DELETE= 'DELETE' }
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
-export class Interface extends Model<Interface> {
+export default class Interface extends Model<Interface> {
 
   public static METHODS= methods
 
@@ -29,7 +29,7 @@ export class Interface extends Model<Interface> {
   method: string
 
   @Column(DataType.TEXT)
-  description
+  description: string
 
   @AllowNull(false)
   @Default(1)

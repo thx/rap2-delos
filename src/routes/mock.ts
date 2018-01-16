@@ -3,13 +3,13 @@ import { Repository, Interface, Property } from '../models'
 import { QueryInclude } from '../models';
 import Tree from './utils/tree'
 import urlUtils from './utils/url'
-const attributes = { exclude: [] }
+const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
 
 // 检测是否存在重复接口，会在返回的插件 JS 中提示。同时也会在编辑器中提示。
-const parseDuplicatedInterfaces = (repository) => {
-  let counter = {}
+const parseDuplicatedInterfaces = (repository: Repository) => {
+  let counter: any = {}
   for (let itf of repository.interfaces) {
     let key = `${itf.method} ${itf.url}`
     counter[key] = [...(counter[key] || []), { id: itf.id, method: itf.method, url: itf.url }]
@@ -22,7 +22,7 @@ const parseDuplicatedInterfaces = (repository) => {
   }
   return duplicated
 }
-const generatePlugin = (protocol, host, repository) => {
+const generatePlugin = (protocol: any, host: any, repository: Repository) => {
   // DONE 2.3 protocol 错误，应该是 https
   let duplicated = parseDuplicatedInterfaces(repository)
   let editor = `${protocol}://rap2.taobao.org/repository/editor?id=${repository.id}` // [TODO] replaced by cur domain
@@ -38,7 +38,7 @@ const generatePlugin = (protocol, host, repository) => {
 ;(function(){
   let repositoryId = ${repository.id}
   let interfaces = [
-    ${repository.interfaces.map(itf =>
+    ${repository.interfaces.map((itf: Interface) =>
       `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
       request: ${JSON.stringify(itf.request)},
       response: ${JSON.stringify(itf.response)} }`
@@ -57,7 +57,7 @@ const generatePlugin = (protocol, host, repository) => {
 }
 
 router.get('/app/plugin/:repositories', async (ctx) => {
-  let repositoryIds = new Set<number>(ctx.params.repositories.split(',').map(item => +item).filter(item => item)) // _.uniq() => Set
+  let repositoryIds = new Set<number>(ctx.params.repositories.split(',').map((item: string) => +item).filter((item: any) => item)) // _.uniq() => Set
   let result = []
   for (let id of repositoryIds) {
     let repository = await Repository.findById(id, {
@@ -70,7 +70,7 @@ router.get('/app/plugin/:repositories', async (ctx) => {
         QueryInclude.Organization,
         QueryInclude.Collaborators
       ]
-    })
+    } as any)
     if (!repository) continue
     if (repository.collaborators) {
       repository.collaborators.map(item => {
@@ -85,7 +85,7 @@ router.get('/app/plugin/:repositories', async (ctx) => {
       include: [
         QueryInclude.Properties
       ]
-    })
+    } as any)
     repository.interfaces.forEach(itf => {
       itf.request = Tree.ArrayToTreeToTemplate(itf.properties.filter(item => item.scope === 'request'))
       itf.response = Tree.ArrayToTreeToTemplate(itf.properties.filter(item => item.scope === 'response'))

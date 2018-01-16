@@ -8,8 +8,9 @@ import * as cors from 'kcors'
 import router from '../routes'
 import config from '../config'
 
-const app: any = new Koa()
-app.counter = { users: {}, mock: 0 }
+const app = new Koa()
+let appAny: any = app
+appAny.counter = { users: {}, mock: 0 }
 
 app.keys = config.keys
 app.use(session(config.session, app))
@@ -18,7 +19,8 @@ app.use(async(ctx, next) => {
   await next()
   if (ctx.path === '/favicon.ico') return
   ctx.session.views = (ctx.session.views || 0) + 1
-  if (ctx.session.fullname) ctx.app.counter.users[ctx.session.fullname] = true
+  let app: any = ctx.app
+  if (ctx.session.fullname) app.counter.users[ctx.session.fullname] = true
 })
 app.use(cors({
   credentials: true

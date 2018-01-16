@@ -51,19 +51,19 @@ export default class Pagination {
   public cursor: number
   public limit: number
   public focus: number
-  public pages
-  public start
-  public end
-  public hasPrev
-  public hasNext
-  public hasFirst
-  public hasLast
-  public prev
-  public next
-  public first
-  public last
+  public pages: any
+  public start: any
+  public end: any
+  public hasPrev: any
+  public hasNext: any
+  public hasFirst: any
+  public hasLast: any
+  public prev: any
+  public next: any
+  public first: any
+  public last: any
 
-  constructor(data, cursor, limit) {
+  constructor(data: any, cursor: any, limit: any) {
     this.data = (typeof data === 'number' || typeof data === 'string') ? undefined : data
     this.total = this.data ? this.data.length : parseInt(data, 10)
     this.cursor = parseInt(cursor, 10)
@@ -108,7 +108,7 @@ export default class Pagination {
     return this
   }
 
-  public moveTo(cursor) {
+  public moveTo(cursor: any) {
     this.cursor = parseInt(cursor, 10)
     return this.calc()
   }
@@ -129,27 +129,27 @@ export default class Pagination {
     return this.moveTo(this.pages)
   }
 
-  public fetch(arr) {
+  public fetch(arr: any) {
     return (arr || this.data).slice(this.start, this.end)
   }
 
-  public setData(data) {
+  public setData(data: any) {
     this.data = data
     this.total = data.length
     return this.calc()
   }
 
-  public setTotal(total) {
+  public setTotal(total: any) {
     this.total = parseInt(total, 10)
     return this.calc()
   }
 
-  public setCursor(cursor) {
+  public setCursor(cursor: any) {
     this.cursor = parseInt(cursor, 10)
     return this.calc()
   }
 
-  public setFocus(focus) {
+  public setFocus(focus: any) {
     this.focus = parseInt(focus, 10)
     if (this.focus < 0) this.focus += this.total
     if (this.focus >= this.total) this.focus -= this.total
@@ -157,12 +157,12 @@ export default class Pagination {
     return this.calc()
   }
 
-  public setLimit(limit) {
+  public setLimit(limit: any) {
     this.limit = parseInt(limit, 10)
     return this.calc()
   }
 
-  public get(focus) {
+  public get(focus: any) {
     if (focus !== undefined) return this.data[focus % this.data.length]
     else return this.data[this.focus]
   }

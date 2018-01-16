@@ -1,5 +1,5 @@
 import {  Table, Column, Model,  AutoIncrement, PrimaryKey, AllowNull, DataType, BelongsTo, ForeignKey } from 'sequelize-typescript'
-import { User, Repository, Organization, Module, Interface } from './index'
+import { User, Repository, Organization, Module, Interface } from '../'
 
 enum types {
   CREATE = 'create', UPDATE = 'update', DELETE = 'delete',
@@ -7,7 +7,7 @@ enum types {
 }
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
-export  class Logger extends Model<Logger> {
+export default class Logger extends Model<Logger> {
   public static TYPES = types
 
   @AutoIncrement

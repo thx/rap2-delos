@@ -21,7 +21,7 @@ router.get('/app/analytics/repositories/created', async (ctx) => {
     ORDER BY label ASC;
   `
   let result = await sequelize.query(sql, SELECT)
-  result = result.map(item => ({
+  result = result.map((item: any) => ({
     label: moment(item.label).format(YYYY_MM_DD),
     value: item.value
   }))
@@ -46,7 +46,7 @@ router.get('/app/analytics/repositories/updated', async (ctx) => {
     ORDER BY label ASC;
   `
   let result = await sequelize.query(sql, SELECT)
-  result = result.map(item => ({
+  result = result.map((item: any) => ({
     label: moment(item.label).format(YYYY_MM_DD),
     value: item.value
   }))

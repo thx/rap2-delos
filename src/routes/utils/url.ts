@@ -2,8 +2,7 @@ let pathToRegexp = require('path-to-regexp')
 
 export default class UrlUtils {
 
-  public static getRelative = url => {
-    if (!url || typeof url !== 'string') return
+  public static getRelative = (url: string) => {
     url = url.toLowerCase()
     const prefixes = ['https://', 'http://']
     for (let item of prefixes) {
@@ -23,7 +22,7 @@ export default class UrlUtils {
     return url
   }
 
-  public static urlMatchesPattern = (url, pattern) => {
+  public static urlMatchesPattern = (url: string, pattern: string) => {
     url = UrlUtils.getRelative(url)
     pattern = UrlUtils.getRelative(pattern)
     let re = pathToRegexp(pattern)

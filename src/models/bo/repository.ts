@@ -1,8 +1,8 @@
 import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey } from 'sequelize-typescript'
-import { User, Repository } from './index'
+import { User, Organization, Module, Interface, RepositoriesCollaborators } from '../'
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
-export class Organization extends Model<Organization> {
+export default class Repository extends Model<Repository> {
 
   @AutoIncrement
   @PrimaryKey
@@ -26,11 +26,19 @@ export class Organization extends Model<Organization> {
 
   @ForeignKey(() => User)
   @Column
+  ownerId: number
+
+  @ForeignKey(() => Organization)
+  @Column
+  organizationId: number
+
+  @ForeignKey(() => User)
+  @Column
   creatorId: number
 
   @ForeignKey(() => User)
   @Column
-  ownerId: number
+  lockerId: number
 
   @BelongsTo(() => User, 'creatorId')
   creator: User
@@ -38,9 +46,22 @@ export class Organization extends Model<Organization> {
   @BelongsTo(() => User, 'ownerId')
   owner: User
 
-  @BelongsToMany(() => User, 'organizations_members', 'userId', 'organizationId')
+  @BelongsTo(() => Organization, 'organizationId')
+  organization: Organization
+
+  @BelongsTo(() => User, 'lockerId')
+  locker: User
+
+  @BelongsToMany(() => User, 'repositories_members', 'repositoryId', 'userId')
   members: User[]
 
-  @HasMany(() => Repository, 'organizationId')
-  repositories: Repository[]
+  @HasMany(() => Module, 'repositoryId')
+  modules: Module[]
+
+  @HasMany(() => Module, 'repositoryId')
+  interfaces: Interface[]
+
+  @BelongsToMany(() => Repository, () => RepositoriesCollaborators)
+  collaborators: Repository[]
+
 }

@@ -1,22 +1,23 @@
+import { Property } from "../../models";
 const vm = require('vm')
 const _ = require('underscore')
-const Mock = require('mockjs')
+import * as Mock from 'mockjs'
 const { RE_KEY } = require('mockjs/src/mock/constant')
 
 
 export default class Tree {
 
-  public static ArrayToTree (list) {
-    let result = {
+  public static ArrayToTree (list: Property[]) {
+    let result: any = {
       name: 'root',
       children: [],
       depth: 0
     }
 
-    let mapped = {}
+    let mapped: any = {}
     list.forEach(item => { mapped[item.id] = item })
 
-    function _parseChildren (parentId, children, depth) {
+    function _parseChildren (parentId: any, children: any, depth: any) {
       for (let id in mapped) {
         let item = mapped[id]
         if (typeof parentId === 'function' ? parentId(item.parentId) : item.parentId === parentId) {
@@ -29,9 +30,10 @@ export default class Tree {
     }
 
     _parseChildren(
-      (parentId) => {
+      (parentId: number) => {
         // 忽略 parentId 为 0 的根属性（历史遗留），现为 -1
         if (parentId === -1) return true
+        return false
       },
       result.children,
       result.depth
@@ -41,8 +43,8 @@ export default class Tree {
   }
 
   // TODO 2.x 和前端重复了
-  public static TreeToTemplate (tree) {
-    function parse (item, result) {
+  public static TreeToTemplate (tree: any) {
+    function parse (item: any, result: any) {
       let rule = item.rule ? ('|' + item.rule) : ''
       let value = item.value
       switch (item.type) {
@@ -80,7 +82,7 @@ export default class Tree {
             }
           } else {
             result[item.name + rule] = {}
-            item.children.forEach((child) => {
+            item.children.forEach((child: any) => {
               parse(child, result[item.name + rule])
             })
           }
@@ -94,7 +96,7 @@ export default class Tree {
             }
           } else {
             result[item.name + rule] = item.children.length ? [{}] : []
-            item.children.forEach((child) => {
+            item.children.forEach((child: any) => {
               parse(child, result[item.name + rule][0])
             })
           }
@@ -102,13 +104,13 @@ export default class Tree {
       }
     }
     let result = {}
-    tree.children.forEach((child) => {
+    tree.children.forEach((child: any) => {
       parse(child, result)
     })
     return result
   }
 
-  public static TemplateToData (template) {
+  public static TemplateToData (template: any) {
     // 数据模板 template 中可能含有攻击代码，例如死循环，所以在沙箱中生成最终数据
     // https://nodejs.org/dist/latest-v7.x/docs/api/vm.html
     const sandbox = { Mock, template, data: {} }
@@ -127,13 +129,13 @@ export default class Tree {
     }
   }
 
-  public static ArrayToTreeToTemplate(list) {
+  public static ArrayToTreeToTemplate(list: Property[]) {
     let tree = Tree.ArrayToTree(list)
     let template = Tree.TreeToTemplate(tree)
     return template
   }
 
-  public static ArrayToTreeToTemplateToData(list, extra?: any) {
+  public static ArrayToTreeToTemplateToData(list: Property[], extra?: any) {
     let tree = Tree.ArrayToTree(list)
     let template = Tree.TreeToTemplate(tree)
     let data
@@ -153,7 +155,7 @@ export default class Tree {
     return data
   }
 
-  public static ArrayToTreeToTemplateToJSONSchema(list) {
+  public static ArrayToTreeToTemplateToJSONSchema(list: Property[]) {
     let tree = Tree.ArrayToTree(list)
     let template = Tree.TreeToTemplate(tree)
     let schema = Mock.toJSONSchema(template)
@@ -163,7 +165,7 @@ export default class Tree {
   // TODO 2.2 执行 JSON.stringify() 序列化时会丢失正则和函数。需要转为字符串或者函数。
   // X Function.protytype.toJSON = Function.protytype.toString
   // X RegExp.protytype.toJSON = RegExp.protytype.toString
-  public static stringifyWithFunctonAndRegExp(json) {
+  public static stringifyWithFunctonAndRegExp(json: object) {
     return JSON.stringify(json, (k, v) => {
       k
       if (typeof v === 'function') return v.toString()

@@ -1,11 +1,11 @@
 import { Sequelize } from 'sequelize-typescript'
-import { Interface, Logger, Module, Notification, Organization, Property, User, Repository } from './index'
 import config from '../config'
+import { Organization, Logger } from '.';
 
 const chalk = require('chalk')
 const now = () => new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
 const logging = process.env.NODE_ENV === 'development'
-  ? (sql) => {
+  ? (sql: string) => {
     sql = sql.replace('Executing (default): ', '')
     console.log(`${chalk.bold('SQL')} ${now()} ${chalk.gray(sql)}`)
   }
@@ -22,12 +22,12 @@ const sequelize = new Sequelize({
   logging: config.db.logging ? logging : false
 })
 
-sequelize.addModels([Interface, Logger, Module, Notification, Organization, Property, Repository, User])
+sequelize.addModels([__dirname + '/bo'])
 sequelize.authenticate()
   .then((/* err */) => {
 
     // initialize hooks
-    Organization.hook('afterCreate', async(instance) => {
+    Organization.hook('afterCreate', async(instance: Organization) => {
       await Logger.create({
         userId: instance.creatorId,
         type: 'create',

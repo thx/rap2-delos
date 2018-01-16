@@ -1,7 +1,7 @@
 import { Table, Column, Model, AutoIncrement, PrimaryKey, AllowNull, DataType, Default } from 'sequelize-typescript'
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
-export class Notification extends Model<Notification> {
+export default class Notification extends Model<Notification> {
 
   @AutoIncrement
   @PrimaryKey
@@ -16,7 +16,7 @@ export class Notification extends Model<Notification> {
   toId: number
 
   @AllowNull(false)
-  @Column({ type: DataType.STRING(128), comment: 'msg type' })
+  @Column({ comment: 'msg type' })
   type: string
 
   @Column(DataType.STRING(128))

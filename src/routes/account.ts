@@ -6,9 +6,9 @@ import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
 
 router.get('/app/get', async (ctx, next) => {
-  let data = {}
+  let data: any = {}
   let query = ctx.query
-  let hooks = {
+  let hooks: any = {
     user: User
   }
   for (let name in hooks) {
@@ -167,7 +167,7 @@ router.post('/account/setting', async(ctx) => {
 })
 
 // TODO 2.3 账户通知
-let NOTIFICATION_EXCLUDE_ATTRIBUTES = []
+let NOTIFICATION_EXCLUDE_ATTRIBUTES: any = []
 router.get('/account/notification/list', async(ctx) => {
   let total = await Notification.count()
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 10)
@@ -234,7 +234,7 @@ router.get('/account/logger', async(ctx) => {
       ['id', 'DESC']
     ],
     paranoid: false
-  })
+  } as any)
 
   ctx.body = {
     data: logs,

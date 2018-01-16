@@ -27,7 +27,7 @@ export const BO_USER_FN = () => mock({
 
 export const BO_ORGANIZATION_COUNT = 3
 
-export const BO_ORGANIZATION_FN = (source) => {
+export const BO_ORGANIZATION_FN = (source: any) => {
   return Object.assign(
     mock({
       id: ORGANIZATION_ID++,
@@ -43,7 +43,7 @@ export const BO_ORGANIZATION_FN = (source) => {
 }
 export const BO_REPOSITORY_COUNT = 3
 
-export const BO_REPOSITORY_FN = (source) => {
+export const BO_REPOSITORY_FN = (source: any) => {
   return Object.assign(
     mock({
       id: REPOSITORY_ID++,
@@ -56,7 +56,7 @@ export const BO_REPOSITORY_FN = (source) => {
 }
 
 export const BO_MODULE_COUNT = 3
-export const BO_MODULE_FN = (source) => {
+export const BO_MODULE_FN = (source: any) => {
   return Object.assign(
     mock({
       id: MODULE_ID++,
@@ -69,7 +69,7 @@ export const BO_MODULE_FN = (source) => {
   )
 }
 export const BO_INTERFACE_COUNT = 3
-export const BO_INTERFACE_FN = (source) => {
+export const BO_INTERFACE_FN = (source: any) => {
   return Object.assign(
     mock({
       id: INTERFACE_ID++,
@@ -86,7 +86,7 @@ export const BO_INTERFACE_FN = (source) => {
   )
 }
 export const BO_PROPERTY_COUNT = 6
-export const BO_PROPERTY_FN = (source) => {
+export const BO_PROPERTY_FN = (source: any) => {
   return Object.assign(
     mock({
       id: PROPERTY_ID++,

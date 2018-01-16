@@ -1,12 +1,13 @@
 import { Module, Interface, Property } from '../../models'
+import { Repository } from '../../models'
 
-const genExampleModule = (extra) => Object.assign({
+const genExampleModule = (extra: any) => Object.assign({
   name: '示例模块',
   description: '示例模块',
   creatorId: undefined,
   repositoryId: undefined
 }, extra)
-const genExampleInterface = (extra) => Object.assign({
+const genExampleInterface = (extra: any) => Object.assign({
   name: '示例接口',
   url: `/example/${Date.now()}`,
   method: 'GET',
@@ -16,13 +17,13 @@ const genExampleInterface = (extra) => Object.assign({
   moduleId: undefined,
   repositoryId: undefined
 }, extra)
-const genExampleProperty = (extra) => Object.assign({
+const genExampleProperty = (extra: any) => Object.assign({
   scope: undefined,
   name: 'foo',
   type: 'String',
   rule: '',
   value: '@ctitle',
-  description: { request: '请求属性示例', response: '响应属性示例' }[extra.scope],
+  description: ({ request: '请求属性示例', response: '响应属性示例' } as any)[extra.scope],
   parentId: -1,
   creatorId: undefined,
   interfaceId: undefined,
@@ -31,7 +32,7 @@ const genExampleProperty = (extra) => Object.assign({
 }, extra)
 
 // 初始化仓库
-const initRepository = async (repository) => {
+const initRepository = async (repository: Repository) => {
   let mod = await Module.create(genExampleModule({
     creatorId: repository.creatorId,
     repositoryId: repository.id
@@ -39,7 +40,7 @@ const initRepository = async (repository) => {
   await initModule(mod)
 }
 // 初始化模块
-const initModule = async (mod) => {
+const initModule = async (mod: Module) => {
   let itf = await Interface.create(genExampleInterface({
     creatorId: mod.creatorId,
     moduleId: mod.id,
@@ -48,7 +49,7 @@ const initModule = async (mod) => {
   await initInterface(itf)
 }
 // 初始化接口
-const initInterface = async (itf) => {
+const initInterface = async (itf: Interface) => {
   let { creatorId, repositoryId, moduleId } = itf
   let interfaceId = itf.id
   await Property.create(genExampleProperty({

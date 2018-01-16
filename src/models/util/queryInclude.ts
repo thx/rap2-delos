@@ -1,13 +1,29 @@
 // TODO 2.2 如何缓存重复查询？https://github.com/rfink/sequelize-redis-cache
 import { Helper } from './helper'
-import { User } from './user'
-import { Repository } from './repository';
-import { Organization } from './organization'
-import { Module } from './module'
-import { Interface } from './interface'
-import { Property } from './property'
+import User from '../bo/user';
+import Repository from '../bo/repository';
+import Module from '../bo/module';
+import Organization from '../bo/organization';
+import Interface from '../bo/interface';
+import Property from '../bo/property';
 
-export const QueryInclude = {
+declare interface IQueryIncludeItem {
+  model?: object,
+  'as'?: string,
+  include?: any,
+  attributes?: any,
+  required?: boolean,
+  through?: any,
+  paranoid?: boolean,
+  separate?: boolean,
+  order?: [string[]]
+}
+
+declare interface IQueryInclude {
+  [key: string]: IQueryIncludeItem
+}
+
+const QueryInclude: IQueryInclude = {
   User: { model: User, as: 'user', attributes: { exclude: ['password', ...Helper.exclude.generalities] }, required: true },
   UserForSearch: { model: User, as: 'user', attributes: { include: ['id', 'fullname'] }, required: true },
   Creator: { model: User, as: 'creator', attributes: { exclude: ['password', ...Helper.exclude.generalities] }, required: true },
@@ -58,3 +74,5 @@ export const QueryInclude = {
     required: false
   }
 }
+
+export default QueryInclude

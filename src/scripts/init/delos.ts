@@ -67,7 +67,7 @@ export async function init () {
   }
 }
 
-async function initRepository (repository) {
+async function initRepository (repository: any) {
   // 模块
   for (let BO_MODULE_INDEX = 0; BO_MODULE_INDEX < BO_MODULE_COUNT; BO_MODULE_INDEX++) {
     let mod = await Module.create(
@@ -135,12 +135,12 @@ export async function after () {
   let admin = await User.findById(BO_ADMIN.id)
   // for (let k in admin) console.log(k)
   let owned: any = await admin.$get('ownedOrganizations')
-  console.log(owned.map(item => item.toJSON()))
+  console.log(owned.map((item: any) => item.toJSON()))
 
   let mozhi = await User.findById(BO_MOZHI.id)
   for (let k in mozhi) console.log(k)
   let joined: any = await mozhi.$get('joinedOrganizations')
-  console.log(joined.map(item => item.toJSON()))
+  console.log(joined.map((item: any) => item.toJSON()))
 }
 
 module.exports = {

@@ -5,7 +5,6 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "allowJs": true,
     "target": "es6",
     "removeComments": true,
     "sourceMap": true,
@@ -13,6 +12,10 @@
     "baseUrl": "./src",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitUseStrict": true,
     "rootDir": "./src",
     "paths": {
       "*": [

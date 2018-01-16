@@ -7,9 +7,9 @@ import Tree from './utils/tree'
 const { initRepository, initModule } = require('./utils/helper')
 
 router.get('/app/get', async (ctx, next) => {
-  let data = {}
+  let data: any = {}
   let query = ctx.query
-  let hooks = {
+  let hooks: any = {
     repository: Repository,
     module: Module,
     interface: Interface,
@@ -52,7 +52,7 @@ router.get('/repository/list', async(ctx) => {
       QueryInclude.Owner,
       QueryInclude.Locker
     ]
-  })
+  } as any)
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let repositories = await Repository.findAll({
     where,
@@ -68,7 +68,7 @@ router.get('/repository/list', async(ctx) => {
     offset: pagination.start,
     limit: pagination.limit,
     order: [['updatedAt', 'DESC']]
-  })
+  } as any)
   ctx.body = {
     data: repositories,
     pagination: pagination
@@ -155,7 +155,7 @@ router.get('/repository/get', async(ctx) => {
       QueryInclude.RepositoryHierarchy,
       QueryInclude.Collaborators
     ]
-  })
+  } as any)
   ctx.body = {
     data: repository
   }
@@ -185,7 +185,7 @@ router.post('/repository/create', async(ctx, next) => {
         QueryInclude.RepositoryHierarchy,
         QueryInclude.Collaborators
       ]
-    })
+    } as any)
   }
   return next()
 }, async(ctx) => {
@@ -227,8 +227,8 @@ router.post('/repository/update', async(ctx, next) => {
   })
   // 加入 & 退出
   if (!ctx.prevAssociations || !ctx.nextAssociations) return
-  let prevIds = ctx.prevAssociations.map(item => item.id)
-  let nextIds = ctx.nextAssociations.map(item => item.id)
+  let prevIds = ctx.prevAssociations.map((item: any) => item.id)
+  let nextIds = ctx.nextAssociations.map((item: any) => item.id)
   let joined = _.difference(nextIds, prevIds)
   let exited = _.difference(prevIds, nextIds)
   let creatorId = ctx.session.id
@@ -448,10 +448,7 @@ router.get('/interface/get', async (ctx) => {
   }
 
   ctx.type = 'json'
-  let result = Tree.stringifyWithFunctonAndRegExp({ data: itf })
-  console.log('result:')
-  console.log(result)
-  ctx.body = result
+  ctx.body = Tree.stringifyWithFunctonAndRegExp({ data: itf })
 })
 router.post('/interface/create', async (ctx, next) => {
   let creatorId = ctx.session.id
@@ -639,10 +636,10 @@ router.post('/properties/update', async (ctx, next) => {
           ) as p
         )
   */
-  let existingProperties = properties.filter(item => !item.memory)
+  let existingProperties = properties.filter((item: any) => !item.memory)
   let result = await Property.destroy({
     where: {
-      id: { $notIn: existingProperties.map(item => item.id) },
+      id: { $notIn: existingProperties.map((item: any) => item.id) },
       interfaceId: itf
     }
   })
@@ -654,8 +651,8 @@ router.post('/properties/update', async (ctx, next) => {
     result += affected[0]
   }
   // 插入新增加的属性
-  let newProperties = properties.filter(item => item.memory)
-  let memoryIdsMap = {}
+  let newProperties = properties.filter((item: any) => item.memory)
+  let memoryIdsMap: any = {}
   for (let item of newProperties) {
     let created = await Property.create(Object.assign({}, item, {
       id: undefined,

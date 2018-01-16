@@ -11,7 +11,7 @@ const start = () => {
   graceful({
     servers: [server],
     killTimeout: '10s',
-    error: function (err, throwErrorCount) {
+    error: function (err: Error, throwErrorCount: any) {
       if (err.message) err.message += ` (uncaughtException throw ${throwErrorCount} times on pid:${process.pid})`
       console.error(`[${now()}] worker#${process.pid}] ${err.message}`)
     }
