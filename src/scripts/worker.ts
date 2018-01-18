@@ -1,9 +1,10 @@
+import config from '../config'
 const start = () => {
   // https://github.com/node-modules/graceful
   const graceful = require('graceful')
   const now = () => new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
   const app = require('./app')
-  const { serve: { port } } = require('../config')
+  const { serve: { port } } = config
   const server = app.listen(port, () => {
     console.log(`[${now()}]   worker#${process.pid} rap2-dolores is running as ${port}`)
   })
