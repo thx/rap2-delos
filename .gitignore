@@ -5,3 +5,4 @@ bower_components
 coverage
 npm-debug.log
 tmp
+.nyc_output
