@@ -72,9 +72,6 @@
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
   },
-  "pre-commit": [
-    "check"
-  ],
   "engines": {
     "install-node": "8.9.3"
   }
