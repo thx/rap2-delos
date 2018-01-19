@@ -35,7 +35,8 @@ router.get('/repository/count', async(ctx) => {
 router.get('/repository/list', async(ctx) => {
   let where = {}
   let { name, user, organization } = ctx.query
-  if (user) Object.assign(where, { ownerId: user, organizationId: undefined })
+  // tslint:disable-next-line:no-null-keyword
+  if (user) Object.assign(where, { ownerId: user, organizationId: null })
   if (organization) Object.assign(where, { organizationId: organization })
   if (name) {
     Object.assign(where, {
