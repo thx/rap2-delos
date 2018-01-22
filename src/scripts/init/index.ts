@@ -2,11 +2,14 @@ import { init, after } from './delos'
 /**
  * initialize database
  */
-async function main () {
+export async function main () {
   await init()
+  console.log('after init')
   await after()
+  console.log('after after')
 }
 
-main()
-
-export {}
+main().then(() => {
+  console.log('Run create-db finished successfully.')
+  process.exit(0)
+})

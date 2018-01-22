@@ -142,8 +142,3 @@ export async function after () {
   let joined: any = await mozhi.$get('joinedOrganizations')
   console.log(joined.map((item: any) => item.toJSON()))
 }
-
-module.exports = {
-  init,
-  after
-}

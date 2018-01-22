@@ -22,6 +22,6 @@ script:
   - npm install
   - npm run create-db
   - npm run test
-  - npm run linter
+  - npm run check
 
 after_success:
