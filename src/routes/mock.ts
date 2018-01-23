@@ -108,7 +108,7 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
   let app: any = ctx.app
   app.counter.mock++
 
-  let [ repositoryId, method, url ] = [+ctx.params[0], ctx.request.method, ctx.params[1]]
+  let [ repositoryId, method, url ] = [+ctx.params[0], ctx.request.method, ctx.params[1].replace(/^(GET|POST|PUT|DELETE)\//i, "")]
 
   let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
   let urlWithoutSearch
