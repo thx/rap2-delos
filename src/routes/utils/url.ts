@@ -26,7 +26,7 @@ export default class UrlUtils {
     url = UrlUtils.getRelative(url)
     pattern = UrlUtils.getRelative(pattern)
     let re = pathToRegexp(pattern)
-    return re.test(url)
+    return re.test(pattern)
   }
 
 }
