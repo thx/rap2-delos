@@ -6,7 +6,7 @@ enum methods { GET= 'GET', POST= 'POST', PUT= 'PUT', DELETE= 'DELETE' }
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export default class Interface extends Model<Interface> {
 
-  public static METHODS= methods
+  public static METHODS = methods
 
   public request?: object
   public response?: object

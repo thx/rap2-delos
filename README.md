@@ -20,6 +20,10 @@ RAP2是在RAP1基础上重做的新项目，它包含两个组件(对应两个Gi
 
 ## Deployment 部署
 
+### enviaronment requirements 环境要求
+* Node.js 8.9.4+
+* MySQL 5.7+
+
 ### development 开发模式
 
 ```sh
