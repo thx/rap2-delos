@@ -11,7 +11,7 @@
     "test": "cross-env NODE_ENV=development cross-env TEST_MODE=true nyc mocha --exit --reporter nyan",
     "check": "echo \"Checking...\" && npm run tslint",
     "dev": "cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
-    "create-db": "node dist/scripts/init",
+    "create-db": "cross-env NODE_ENV=development node dist/scripts/init",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "start": "cross-env NODE_ENV=production node dist/dispatch.js"
   },
