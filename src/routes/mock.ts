@@ -41,7 +41,7 @@ const generatePlugin = (protocol: any, host: any, repository: Repository) => {
     ${repository.interfaces.map((itf: Interface) =>
       `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
       request: ${JSON.stringify(itf.request)},
-      response: ${JSON.stringify(itf.response)} }`
+      response: ${JSON.stringify(itf.response)} }`,
     ).join(',\n    ')}
   ]
   ${duplicated.length ? `console.warn('检测到重复接口，请访问 ${editor} 修复警告！')\n` : ''}
@@ -68,8 +68,8 @@ router.get('/app/plugin/:repositories', async (ctx) => {
         QueryInclude.Locker,
         QueryInclude.Members,
         QueryInclude.Organization,
-        QueryInclude.Collaborators
-      ]
+        QueryInclude.Collaborators,
+      ],
     } as any)
     if (!repository) continue
     if (repository.collaborators) {
@@ -80,11 +80,11 @@ router.get('/app/plugin/:repositories', async (ctx) => {
     repository.interfaces = await Interface.findAll<Interface>({
       attributes: { exclude: [] },
       where: {
-        repositoryId: repository.id
+        repositoryId: repository.id,
       },
       include: [
-        QueryInclude.Properties
-      ]
+        QueryInclude.Properties,
+      ],
     } as any)
     repository.interfaces.forEach(itf => {
       itf.request = Tree.ArrayToTreeToTemplate(itf.properties.filter(item => item.scope === 'request'))
@@ -131,8 +131,8 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
     where: {
       repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
       method,
-      url: [urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch]
-    }
+      url: [urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch],
+    },
   })
 
   if (!itf) {
@@ -140,8 +140,8 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
     let list = await Interface.findAll({
       attributes: ['id', 'url', 'method'],
       where: {
-        repositoryId: [repositoryId, ...collaborators.map(item => item.id)]
-      }
+        repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
+      },
     })
 
     let listMatched = []
@@ -165,14 +165,14 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
   let interfaceId = itf.id
   let properties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope: 'response' }
+    where: { interfaceId, scope: 'response' },
   })
   properties = properties.map(item => item.toJSON())
 
   // DONE 2.2 支持引用请求参数
   let requestProperties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope: 'request' }
+    where: { interfaceId, scope: 'request' },
   })
   requestProperties = requestProperties.map(item => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
@@ -191,7 +191,7 @@ router.get('/app/mock/template/:interfaceId', async (ctx) => {
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope }
+    where: { interfaceId, scope },
   })
   pt(properties.map(item => item.toJSON()))
   let template = Tree.ArrayToTreeToTemplate(properties)
@@ -208,7 +208,7 @@ router.get('/app/mock/data/:interfaceId', async (ctx) => {
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope }
+    where: { interfaceId, scope },
   })
   properties = properties.map(item => item.toJSON())
   // pt(properties)
@@ -216,7 +216,7 @@ router.get('/app/mock/data/:interfaceId', async (ctx) => {
   // DONE 2.2 支持引用请求参数
   let requestProperties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope: 'request' }
+    where: { interfaceId, scope: 'request' },
   })
   requestProperties = requestProperties.map(item => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
@@ -234,7 +234,7 @@ router.get('/app/mock/schema/:interfaceId', async (ctx) => {
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope }
+    where: { interfaceId, scope },
   })
   pt(properties.map(item => item.toJSON()))
   properties = properties.map(item => item.toJSON())
@@ -250,7 +250,7 @@ router.get('/app/mock/tree/:interfaceId', async (ctx) => {
   let { scope = 'response' } = ctx.query
   let properties = await Property.findAll({
     attributes,
-    where: { interfaceId, scope }
+    where: { interfaceId, scope },
   })
   pt(properties.map(item => item.toJSON()))
   properties = properties.map(item => item.toJSON())

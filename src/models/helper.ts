@@ -1,6 +1,6 @@
 export let Helper: any =  {
   include: [],
   exclude: {
-    generalities: ['createdAt', 'updatedAt', 'deletedAt', 'reserve']
-  }
+    generalities: ['createdAt', 'updatedAt', 'deletedAt', 'reserve'],
+  },
 }

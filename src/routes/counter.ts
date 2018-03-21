@@ -7,7 +7,7 @@ router.get('/app/counter', async(ctx) => {
     data: {
       version: config.version,
       users: Object.keys(app.counter.users).length,
-      mock: app.counter.mock
-    }
+      mock: app.counter.mock,
+    },
   }
 })

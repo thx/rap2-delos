@@ -10,7 +10,7 @@ export async function init () {
   await sequelize.drop()
   await sequelize.sync({
     force: true,
-    logging: console.log
+    logging: console.log,
   })
   await User.destroy(EMPTY_WHERE)
   await Organization.destroy(EMPTY_WHERE)
@@ -31,7 +31,7 @@ export async function init () {
   // 用户 admin 仓库
   for (let BO_REPOSITORY_INDEX = 0; BO_REPOSITORY_INDEX < BO_REPOSITORY_COUNT; BO_REPOSITORY_INDEX++) {
     let repository = await Repository.create(
-      BO_REPOSITORY_FN({ creatorId: BO_ADMIN.id, ownerId: BO_ADMIN.id })
+      BO_REPOSITORY_FN({ creatorId: BO_ADMIN.id, ownerId: BO_ADMIN.id }),
     )
     await repository.$set('members', users.filter(user => user.id !== BO_ADMIN.id))
     await initRepository(repository)
@@ -40,7 +40,7 @@ export async function init () {
   // 用户 mozhi 的仓库
   for (let BO_REPOSITORY_INDEX = 0; BO_REPOSITORY_INDEX < BO_REPOSITORY_COUNT; BO_REPOSITORY_INDEX++) {
     let repository = await Repository.create(
-      BO_REPOSITORY_FN({ creatorId: BO_MOZHI.id, ownerId: BO_MOZHI.id })
+      BO_REPOSITORY_FN({ creatorId: BO_MOZHI.id, ownerId: BO_MOZHI.id }),
     )
     await repository.$set('members', (
       users.filter(user => user.id !== BO_MOZHI.id)
@@ -51,7 +51,7 @@ export async function init () {
   // 团队
   for (let BO_ORGANIZATION_INDEX = 0; BO_ORGANIZATION_INDEX < BO_ORGANIZATION_COUNT; BO_ORGANIZATION_INDEX++) {
     let organization = await Organization.create(
-      BO_ORGANIZATION_FN({ creatorId: BO_ADMIN.id, ownerId: BO_ADMIN.id })
+      BO_ORGANIZATION_FN({ creatorId: BO_ADMIN.id, ownerId: BO_ADMIN.id }),
     )
     await organization.$set('members', (
       users.filter(user => user.id !== BO_ADMIN.id)
@@ -59,7 +59,7 @@ export async function init () {
     // 团队的仓库
     for (let BO_REPOSITORY_INDEX = 0; BO_REPOSITORY_INDEX < BO_REPOSITORY_COUNT; BO_REPOSITORY_INDEX++) {
       let repository = await Repository.create(
-        BO_REPOSITORY_FN({ creatorId: BO_ADMIN.id, ownerId: BO_ADMIN.id, organizationId: organization.id })
+        BO_REPOSITORY_FN({ creatorId: BO_ADMIN.id, ownerId: BO_ADMIN.id, organizationId: organization.id }),
       )
       await repository.$set('members', users.filter(user => user.id !== BO_ADMIN.id))
       await initRepository(repository)
@@ -71,19 +71,19 @@ async function initRepository (repository: any) {
   // 模块
   for (let BO_MODULE_INDEX = 0; BO_MODULE_INDEX < BO_MODULE_COUNT; BO_MODULE_INDEX++) {
     let mod = await Module.create(
-      BO_MODULE_FN({ creatorId: repository.creatorId, repositoryId: repository.id })
+      BO_MODULE_FN({ creatorId: repository.creatorId, repositoryId: repository.id }),
     )
     await repository.addModule(mod)
     // 接口
     for (let BO_INTERFACE_INDEX = 0; BO_INTERFACE_INDEX < BO_INTERFACE_COUNT; BO_INTERFACE_INDEX++) {
       let itf = await Interface.create(
-        BO_INTERFACE_FN({ creatorId: mod.creatorId, repositoryId: repository.id, moduleId: mod.id })
+        BO_INTERFACE_FN({ creatorId: mod.creatorId, repositoryId: repository.id, moduleId: mod.id }),
       )
       await mod.$add('interfaces', itf)
       // 属性
       for (let BO_PROPERTY_INDEX = 0; BO_PROPERTY_INDEX < BO_PROPERTY_COUNT; BO_PROPERTY_INDEX++) {
         let prop = await Property.create(
-          BO_PROPERTY_FN({ creatorId: itf.creatorId, repositoryId: repository.id, moduleId: mod.id, interfaceId: itf.id })
+          BO_PROPERTY_FN({ creatorId: itf.creatorId, repositoryId: repository.id, moduleId: mod.id, interfaceId: itf.id }),
         )
         await itf.$add('properties', prop)
       }
@@ -117,17 +117,17 @@ export async function after () {
                 as: 'properties',
                 attributes: { exclude },
                 // through: { attributes: [] },
-                required: true
-              }
+                required: true,
+              },
             ],
-            required: true
-          }
+            required: true,
+          },
         ],
-        required: true
-      }
+        required: true,
+      },
     ],
     offset: 0,
-    limit: 100
+    limit: 100,
   })
   // console.log(JSON.stringify(repositories, null, 2))
   console.log(repositories.map(item => item.toJSON()))

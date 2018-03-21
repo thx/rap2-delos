@@ -19,7 +19,7 @@ const sequelize = new Sequelize({
   host: config.db.host,
   port: config.db.port,
   pool: config.db.pool,
-  logging: config.db.logging ? logging : false
+  logging: config.db.logging ? logging : false,
 })
 
 sequelize.addModels([__dirname + '/bo'])
@@ -31,7 +31,7 @@ sequelize.authenticate()
       await Logger.create({
         userId: instance.creatorId,
         type: 'create',
-        organizationId: instance.id
+        organizationId: instance.id,
       })
     })
     console.log('----------------------------------------')

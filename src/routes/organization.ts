@@ -8,16 +8,16 @@ router.get('/app/get', async (ctx, next) => {
   let data: any = {}
   let query = ctx.query
   let hooks: any = {
-    organization: Organization
+    organization: Organization,
   }
   for (let name in hooks) {
     if (!query[name]) continue
     data[name] = await hooks[name].findById(query[name], {
-      attributes: { exclude: [] }
+      attributes: { exclude: [] },
     })
   }
   ctx.body = {
-    data: Object.assign({}, ctx.body && ctx.body.data, data)
+    data: Object.assign({}, ctx.body && ctx.body.data, data),
   }
 
   return next()
@@ -25,7 +25,7 @@ router.get('/app/get', async (ctx, next) => {
 
 router.get('/organization/count', async(ctx) => {
   ctx.body = {
-    data: await Organization.count()
+    data: await Organization.count(),
   }
 })
 router.get('/organization/list', async(ctx) => {
@@ -35,16 +35,16 @@ router.get('/organization/list', async(ctx) => {
     Object.assign(where, {
       $or: [
         { name: { $like: `%${name}%` } },
-        { id: name } // name => id
-      ]
+        { id: name }, // name => id
+      ],
     })
   }
   let total = await Organization.count({
     where,
     include: [
       QueryInclude.Creator,
-      QueryInclude.Owner
-    ]
+      QueryInclude.Owner,
+    ],
   } as any)
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let organizations = await Organization.findAll({
@@ -53,15 +53,15 @@ router.get('/organization/list', async(ctx) => {
     include: [
       QueryInclude.Creator,
       QueryInclude.Owner,
-      QueryInclude.Members
+      QueryInclude.Members,
     ],
     offset: pagination.start,
     limit: pagination.limit,
-    order: [['updatedAt', 'DESC']]
+    order: [['updatedAt', 'DESC']],
   } as any)
   ctx.body = {
     data: organizations,
-    pagination: pagination
+    pagination: pagination,
   }
 })
 router.get('/organization/owned', async(ctx) => {
@@ -71,8 +71,8 @@ router.get('/organization/owned', async(ctx) => {
     Object.assign(where, {
       $or: [
         { name: { $like: `%${name}%` } },
-        { id: name } // name => id
-      ]
+        { id: name }, // name => id
+      ],
     })
   }
 
@@ -81,12 +81,12 @@ router.get('/organization/owned', async(ctx) => {
     where,
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
-    order: [['updatedAt', 'DESC']]
+    order: [['updatedAt', 'DESC']],
   }
   let owned = await auth.$get('ownedOrganizations', options)
   ctx.body = {
     data: owned,
-    pagination: undefined
+    pagination: undefined,
   }
 })
 router.get('/organization/joined', async(ctx) => {
@@ -96,8 +96,8 @@ router.get('/organization/joined', async(ctx) => {
     Object.assign(where, {
       $or: [
         { name: { $like: `%${name}%` } },
-        { id: name } // name => id
-      ]
+        { id: name }, // name => id
+      ],
     })
   }
 
@@ -106,23 +106,23 @@ router.get('/organization/joined', async(ctx) => {
     where,
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
-    order: [['updatedAt', 'DESC']]
+    order: [['updatedAt', 'DESC']],
   }
   let joined = await auth.$get('joinedOrganizations', options)
   // await auth.getOwnedOrganizations()
   // await auth.getJoinedOrganizations()
   ctx.body = {
     data: joined,
-    pagination: undefined
+    pagination: undefined,
   }
 })
 router.get('/organization/get', async(ctx) => {
   let organization = await Organization.findById(ctx.query.id, {
     attributes: { exclude: [] },
-    include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members]
+    include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
   } as any)
   ctx.body = {
-    data: organization
+    data: organization,
   }
 })
 router.post('/organization/create', async(ctx) => {
@@ -135,10 +135,10 @@ router.post('/organization/create', async(ctx) => {
   }
   let filled = await Organization.findById(created.id, {
     attributes: { exclude: [] },
-    include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members]
+    include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
   } as any)
   ctx.body = {
-    data: filled
+    data: filled,
   }
 })
 router.post('/organization/update', async(ctx, next) => {
@@ -155,7 +155,7 @@ router.post('/organization/update', async(ctx, next) => {
     ctx.nextAssociations = await reloaded.$get('members')
   }
   ctx.body = {
-    data: updated[0]
+    data: updated[0],
   }
   return next()
 }, async(ctx) => {
@@ -164,7 +164,7 @@ router.post('/organization/update', async(ctx, next) => {
   await Logger.create({
     userId: ctx.session.id,
     type: 'update',
-    organizationId: id
+    organizationId: id,
   })
   // 加入 & 退出
   if (!ctx.prevAssociations || !ctx.nextAssociations) return
@@ -185,14 +185,14 @@ router.post('/organization/transfer', async(ctx) => {
   let body = { ownerId }
   let result = await Organization.update(body, { where: { id } })
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
 })
 router.get('/organization/remove', async(ctx, next) => {
   let { id } = ctx.query
   let result = await Organization.destroy({ where: { id } })
   let repositories = await Repository.findAll({
-    where: { organizationId: id }
+    where: { organizationId: id },
   })
   if (repositories.length) {
     let ids = repositories.map(item => item.id)
@@ -202,7 +202,7 @@ router.get('/organization/remove', async(ctx, next) => {
     await Property.destroy({ where: { repositoryId: ids } })
   }
   ctx.body = {
-    data: result
+    data: result,
   }
   return next()
 }, async(ctx) => {
@@ -211,6 +211,6 @@ router.get('/organization/remove', async(ctx, next) => {
   await Logger.create({
     userId: ctx.session.id,
     type: 'delete',
-    organizationId: id
+    organizationId: id,
   })
 })

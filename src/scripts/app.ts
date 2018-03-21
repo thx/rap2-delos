@@ -23,7 +23,7 @@ app.use(async(ctx, next) => {
   if (ctx.session.fullname) app.counter.users[ctx.session.fullname] = true
 })
 app.use(cors({
-  credentials: true
+  credentials: true,
 }))
 app.use(async(ctx, next) => {
   await next()

@@ -11,7 +11,7 @@ export default class Tree {
     let result: any = {
       name: 'root',
       children: [],
-      depth: 0
+      depth: 0,
     }
 
     let mapped: any = {}
@@ -36,7 +36,7 @@ export default class Tree {
         return false
       },
       result.children,
-      result.depth
+      result.depth,
     )
 
     return result
@@ -145,7 +145,7 @@ export default class Tree {
       let keys = Object.keys(template).map(item => item.replace(RE_KEY, '$1'))
       let extraKeys = _.difference(Object.keys(extra), keys)
       let scopedData = Tree.TemplateToData(
-        Object.assign({}, _.pick(extra, extraKeys), template)
+        Object.assign({}, _.pick(extra, extraKeys), template),
       )
       data = _.pick(scopedData, keys)
     } else {

@@ -1,7 +1,4 @@
 import router from './router'
-import Repository from "../models/bo/repository";
-import Logger from "../models/bo/logger";
-import User from "../models/bo/user";
 const moment = require('moment')
 const Sequelize = require('sequelize')
 const SELECT = { type: Sequelize.QueryTypes.SELECT }
@@ -17,7 +14,7 @@ router.get('/app/analytics/repositories/created', async (ctx) => {
         DATE(createdAt) AS label,
         COUNT(*) as value
     FROM
-        ${Repository.getTableName()}
+        RAP2_DELOS_APP.repositories
     WHERE
         createdAt >= '${start}' AND createdAt <= '${end}'
     GROUP BY label
@@ -26,10 +23,10 @@ router.get('/app/analytics/repositories/created', async (ctx) => {
   let result = await sequelize.query(sql, SELECT)
   result = result.map((item: any) => ({
     label: moment(item.label).format(YYYY_MM_DD),
-    value: item.value
+    value: item.value,
   }))
   ctx.body = {
-    data: result
+    data: result,
   }
 })
 
@@ -42,7 +39,7 @@ router.get('/app/analytics/repositories/updated', async (ctx) => {
         DATE(updatedAt) AS label,
         COUNT(*) as value
     FROM
-        ${Repository.getTableName()}
+        RAP2_DELOS_APP.repositories
     WHERE
         updatedAt >= '${start}' AND updatedAt <= '${end}'
     GROUP BY label
@@ -51,10 +48,10 @@ router.get('/app/analytics/repositories/updated', async (ctx) => {
   let result = await sequelize.query(sql, SELECT)
   result = result.map((item: any) => ({
     label: moment(item.label).format(YYYY_MM_DD),
-    value: item.value
+    value: item.value,
   }))
   ctx.body = {
-    data: result
+    data: result,
   }
 })
 
@@ -68,9 +65,9 @@ router.get('/app/analytics/users/activation', async (ctx) => {
         users.fullname AS fullname,
         COUNT(*) AS value
     FROM
-        ${Logger.getTableName()} loggers
+        loggers
             LEFT JOIN
-        ${User.getTableName()} users ON (loggers.userId = users.id)
+        (users) ON (loggers.userId = users.id)
     WHERE
         loggers.updatedAt >= '${start}' AND loggers.updatedat <= '${end}'
     GROUP BY loggers.userId
@@ -79,7 +76,7 @@ router.get('/app/analytics/users/activation', async (ctx) => {
   `
   let result = await sequelize.query(sql, SELECT)
   ctx.body = {
-    data: result
+    data: result,
   }
 })
 
@@ -93,10 +90,9 @@ router.get('/app/analytics/repositories/activation', async (ctx) => {
         repositories.name,
         COUNT(*) AS value
     FROM
-        ${Logger.getTableName()} loggers
-    LEFT JOIN
-        ${Repository.getTableName()} repositories
-        ON (loggers.repositoryId = repositories.id)
+        loggers
+            LEFT JOIN
+        (repositories) ON (loggers.repositoryId = repositories.id)
     WHERE
         loggers.repositoryId IS NOT NULL
             AND loggers.updatedAt >= '${start}'
@@ -107,7 +103,7 @@ router.get('/app/analytics/repositories/activation', async (ctx) => {
   `
   let result = await sequelize.query(sql, SELECT)
   ctx.body = {
-    data: result
+    data: result,
   }
 })
 

@@ -22,7 +22,7 @@ export const BO_USER_FN = () => mock({
   id: USER_ID++,
   fullname: '@cname',
   email: '@email',
-  password: '@word(6)'
+  password: '@word(6)',
 })
 
 export const BO_ORGANIZATION_COUNT = 3
@@ -36,9 +36,9 @@ export const BO_ORGANIZATION_FN = (source: any) => {
       logo: '@url',
       creatorId: undefined,
       owner: undefined,
-      members: ''
+      members: '',
     }),
-    source
+    source,
   )
 }
 export const BO_REPOSITORY_COUNT = 3
@@ -49,9 +49,9 @@ export const BO_REPOSITORY_FN = (source: any) => {
       id: REPOSITORY_ID++,
       name: '仓库@ctitle',
       description: '@cparagraph',
-      logo: '@url'
+      logo: '@url',
     }),
-    source
+    source,
   )
 }
 
@@ -63,9 +63,9 @@ export const BO_MODULE_FN = (source: any) => {
       name: '模块@ctitle(4)',
       description: '@cparagraph',
       repositoryId: undefined,
-      creatorId: undefined
+      creatorId: undefined,
     }),
-    source
+    source,
   )
 }
 export const BO_INTERFACE_COUNT = 3
@@ -80,9 +80,9 @@ export const BO_INTERFACE_FN = (source: any) => {
       creatorId: undefined,
       lockerId: undefined,
       repositoryId: undefined,
-      moduleId: undefined
+      moduleId: undefined,
     }),
-    source
+    source,
   )
 }
 export const BO_PROPERTY_COUNT = 6
@@ -98,8 +98,8 @@ export const BO_PROPERTY_FN = (source: any) => {
       creatorId: undefined,
       repositoryId: undefined,
       moduleId: undefined,
-      interfaceId: undefined
+      interfaceId: undefined,
     }),
-    source
+    source,
   )
 }

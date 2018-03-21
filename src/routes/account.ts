@@ -9,16 +9,16 @@ router.get('/app/get', async (ctx, next) => {
   let data: any = {}
   let query = ctx.query
   let hooks: any = {
-    user: User
+    user: User,
   }
   for (let name in hooks) {
     if (!query[name]) continue
     data[name] = await hooks[name].findById(query[name], {
-      attributes: { exclude: [] }
+      attributes: { exclude: [] },
     })
   }
   ctx.body = {
-    data: Object.assign({}, ctx.body && ctx.body.data, data)
+    data: Object.assign({}, ctx.body && ctx.body.data, data),
   }
 
   return next()
@@ -26,7 +26,7 @@ router.get('/app/get', async (ctx, next) => {
 
 router.get('/account/count', async(ctx) => {
   ctx.body = {
-    data: await User.count()
+    data: await User.count(),
   }
 })
 
@@ -36,8 +36,8 @@ router.get('/account/list', async(ctx) => {
   if (name) {
     Object.assign(where, {
       $or: [
-        { fullname: { $like: `%${name}%` } }
-      ]
+        { fullname: { $like: `%${name}%` } },
+      ],
     })
   }
   let options = { where }
@@ -49,18 +49,18 @@ router.get('/account/list', async(ctx) => {
       offset: pagination.start,
       limit: pagination.limit,
       order: [
-        ['id', 'DESC']
-      ]
+        ['id', 'DESC'],
+      ],
     })),
-    pagination: pagination
+    pagination: pagination,
   }
 })
 
 router.get('/account/info', async(ctx) => {
   ctx.body = {
     data: ctx.session.id ? await User.findById(ctx.session.id, {
-      attributes: QueryInclude.User.attributes
-    }) : undefined
+      attributes: QueryInclude.User.attributes,
+    }) : undefined,
   }
 })
 
@@ -74,7 +74,7 @@ router.post('/account/login', async(ctx) => {
   } else {
     result = await User.findOne({
       attributes: QueryInclude.User.attributes,
-      where: { email, password }
+      where: { email, password },
     })
     if (result) {
       ctx.session.id = result.id
@@ -87,7 +87,7 @@ router.post('/account/login', async(ctx) => {
     }
   }
   ctx.body = {
-    data: result ? result : { errMsg }
+    data: result ? result : { errMsg },
   }
 })
 
@@ -97,21 +97,21 @@ router.get('/account/logout', async(ctx) => {
   let id = ctx.session.id
   Object.assign(ctx.session, { id: undefined, fullname: undefined, email: undefined })
   ctx.body = {
-    data: await { id }
+    data: await { id },
   }
 })
 
 router.post('/account/register', async(ctx) => {
   let { fullname, email, password } = ctx.request.body
   let exists = await User.findAll({
-    where: { email }
+    where: { email },
   })
   if (exists && exists.length) {
     ctx.body = {
       data: {
         isOk: false,
-        errMsg: '该邮件已被注册，请更换再试。'
-      }
+        errMsg: '该邮件已被注册，请更换再试。',
+      },
     }
     return
   }
@@ -131,8 +131,8 @@ router.post('/account/register', async(ctx) => {
     data: {
       id: result.id,
       fullname: result.fullname,
-      email: result.email
-    }
+      email: result.email,
+    },
   }
 })
 
@@ -140,15 +140,15 @@ router.get('/account/remove', async(ctx) => {
   if (process.env.TEST_MODE === 'true') {
     ctx.body = {
       data: await User.destroy({
-        where: { id: ctx.query.id }
-      })
+        where: { id: ctx.query.id },
+      }),
     }
   } else {
     ctx.body = {
       data: {
         isOk: false,
-        errMsg: 'access forbidden'
-      }
+        errMsg: 'access forbidden',
+      },
     }
   }
 })
@@ -156,13 +156,13 @@ router.get('/account/remove', async(ctx) => {
 // TODO 2.3 账户设置
 router.get('/account/setting', async(ctx) => {
   ctx.body = {
-    data: {}
+    data: {},
   }
 })
 
 router.post('/account/setting', async(ctx) => {
   ctx.body = {
-    data: {}
+    data: {},
   }
 })
 
@@ -177,28 +177,28 @@ router.get('/account/notification/list', async(ctx) => {
       offset: pagination.start,
       limit: pagination.limit,
       order: [
-        ['id', 'DESC']
-      ]
+        ['id', 'DESC'],
+      ],
     }),
-    pagination: pagination
+    pagination: pagination,
   }
 })
 
 router.get('/account/notification/unreaded', async(ctx) => {
   ctx.body = {
-    data: []
+    data: [],
   }
 })
 
 router.post('/account/notification/unreaded', async(ctx) => {
   ctx.body = {
-    data: 0
+    data: 0,
   }
 })
 
 router.post('/account/notification/read', async(ctx) => {
   ctx.body = {
-    data: 0
+    data: 0,
   }
 })
 
@@ -212,8 +212,8 @@ router.get('/account/logger', async(ctx) => {
     $or: [
       { userId: ctx.session.id },
       { repositoryId: repositories.map(item => item.id) },
-      { organizationId: organizations.map(item => item.id) }
-    ]
+      { organizationId: organizations.map(item => item.id) },
+    ],
   }
   let total = await Logger.count({ where })
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
@@ -226,19 +226,19 @@ router.get('/account/logger', async(ctx) => {
       QueryInclude.Organization,
       QueryInclude.Repository,
       QueryInclude.Module,
-      QueryInclude.Interface
+      QueryInclude.Interface,
     ],
     offset: pagination.start,
     limit: pagination.limit,
     order: [
-      ['id', 'DESC']
+      ['id', 'DESC'],
     ],
-    paranoid: false
+    paranoid: false,
   } as any)
 
   ctx.body = {
     data: logs,
-    pagination
+    pagination,
   }
 })
 

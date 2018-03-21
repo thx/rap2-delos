@@ -5,7 +5,7 @@ const genExampleModule = (extra: any) => Object.assign({
   name: '示例模块',
   description: '示例模块',
   creatorId: undefined,
-  repositoryId: undefined
+  repositoryId: undefined,
 }, extra)
 const genExampleInterface = (extra: any) => Object.assign({
   name: '示例接口',
@@ -15,7 +15,7 @@ const genExampleInterface = (extra: any) => Object.assign({
   creatorId: undefined,
   lockerId: undefined,
   moduleId: undefined,
-  repositoryId: undefined
+  repositoryId: undefined,
 }, extra)
 const genExampleProperty = (extra: any) => Object.assign({
   scope: undefined,
@@ -28,14 +28,14 @@ const genExampleProperty = (extra: any) => Object.assign({
   creatorId: undefined,
   interfaceId: undefined,
   moduleId: undefined,
-  repositoryId: undefined
+  repositoryId: undefined,
 }, extra)
 
 // 初始化仓库
 const initRepository = async (repository: Repository) => {
   let mod = await Module.create(genExampleModule({
     creatorId: repository.creatorId,
-    repositoryId: repository.id
+    repositoryId: repository.id,
   }))
   await initModule(mod)
 }
@@ -44,7 +44,7 @@ const initModule = async (mod: Module) => {
   let itf = await Interface.create(genExampleInterface({
     creatorId: mod.creatorId,
     moduleId: mod.id,
-    repositoryId: mod.repositoryId
+    repositoryId: mod.repositoryId,
   }))
   await initInterface(itf)
 }
@@ -57,7 +57,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   // TODO 2.1 完整的 Mock 示例：无法模拟所有 Mock 规则
   await Property.create(genExampleProperty({
@@ -70,7 +70,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -82,7 +82,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -94,7 +94,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -106,7 +106,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -118,7 +118,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   let array = await Property.create(genExampleProperty({
     scope: 'response',
@@ -130,7 +130,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -143,7 +143,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -156,7 +156,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -168,7 +168,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   let object = await Property.create(genExampleProperty({
     scope: 'response',
@@ -180,7 +180,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -193,7 +193,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -206,7 +206,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
   await Property.create(genExampleProperty({
     scope: 'response',
@@ -218,7 +218,7 @@ const initInterface = async (itf: Interface) => {
     creatorId,
     repositoryId,
     moduleId,
-    interfaceId
+    interfaceId,
   }))
 }
 
@@ -227,5 +227,5 @@ module.exports = {
   genExampleInterface,
   initRepository,
   initModule,
-  initInterface
+  initInterface,
 }

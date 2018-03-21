@@ -3,8 +3,10 @@ import router from './router'
 const _ = require('underscore')
 import Pagination from './utils/pagination'
 import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
+import { Sequelize } from 'sequelize-typescript'
 import Tree from './utils/tree'
 const { initRepository, initModule } = require('./utils/helper')
+const Op = Sequelize.Op
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -13,26 +15,26 @@ router.get('/app/get', async (ctx, next) => {
     repository: Repository,
     module: Module,
     interface: Interface,
-    property: Property
+    property: Property,
   }
   for (let name in hooks) {
     if (!query[name]) continue
     data[name] = await hooks[name].findById(query[name])
   }
   ctx.body = {
-    data: Object.assign({}, ctx.body && ctx.body.data, data)
+    data: Object.assign({}, ctx.body && ctx.body.data, data),
   }
 
   return next()
 })
 
-router.get('/repository/count', async(ctx) => {
+router.get('/repository/count', async (ctx) => {
   ctx.body = {
-    data: await Repository.count()
+    data: await Repository.count(),
   }
 })
 
-router.get('/repository/list', async(ctx) => {
+router.get('/repository/list', async (ctx) => {
   let where = {}
   let { name, user, organization } = ctx.query
   // tslint:disable-next-line:no-null-keyword
@@ -42,8 +44,8 @@ router.get('/repository/list', async(ctx) => {
     Object.assign(where, {
       $or: [
         { name: { $like: `%${name}%` } },
-        { id: name } // name => id
-      ]
+        { id: name }, // name => id
+      ],
     })
   }
   let total = await Repository.count({
@@ -51,8 +53,8 @@ router.get('/repository/list', async(ctx) => {
     include: [
       QueryInclude.Creator,
       QueryInclude.Owner,
-      QueryInclude.Locker
-    ]
+      QueryInclude.Locker,
+    ],
   } as any)
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let repositories = await Repository.findAll({
@@ -64,26 +66,26 @@ router.get('/repository/list', async(ctx) => {
       QueryInclude.Locker,
       QueryInclude.Members,
       QueryInclude.Organization,
-      QueryInclude.Collaborators
+      QueryInclude.Collaborators,
     ],
     offset: pagination.start,
     limit: pagination.limit,
-    order: [['updatedAt', 'DESC']]
+    order: [['updatedAt', 'DESC']],
   } as any)
   ctx.body = {
     data: repositories,
-    pagination: pagination
+    pagination: pagination,
   }
 })
-router.get('/repository/owned', async(ctx) => {
+router.get('/repository/owned', async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
       $or: [
         { name: { $like: `%${name}%` } },
-        { id: name } // name => id
-      ]
+        { id: name }, // name => id
+      ],
     })
   }
 
@@ -98,26 +100,26 @@ router.get('/repository/owned', async(ctx) => {
       QueryInclude.Locker,
       QueryInclude.Members,
       QueryInclude.Organization,
-      QueryInclude.Collaborators
+      QueryInclude.Collaborators,
     ],
     // offset: pagination.start,
     // limit: pagination.limit,
-    order: [['updatedAt', 'DESC']]
+    order: [['updatedAt', 'DESC']],
   })
   ctx.body = {
     data: repositories,
-    pagination: undefined
+    pagination: undefined,
   }
 })
-router.get('/repository/joined', async(ctx) => {
+router.get('/repository/joined', async (ctx) => {
   let where: any = {}
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
       $or: [
         { name: { $like: `%${name}%` } },
-        { id: name } // name => id
-      ]
+        { id: name }, // name => id
+      ],
     })
   }
 
@@ -133,18 +135,18 @@ router.get('/repository/joined', async(ctx) => {
       QueryInclude.Locker,
       QueryInclude.Members,
       QueryInclude.Organization,
-      QueryInclude.Collaborators
+      QueryInclude.Collaborators,
     ],
     // offset: pagination.start,
     // limit: pagination.limit,
-    order: [['updatedAt', 'DESC']]
+    order: [['updatedAt', 'DESC']],
   })
   ctx.body = {
     data: repositories,
-    pagination: undefined
+    pagination: undefined,
   }
 })
-router.get('/repository/get', async(ctx) => {
+router.get('/repository/get', async (ctx) => {
   let repository = await Repository.findById(ctx.query.id, {
     attributes: { exclude: [] },
     include: [
@@ -154,14 +156,14 @@ router.get('/repository/get', async(ctx) => {
       QueryInclude.Members,
       QueryInclude.Organization,
       QueryInclude.RepositoryHierarchy,
-      QueryInclude.Collaborators
-    ]
+      QueryInclude.Collaborators,
+    ],
   } as any)
   ctx.body = {
-    data: repository
+    data: repository,
   }
 })
-router.post('/repository/create', async(ctx, next) => {
+router.post('/repository/create', async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign({}, ctx.request.body, { creatorId, ownerId: creatorId })
   let created = await Repository.create(body)
@@ -184,19 +186,19 @@ router.post('/repository/create', async(ctx, next) => {
         QueryInclude.Members,
         QueryInclude.Organization,
         QueryInclude.RepositoryHierarchy,
-        QueryInclude.Collaborators
-      ]
-    } as any)
+        QueryInclude.Collaborators,
+      ],
+    } as any),
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   await Logger.create({
     userId: ctx.session.id,
     type: 'create',
-    repositoryId: ctx.body.data.id
+    repositoryId: ctx.body.data.id,
   })
 })
-router.post('/repository/update', async(ctx, next) => {
+router.post('/repository/update', async (ctx, next) => {
   let body = Object.assign({}, ctx.request.body)
   delete body.creatorId
   // DONE 2.2 支持转移仓库
@@ -204,27 +206,46 @@ router.post('/repository/update', async(ctx, next) => {
   delete body.organizationId
   let result = await Repository.update(body, { where: { id: body.id } })
   if (body.memberIds) {
-    let reloaded = await Repository.findById(body.id)
-    let members = await User.findAll({ where: { id: body.memberIds } })
-    ctx.prevAssociations = await reloaded.$get('members')
-    await reloaded.$set('members', members)
-    ctx.nextAssociations = await reloaded.$get('members')
+    let reloaded = await Repository.findById(body.id, {
+      include: [{
+        model: User,
+        as: 'members',
+      }],
+    })
+    let members = await User.findAll({
+      where: {
+        id: {
+          [Op.in]: body.memberIds,
+        },
+      },
+    })
+    ctx.prevAssociations = reloaded.members
+    reloaded.$set('members', members)
+    await reloaded.save()
+    ctx.nextAssociations = reloaded.members
   }
   if (body.collaboratorIds) {
     let reloaded = await Repository.findById(body.id)
-    let collaborators = await Repository.findAll({ where: { id: body.collaboratorIds } })
-    await reloaded.$set('collaborators', collaborators)
+    let collaborators = await Repository.findAll({
+      where: {
+        id: {
+          [Op.in]: body.collaboratorIds,
+        },
+      },
+    })
+    reloaded.$set('collaborators', collaborators)
+    await reloaded.save()
   }
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   let { id } = ctx.request.body
   await Logger.create({
     userId: ctx.session.id,
     type: 'update',
-    repositoryId: id
+    repositoryId: id,
   })
   // 加入 & 退出
   if (!ctx.prevAssociations || !ctx.nextAssociations) return
@@ -240,7 +261,7 @@ router.post('/repository/update', async(ctx, next) => {
     await Logger.create({ creatorId, userId, type: 'exit', repositoryId: id })
   }
 })
-router.post('/repository/transfer', async(ctx) => {
+router.post('/repository/transfer', async (ctx) => {
   let { id, ownerId, organizationId } = ctx.request.body
   let body: any = {}
   if (ownerId) body.ownerId = ownerId // 转移给其他用户
@@ -250,26 +271,26 @@ router.post('/repository/transfer', async(ctx) => {
   }
   let result = await Repository.update(body, { where: { id } })
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
 })
-router.get('/repository/remove', async(ctx, next) => {
+router.get('/repository/remove', async (ctx, next) => {
   let { id } = ctx.query
   let result = await Repository.destroy({ where: { id } })
   await Module.destroy({ where: { repositoryId: id } })
   await Interface.destroy({ where: { repositoryId: id } })
   await Property.destroy({ where: { repositoryId: id } })
   ctx.body = {
-    data: result
+    data: result,
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
   await Logger.create({
     userId: ctx.session.id,
     type: 'delete',
-    repositoryId: id
+    repositoryId: id,
   })
 })
 
@@ -282,7 +303,7 @@ router.post('/repository/lock', async (ctx) => {
   }
   let { id } = ctx.request.body
   let result = await Repository.update({ lockerId: user }, {
-    where: { id }
+    where: { id },
   })
   ctx.body = { data: result[0] }
 })
@@ -294,7 +315,7 @@ router.post('/repository/unlock', async (ctx) => {
   let { id } = ctx.request.body
   // tslint:disable-next-line:no-null-keyword
   let result = await Repository.update({ lockerId: null }, {
-    where: { id }
+    where: { id },
   })
   ctx.body = { data: result[0] }
 })
@@ -302,7 +323,7 @@ router.post('/repository/unlock', async (ctx) => {
 // 模块
 router.get('/module/count', async (ctx) => {
   ctx.body = {
-    data: await Module.count()
+    data: await Module.count(),
   }
 })
 router.get('/module/list', async (ctx) => {
@@ -313,15 +334,15 @@ router.get('/module/list', async (ctx) => {
   ctx.body = {
     data: await Module.findAll({
       attributes: { exclude: [] },
-      where
-    })
+      where,
+    }),
   }
 })
 router.get('/module/get', async (ctx) => {
   ctx.body = {
     data: await Module.findById(ctx.query.id, {
-      attributes: { exclude: [] }
-    })
+      attributes: { exclude: [] },
+    }),
   }
 })
 router.post('/module/create', async (ctx, next) => {
@@ -331,35 +352,35 @@ router.post('/module/create', async (ctx, next) => {
   let created = await Module.create(body)
   await initModule(created)
   ctx.body = {
-    data: await Module.findById(created.id)
+    data: await Module.findById(created.id),
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   let mod = ctx.body.data
   await Logger.create({
     userId: ctx.session.id,
     type: 'create',
     repositoryId: mod.repositoryId,
-    moduleId: mod.id
+    moduleId: mod.id,
   })
 })
 router.post('/module/update', async (ctx, next) => {
   let body = ctx.request.body
   let result = await Module.update(body, {
-    where: { id: body.id }
+    where: { id: body.id },
   })
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let mod = ctx.request.body
   await Logger.create({
     userId: ctx.session.id,
     type: 'update',
     repositoryId: mod.repositoryId,
-    moduleId: mod.id
+    moduleId: mod.id,
   })
 })
 router.get('/module/remove', async (ctx, next) => {
@@ -368,10 +389,10 @@ router.get('/module/remove', async (ctx, next) => {
   await Interface.destroy({ where: { moduleId: id } })
   await Property.destroy({ where: { moduleId: id } })
   ctx.body = {
-    data: result
+    data: result,
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
   let mod = await Module.findById(id, { paranoid: false })
@@ -379,25 +400,25 @@ router.get('/module/remove', async (ctx, next) => {
     userId: ctx.session.id,
     type: 'delete',
     repositoryId: mod.repositoryId,
-    moduleId: mod.id
+    moduleId: mod.id,
   })
 })
 router.post('/module/sort', async (ctx) => {
   let { ids } = ctx.request.body
   for (let index = 0; index < ids.length; index++) {
     await Module.update({ priority: index + 1 }, {
-      where: { id: ids[index] }
+      where: { id: ids[index] },
     })
   }
   ctx.body = {
-    data: ids.length
+    data: ids.length,
   }
 })
 
 //
 router.get('/interface/count', async (ctx) => {
   ctx.body = {
-    data: await Interface.count()
+    data: await Interface.count(),
   }
 })
 router.get('/interface/list', async (ctx) => {
@@ -409,8 +430,8 @@ router.get('/interface/list', async (ctx) => {
   ctx.body = {
     data: await Interface.findAll({
       attributes: { exclude: [] },
-      where
-    })
+      where,
+    }),
   }
 })
 router.get('/interface/get', async (ctx) => {
@@ -419,7 +440,7 @@ router.get('/interface/get', async (ctx) => {
   let itf
   if (id) {
     itf = await Interface.findById(id, {
-      attributes: { exclude: [] }
+      attributes: { exclude: [] },
     })
   } else if (repositoryId && method && url) {
     // 同 /app/mock/:repository/:method/:url
@@ -432,8 +453,8 @@ router.get('/interface/get', async (ctx) => {
       where: {
         repositoryId: [repositoryId, ...(<Repository[]>collaborators).map(item => item.id)],
         method,
-        url: [urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash]
-      }
+        url: [urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash],
+      },
     })
   }
   itf = itf.toJSON()
@@ -442,7 +463,7 @@ router.get('/interface/get', async (ctx) => {
   for (let i = 0; i < scopes.length; i++) {
     let properties = await Property.findAll({
       attributes: { exclude: [] },
-      where: { interfaceId: itf.id, scope: scopes[i] }
+      where: { interfaceId: itf.id, scope: scopes[i] },
     })
     properties = properties.map(item => item.toJSON())
     itf[scopes[i] + 'Properties'] = Tree.ArrayToTree(properties).children
@@ -458,29 +479,29 @@ router.post('/interface/create', async (ctx, next) => {
   let created = await Interface.create(body)
   // await initInterface(created)
   ctx.body = {
-    data: await Interface.findById(created.id)
+    data: await Interface.findById(created.id),
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   let itf = ctx.body.data
   await Logger.create({
     userId: ctx.session.id,
     type: 'create',
     repositoryId: itf.repositoryId,
     moduleId: itf.moduleId,
-    interfaceId: itf.id
+    interfaceId: itf.id,
   })
 })
 router.post('/interface/update', async (ctx, next) => {
   let body = ctx.request.body
   let result = await Interface.update(body, {
-    where: { id: body.id }
+    where: { id: body.id },
   })
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let itf = ctx.request.body
   await Logger.create({
@@ -488,7 +509,7 @@ router.post('/interface/update', async (ctx, next) => {
     type: 'update',
     repositoryId: itf.repositoryId,
     moduleId: itf.moduleId,
-    interfaceId: itf.id
+    interfaceId: itf.id,
   })
 })
 router.get('/interface/remove', async (ctx, next) => {
@@ -496,10 +517,10 @@ router.get('/interface/remove', async (ctx, next) => {
   let result = await Interface.destroy({ where: { id } })
   await Property.destroy({ where: { interfaceId: id } })
   ctx.body = {
-    data: result
+    data: result,
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
   let itf = await Interface.findById(id, { paranoid: false })
@@ -508,7 +529,7 @@ router.get('/interface/remove', async (ctx, next) => {
     type: 'delete',
     repositoryId: itf.repositoryId,
     moduleId: itf.moduleId,
-    interfaceId: itf.id
+    interfaceId: itf.id,
   })
 })
 router.post('/interface/lock', async (ctx, next) => {
@@ -521,16 +542,16 @@ router.post('/interface/lock', async (ctx, next) => {
   let itf = await Interface.findById(id)
   if (itf.lockerId) { // DONE 2.3 BUG 接口可能被不同的人重复锁定。如果已经被锁定，则忽略。
     ctx.body = {
-      data: 0
+      data: 0,
     }
     return
   }
 
   let result = await Interface.update({ lockerId: ctx.session.id }, {
-    where: { id }
+    where: { id },
   })
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
   return next()
 })
@@ -549,10 +570,10 @@ router.post('/interface/unlock', async (ctx, next) => {
 
   // tslint:disable-next-line:no-null-keyword
   let result = await Interface.update({ lockerId: null }, {
-    where: { id }
+    where: { id },
   })
   ctx.body = {
-    data: result[0]
+    data: result[0],
   }
   return next()
 })
@@ -560,18 +581,18 @@ router.post('/interface/sort', async (ctx) => {
   let { ids } = ctx.request.body
   for (let index = 0; index < ids.length; index++) {
     await Interface.update({ priority: index + 1 }, {
-      where: { id: ids[index] }
+      where: { id: ids[index] },
     })
   }
   ctx.body = {
-    data: ids.length
+    data: ids.length,
   }
 })
 
 //
 router.get('/property/count', async (ctx) => {
   ctx.body = {
-    data: await Property.count()
+    data: await Property.count(),
   }
 })
 router.get('/property/list', async (ctx) => {
@@ -582,15 +603,15 @@ router.get('/property/list', async (ctx) => {
   if (interfaceId) where.interfaceId = interfaceId
   if (name) where.name = { $like: `%${name}%` }
   ctx.body = {
-    data: await Property.findAll({ where })
+    data: await Property.findAll({ where }),
   }
 })
 router.get('/property/get', async (ctx) => {
   let { id } = ctx.query
   ctx.body = {
     data: await Property.findById(id, {
-      attributes: { exclude: [] }
-    })
+      attributes: { exclude: [] },
+    }),
   }
 })
 router.post('/property/create', async (ctx) => {
@@ -599,8 +620,8 @@ router.post('/property/create', async (ctx) => {
   let created = await Property.create(body)
   ctx.body = {
     data: await Property.findById(created.id, {
-      attributes: { exclude: [] }
-    })
+      attributes: { exclude: [] },
+    }),
   }
 })
 router.post('/property/update', async (ctx) => {
@@ -610,12 +631,12 @@ router.post('/property/update', async (ctx) => {
   for (let item of properties) {
     let property = _.pick(item, Object.keys(Property.attributes))
     let affected = await Property.update(property, {
-      where: { id: property.id }
+      where: { id: property.id },
     })
     result += affected[0]
   }
   ctx.body = {
-    data: result
+    data: result,
   }
 })
 router.post('/properties/update', async (ctx, next) => {
@@ -641,13 +662,13 @@ router.post('/properties/update', async (ctx, next) => {
   let result = await Property.destroy({
     where: {
       id: { $notIn: existingProperties.map((item: any) => item.id) },
-      interfaceId: itf
-    }
+      interfaceId: itf,
+    },
   })
   // 更新已存在的属性
   for (let item of existingProperties) {
     let affected = await Property.update(item, {
-      where: { id: item.id }
+      where: { id: item.id },
     })
     result += affected[0]
   }
@@ -658,7 +679,7 @@ router.post('/properties/update', async (ctx, next) => {
     let created = await Property.create(Object.assign({}, item, {
       id: undefined,
       parentId: -1,
-      priority: item.priority || ((await Property.count()) + 1)
+      priority: item.priority || ((await Property.count()) + 1),
     }))
     memoryIdsMap[item.id] = created.id
     item.id = created.id
@@ -668,31 +689,31 @@ router.post('/properties/update', async (ctx, next) => {
   for (let item of newProperties) {
     let parentId = memoryIdsMap[item.parentId] || item.parentId
     await Property.update({ parentId }, {
-      where: { id: item.id }
+      where: { id: item.id },
     })
   }
   ctx.body = {
-    data: result
+    data: result,
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let itf = await Interface.findById(ctx.query.itf, {
-    attributes: { exclude: [] }
+    attributes: { exclude: [] },
   })
   await Logger.create({
     userId: ctx.session.id,
     type: 'update',
     repositoryId: itf.repositoryId,
     moduleId: itf.moduleId,
-    interfaceId: itf.id
+    interfaceId: itf.id,
   })
 })
 router.get('/property/remove', async (ctx) => {
   let { id } = ctx.query
   ctx.body = {
     data: await Property.destroy({
-      where: { id }
-    })
+      where: { id },
+    }),
   }
 })

@@ -21,14 +21,14 @@ export default class Property extends Model<Property> {
   @Default(SCOPES.RESPONSE)
   @Column({
     type: DataType.ENUM(SCOPES.REQUEST, SCOPES.RESPONSE),
-    comment: 'property owner'
+    comment: 'property owner',
   })
   scope: string
 
   @AllowNull(false)
   @Column({
     type: DataType.ENUM(TYPES.STRING, TYPES.NUMBER, TYPES.BOOLEAN, TYPES.OBJECT, TYPES.ARRAY, TYPES.FUNCTION, TYPES.REGEXP),
-    comment: 'property type'
+    comment: 'property type',
   })
   type: string
 

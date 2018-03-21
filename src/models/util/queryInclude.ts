@@ -42,7 +42,7 @@ const QueryInclude: IQueryInclude = {
     required: false,
     separate: true,
     order: [
-      ['priority', 'ASC']
+      ['priority', 'ASC'],
     ],
     include: [{
       model: Interface,
@@ -51,28 +51,28 @@ const QueryInclude: IQueryInclude = {
       required: false,
       separate: true,
       order: [
-        ['priority', 'ASC']
+        ['priority', 'ASC'],
       ],
       include: [{
         model: User,
         as: 'locker',
         attributes: { exclude: ['password', ...Helper.exclude.generalities] },
-        required: false
+        required: false,
       }, {
         model: Property,
         as: 'properties',
         attributes: { exclude: [] },
         required: false,
-        separate: true
-      }]
-    }]
+        separate: true,
+      }],
+    }],
   },
   Properties: {
     model: Property,
     as: 'properties',
     attributes: { exclude: [] },
-    required: false
-  }
+    required: false,
+  },
 }
 
 export default QueryInclude
