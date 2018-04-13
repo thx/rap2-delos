@@ -41,6 +41,9 @@ export default class Organization extends Model<Organization> {
   @BelongsToMany(() => User, () => OrganizationsMembers)
   members: User[]
 
+  @HasMany(() => OrganizationsMembers)
+  organizationMembersList: OrganizationsMembers[]
+
   @HasMany(() => Repository, 'organizationId')
   repositories: Repository[]
 }

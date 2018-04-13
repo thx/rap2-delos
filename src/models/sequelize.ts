@@ -34,15 +34,17 @@ sequelize.authenticate()
         organizationId: instance.id,
       })
     })
+
     console.log('----------------------------------------')
     console.log('DATABASE √')
     console.log('    HOST     %s', config.db.host)
     console.log('    PORT     %s', config.db.port)
     console.log('    DATABASE %s', config.db.database)
     console.log('----------------------------------------')
+
   })
   .catch(err => {
     console.log('Unable to connect to the database:', err)
   })
 
-module.exports = sequelize
+  export default sequelize

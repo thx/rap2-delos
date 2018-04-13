@@ -68,6 +68,7 @@ router.post('/account/login', async(ctx) => {
   let { email, password, captcha } = ctx.request.body
   let result, errMsg
 
+  console.log(`captcha=${captcha} ctx.session.captcha=${ctx.session.captcha}`)
   if (process.env.TEST_MODE !== 'true' &&
     (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase())) {
     errMsg = '错误的验证码'
@@ -88,6 +89,12 @@ router.post('/account/login', async(ctx) => {
   }
   ctx.body = {
     data: result ? result : { errMsg },
+  }
+})
+
+router.get('/captcha_data', ctx => {
+  ctx.body = {
+    data: JSON.stringify(ctx.session)
   }
 })
 
@@ -245,6 +252,7 @@ router.get('/account/logger', async(ctx) => {
 router.get('/captcha', async(ctx) => {
   const captcha = svgCaptcha.create()
   ctx.session.captcha = captcha.text
+  console.log(`ctx.session.captcha=${ctx.session.captcha}`)
   ctx.set('Content-Type', 'image/svg+xml')
   ctx.body = captcha.data
 })

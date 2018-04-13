@@ -3,6 +3,9 @@ import { Organization, User, Logger, Repository, Module, Interface, Property } f
 import { QueryInclude } from '../models';
 import * as _ from 'lodash'
 import Pagination from './utils/pagination'
+import { Op } from 'sequelize';
+import OrganizationService from '../service/organization'
+import { IFindOptions } from 'sequelize-typescript';
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -23,48 +26,34 @@ router.get('/app/get', async (ctx, next) => {
   return next()
 })
 
-router.get('/organization/count', async(ctx) => {
+router.get('/organization/count', async (ctx) => {
   ctx.body = {
     data: await Organization.count(),
   }
 })
-router.get('/organization/list', async(ctx) => {
-  let where = {}
-  let { name } = ctx.query
-  if (name) {
-    Object.assign(where, {
-      $or: [
-        { name: { $like: `%${name}%` } },
-        { id: name }, // name => id
-      ],
-    })
+
+router.get('/organization/list', async (ctx) => {
+  const curUserId = ctx.session.id
+  const { name } = ctx.query
+  const total = await OrganizationService.getAllOrganizationIdListNum(curUserId)
+  const pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
+  const organizationIds = await OrganizationService.getAllOrganizationIdList(curUserId, pagination, name)
+  const options: IFindOptions<Organization> = {
+    where: { id: { [Op.in]: organizationIds } },
+    include: [
+      QueryInclude.Creator,
+      QueryInclude.Owner,
+      QueryInclude.Members
+    ],
+    order: [['updatedAt', 'desc']]
   }
-  let total = await Organization.count({
-    where,
-    include: [
-      QueryInclude.Creator,
-      QueryInclude.Owner,
-    ],
-  } as any)
-  let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
-  let organizations = await Organization.findAll({
-    where,
-    attributes: { exclude: [] },
-    include: [
-      QueryInclude.Creator,
-      QueryInclude.Owner,
-      QueryInclude.Members,
-    ],
-    offset: pagination.start,
-    limit: pagination.limit,
-    order: [['updatedAt', 'DESC']],
-  } as any)
+  const organizations = await Organization.findAll(options)
   ctx.body = {
     data: organizations,
-    pagination: pagination,
+    pagination,
   }
 })
-router.get('/organization/owned', async(ctx) => {
+router.get('/organization/owned', async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -89,7 +78,7 @@ router.get('/organization/owned', async(ctx) => {
     pagination: undefined,
   }
 })
-router.get('/organization/joined', async(ctx) => {
+router.get('/organization/joined', async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -116,7 +105,7 @@ router.get('/organization/joined', async(ctx) => {
     pagination: undefined,
   }
 })
-router.get('/organization/get', async(ctx) => {
+router.get('/organization/get', async (ctx) => {
   let organization = await Organization.findById(ctx.query.id, {
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
@@ -125,7 +114,7 @@ router.get('/organization/get', async(ctx) => {
     data: organization,
   }
 })
-router.post('/organization/create', async(ctx) => {
+router.post('/organization/create', async (ctx) => {
   let creatorId = ctx.session.id
   let body = Object.assign({}, ctx.request.body, { creatorId, ownerId: creatorId })
   let created = await Organization.create(body)
@@ -141,7 +130,7 @@ router.post('/organization/create', async(ctx) => {
     data: filled,
   }
 })
-router.post('/organization/update', async(ctx, next) => {
+router.post('/organization/update', async (ctx, next) => {
   let body = Object.assign({}, ctx.request.body)
   delete body.creatorId
   // DONE 2.2 支持转移团队
@@ -158,7 +147,7 @@ router.post('/organization/update', async(ctx, next) => {
     data: updated[0],
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   let { id } = ctx.request.body
   // 团队改
   await Logger.create({
@@ -180,7 +169,7 @@ router.post('/organization/update', async(ctx, next) => {
     await Logger.create({ creatorId, userId, type: 'exit', organizationId: id })
   }
 })
-router.post('/organization/transfer', async(ctx) => {
+router.post('/organization/transfer', async (ctx) => {
   let { id, ownerId } = ctx.request.body
   let body = { ownerId }
   let result = await Organization.update(body, { where: { id } })
@@ -188,7 +177,7 @@ router.post('/organization/transfer', async(ctx) => {
     data: result[0],
   }
 })
-router.get('/organization/remove', async(ctx, next) => {
+router.get('/organization/remove', async (ctx, next) => {
   let { id } = ctx.query
   let result = await Organization.destroy({ where: { id } })
   let repositories = await Repository.findAll({
@@ -205,7 +194,7 @@ router.get('/organization/remove', async(ctx, next) => {
     data: result,
   }
   return next()
-}, async(ctx) => {
+}, async (ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
   await Logger.create({

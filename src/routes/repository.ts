@@ -5,6 +5,8 @@ import Pagination from './utils/pagination'
 import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
 import { Sequelize } from 'sequelize-typescript'
 import Tree from './utils/tree'
+import { AccessUtils, ACCESS_TYPE } from './utils/access';
+import * as Consts from './utils/const'
 const { initRepository, initModule } = require('./utils/helper')
 const Op = Sequelize.Op
 
@@ -37,6 +39,16 @@ router.get('/repository/count', async (ctx) => {
 router.get('/repository/list', async (ctx) => {
   let where = {}
   let { name, user, organization } = ctx.query
+  const access = await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organization)
+
+  if (access === false) {
+    ctx.body = {
+      isOk: false,
+      errMsg: Consts.COMMON_MSGS.ACCESS_DENY
+    }
+    return
+  }
+
   // tslint:disable-next-line:no-null-keyword
   if (user) Object.assign(where, { ownerId: user, organizationId: null })
   if (organization) Object.assign(where, { organizationId: organization })
@@ -73,6 +85,7 @@ router.get('/repository/list', async (ctx) => {
     order: [['updatedAt', 'DESC']],
   } as any)
   ctx.body = {
+    isOk: true,
     data: repositories,
     pagination: pagination,
   }
@@ -147,6 +160,14 @@ router.get('/repository/joined', async (ctx) => {
   }
 })
 router.get('/repository/get', async (ctx) => {
+  const access = await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, ctx.query.id)
+  if (access === false) {
+    ctx.body = {
+      isOk: false,
+      errMsg: Consts.COMMON_MSGS.ACCESS_DENY
+    }
+    return
+  }
   let repository = await Repository.findById(ctx.query.id, {
     attributes: { exclude: [] },
     include: [
