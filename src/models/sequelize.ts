@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize-typescript'
 import config from '../config'
 import { Organization, Logger } from '.';
+import MigrateService from '../service/migrate'
 
 const chalk = require('chalk')
 const now = () => new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
@@ -41,7 +42,7 @@ sequelize.authenticate()
     console.log('    PORT     %s', config.db.port)
     console.log('    DATABASE %s', config.db.database)
     console.log('----------------------------------------')
-
+    MigrateService.checkAndFix()
   })
   .catch(err => {
     console.log('Unable to connect to the database:', err)

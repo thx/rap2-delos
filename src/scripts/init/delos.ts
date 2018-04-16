@@ -1,4 +1,4 @@
-const sequelize = require('../../models/sequelize')
+import sequelize from '../../models/sequelize'
 import { User, Organization, Repository, Module, Interface, Property } from '../../models/index'
 import { BO_ADMIN, BO_MOZHI } from './bo'
 import { BO_USER_FN, BO_ORGANIZATION_FN, BO_REPOSITORY_FN, BO_MODULE_FN, BO_INTERFACE_FN, BO_PROPERTY_FN } from './bo'

@@ -4,6 +4,7 @@ import router from './router'
 import { Model } from 'sequelize-typescript';
 import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
+import * as md5 from 'md5'
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -75,7 +76,7 @@ router.post('/account/login', async(ctx) => {
   } else {
     result = await User.findOne({
       attributes: QueryInclude.User.attributes,
-      where: { email, password },
+      where: { email, password: md5(md5(password)) },
     })
     if (result) {
       ctx.session.id = result.id
@@ -124,7 +125,7 @@ router.post('/account/register', async(ctx) => {
   }
 
   // login automatically after register
-  let result = await User.create({ fullname, email, password })
+  let result = await User.create({ fullname, email, password: md5(md5(password)) })
 
   if (result) {
     ctx.session.id = result.id
