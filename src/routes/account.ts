@@ -25,13 +25,13 @@ router.get('/app/get', async (ctx, next) => {
   return next()
 })
 
-router.get('/account/count', async(ctx) => {
+router.get('/account/count', async (ctx) => {
   ctx.body = {
     data: await User.count(),
   }
 })
 
-router.get('/account/list', async(ctx) => {
+router.get('/account/list', async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -57,7 +57,7 @@ router.get('/account/list', async(ctx) => {
   }
 })
 
-router.get('/account/info', async(ctx) => {
+router.get('/account/info', async (ctx) => {
   ctx.body = {
     data: ctx.session.id ? await User.findById(ctx.session.id, {
       attributes: QueryInclude.User.attributes,
@@ -65,7 +65,7 @@ router.get('/account/info', async(ctx) => {
   }
 })
 
-router.post('/account/login', async(ctx) => {
+router.post('/account/login', async (ctx) => {
   let { email, password, captcha } = ctx.request.body
   let result, errMsg
 
@@ -99,7 +99,7 @@ router.get('/captcha_data', ctx => {
   }
 })
 
-router.get('/account/logout', async(ctx) => {
+router.get('/account/logout', async (ctx) => {
   let app: any = ctx.app
   delete app.counter.users[ctx.session.email]
   let id = ctx.session.id
@@ -109,7 +109,7 @@ router.get('/account/logout', async(ctx) => {
   }
 })
 
-router.post('/account/register', async(ctx) => {
+router.post('/account/register', async (ctx) => {
   let { fullname, email, password } = ctx.request.body
   let exists = await User.findAll({
     where: { email },
@@ -144,7 +144,30 @@ router.post('/account/register', async(ctx) => {
   }
 })
 
-router.get('/account/remove', async(ctx) => {
+router.post('/account/update', async (ctx) => {
+  const { password } = ctx.request.body
+  let errMsg = ''
+  let isOk = false
+
+  if (!ctx.session || !ctx.session.id) {
+    errMsg = '登陆超时'
+  } else if (password.length < 6) {
+    errMsg = '密码长度过短'
+  } else {
+    const user = await User.findById(ctx.session.id)
+    user.password = md5(md5(password))
+    await user.save()
+    isOk = true
+  }
+  ctx.body = {
+    data: {
+      isOk,
+      errMsg
+    }
+  }
+})
+
+router.get('/account/remove', async (ctx) => {
   if (process.env.TEST_MODE === 'true') {
     ctx.body = {
       data: await User.destroy({
@@ -162,13 +185,13 @@ router.get('/account/remove', async(ctx) => {
 })
 
 // TODO 2.3 账户设置
-router.get('/account/setting', async(ctx) => {
+router.get('/account/setting', async (ctx) => {
   ctx.body = {
     data: {},
   }
 })
 
-router.post('/account/setting', async(ctx) => {
+router.post('/account/setting', async (ctx) => {
   ctx.body = {
     data: {},
   }
@@ -176,7 +199,7 @@ router.post('/account/setting', async(ctx) => {
 
 // TODO 2.3 账户通知
 let NOTIFICATION_EXCLUDE_ATTRIBUTES: any = []
-router.get('/account/notification/list', async(ctx) => {
+router.get('/account/notification/list', async (ctx) => {
   let total = await Notification.count()
   let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 10)
   ctx.body = {
@@ -192,29 +215,29 @@ router.get('/account/notification/list', async(ctx) => {
   }
 })
 
-router.get('/account/notification/unreaded', async(ctx) => {
+router.get('/account/notification/unreaded', async (ctx) => {
   ctx.body = {
     data: [],
   }
 })
 
-router.post('/account/notification/unreaded', async(ctx) => {
+router.post('/account/notification/unreaded', async (ctx) => {
   ctx.body = {
     data: 0,
   }
 })
 
-router.post('/account/notification/read', async(ctx) => {
+router.post('/account/notification/read', async (ctx) => {
   ctx.body = {
     data: 0,
   }
 })
 
 // TODO 2.3 账户日志
-router.get('/account/logger', async(ctx) => {
+router.get('/account/logger', async (ctx) => {
   let auth = await User.findById(ctx.session.id)
-  let repositories: Model<Repository>[] = [...(<Model<Repository>[]>await auth.$get('ownedRepositories')), ...(<Model<Repository>[]> await auth.$get('joinedRepositories'))]
-  let organizations: Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]> await auth.$get('joinedOrganizations'))]
+  let repositories: Model<Repository>[] = [...(<Model<Repository>[]>await auth.$get('ownedRepositories')), ...(<Model<Repository>[]>await auth.$get('joinedRepositories'))]
+  let organizations: Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]>await auth.$get('joinedOrganizations'))]
 
   let where: any = {
     $or: [
@@ -250,7 +273,7 @@ router.get('/account/logger', async(ctx) => {
   }
 })
 
-router.get('/captcha', async(ctx) => {
+router.get('/captcha', async (ctx) => {
   const captcha = svgCaptcha.create()
   ctx.session.captcha = captcha.text
   console.log(`ctx.session.captcha=${ctx.session.captcha}`)
