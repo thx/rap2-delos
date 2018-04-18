@@ -3,6 +3,8 @@ import { Repository, Interface, Property } from '../models'
 import { QueryInclude } from '../models';
 import Tree from './utils/tree'
 import urlUtils from './utils/url'
+import * as querystring from 'querystring'
+
 const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
@@ -177,10 +179,22 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
   requestProperties = requestProperties.map(item => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
   Object.assign(requestData, ctx.query)
-
-  let data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
+  const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
   ctx.body = JSON.stringify(data, undefined, 2)
+  console.log(itf.url)
+  if (itf && itf.url.indexOf('[callback]=') > -1) {
+    const query = querystring.parse(itf.url.substring(itf.url.indexOf('?') + 1))
+    console.log(query)
+    const cbName = query['[callback]']
+    const cbVal = ctx.request.query[`${cbName}`]
+    console.log(cbName + '|' + cbVal)
+    if (cbVal) {
+      let body = typeof ctx.body === 'object' ? JSON.stringify(ctx.body, undefined, 2) : ctx.body
+      ctx.type = 'application/x-javascript'
+      ctx.body = cbVal + '(' + body + ')'
+    }
+  }
 })
 
 // DONE 2.2 支持获取请求参数的模板、数据、Schema
