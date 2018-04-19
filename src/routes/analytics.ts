@@ -5,7 +5,7 @@ import User from "../models/bo/user";
 const moment = require('moment')
 const Sequelize = require('sequelize')
 const SELECT = { type: Sequelize.QueryTypes.SELECT }
-const sequelize = require('../models/sequelize')
+import sequelize from '../models/sequelize'
 const YYYY_MM_DD = 'YYYY-MM-DD'
 
 // 最近 30 天新建仓库数
