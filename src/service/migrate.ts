@@ -19,7 +19,7 @@ export default class Migrate {
       console.log(`load user ${user.id}`)
       if (!isMd5(user.password)) {
         user.password = md5(md5(user.password))
-        user.save().then()
+        await user.save()
         console.log(`handle user ${user.id}`)
       }
     }

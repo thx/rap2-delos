@@ -13,7 +13,7 @@
     "dev": "cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
     "create-db": "cross-env NODE_ENV=development node dist/scripts/init",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "start": "cross-env NODE_ENV=production node dist/dispatch.js"
+    "start": "cross-env NODE_ENV=production pm2 start dist/dispatch.js --name=rap-server-delos"
   },
   "author": "bosn, nuysoft",
   "license": "ISC",
@@ -37,7 +37,6 @@
     "koa-static": "^3.0.0",
     "lodash": "^4.17.5",
     "md5": "^2.2.1",
-    "md5is": "^2.0.2",
     "mockjs": "^1.0.1-beta3",
     "moment": "^2.17.1",
     "mysql": "^2.11.1",
