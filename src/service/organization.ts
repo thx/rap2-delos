@@ -5,7 +5,7 @@ import Utils from './utils';
 export default class OrganizationService {
   public static canUserAccessOrganization(userId: number, organizationId: number): Promise<boolean> {
     const sql = `
-      SELECT COUNT(*) AS num FROM (
+      SELECT COUNT(id) AS num FROM (
         SELECT o.id, o.name
         FROM Organizations o
         WHERE visibility = ${1} OR creatorId = ${userId} OR ownerId = ${userId}
@@ -17,6 +17,7 @@ export default class OrganizationService {
       ) as result
       WHERE id = ${organizationId}
     `
+    console.log(sql)
     return new Promise(resolve => {
       seq.query(sql).spread((result: any) => {
         resolve(+result[0].num > 0)
