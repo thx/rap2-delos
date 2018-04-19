@@ -72,6 +72,7 @@
     "nodemon": "^1.11.0",
     "npm-run-all": "^4.0.2",
     "nyc": "^11.4.1",
+    "pm2": "^2.10.2",
     "pre-commit": "^1.2.2",
     "source-map-support": "^0.5.0",
     "standard": "^10.0.2",
