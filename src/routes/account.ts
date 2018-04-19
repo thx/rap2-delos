@@ -272,7 +272,6 @@ router.get('/account/logger', async (ctx) => {
     pagination,
   }
 })
-<<<<<<< HEAD
 
 router.get('/captcha', async (ctx) => {
   const captcha = svgCaptcha.create()
@@ -281,5 +280,3 @@ router.get('/captcha', async (ctx) => {
   ctx.set('Content-Type', 'image/svg+xml')
   ctx.body = captcha.data
 })
-=======
->>>>>>> dev
