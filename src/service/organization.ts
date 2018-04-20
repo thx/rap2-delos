@@ -17,7 +17,6 @@ export default class OrganizationService {
       ) as result
       WHERE id = ${organizationId}
     `
-    console.log(sql)
     return new Promise(resolve => {
       seq.query(sql).spread((result: any) => {
         resolve(+result[0].num > 0)
@@ -46,7 +45,6 @@ export default class OrganizationService {
     `
     return new Promise(resolve => {
       seq.query(sql).spread((result: { id: number }[]) => {
-        console.log(result)
         resolve(result.map(item => item.id))
       })
     })

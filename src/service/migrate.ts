@@ -16,7 +16,6 @@ export default class Migrate {
       return
     }
     for (const user of users) {
-      console.log(`load user ${user.id}`)
       if (!isMd5(user.password)) {
         user.password = md5(md5(user.password))
         await user.save()

@@ -182,13 +182,10 @@ router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
   const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
   ctx.body = JSON.stringify(data, undefined, 2)
-  console.log(itf.url)
   if (itf && itf.url.indexOf('[callback]=') > -1) {
     const query = querystring.parse(itf.url.substring(itf.url.indexOf('?') + 1))
-    console.log(query)
     const cbName = query['[callback]']
     const cbVal = ctx.request.query[`${cbName}`]
-    console.log(cbName + '|' + cbVal)
     if (cbVal) {
       let body = typeof ctx.body === 'object' ? JSON.stringify(ctx.body, undefined, 2) : ctx.body
       ctx.type = 'application/x-javascript'

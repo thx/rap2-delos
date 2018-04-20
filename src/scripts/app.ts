@@ -14,7 +14,7 @@ appAny.counter = { users: {}, mock: 0 }
 
 app.keys = config.keys
 app.use(session(config.session, app))
-if (process.env.NODE_ENV === 'development') app.use(logger())
+app.use(logger())
 app.use(async(ctx, next) => {
   await next()
   if (ctx.path === '/favicon.ico') return

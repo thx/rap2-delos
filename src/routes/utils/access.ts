@@ -5,7 +5,6 @@ export enum ACCESS_TYPE { ORGANIZATION, REPOSITORY, USER }
 
 export class AccessUtils {
   public static async canUserAccess(accessType: ACCESS_TYPE, curUserId: number, entityId: number): Promise<boolean> {
-    console.log(`accessType=${accessType}&curUserId=${curUserId}&&entityId=${entityId}`)
     if (accessType === ACCESS_TYPE.ORGANIZATION) {
       return await OrganizationService.canUserAccessOrganization(curUserId, entityId)
     } else if (accessType === ACCESS_TYPE.REPOSITORY) {

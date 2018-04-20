@@ -15,13 +15,14 @@ let config: IConfigOptions =  {
     port: 3306,
     username: 'root',
     password: '',
-    database: 'RAP2_DELOS_APP',
+    database: 'rap',
     pool: {
-      max: 5,
+      max: 80,
       min: 0,
-      idle: 10000,
+      idle: 20000,
+      acquire: 20000,
     },
-    logging: true,
+    logging: false,
   },
 }
 

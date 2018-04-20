@@ -68,8 +68,6 @@ router.get('/account/info', async (ctx) => {
 router.post('/account/login', async (ctx) => {
   let { email, password, captcha } = ctx.request.body
   let result, errMsg
-
-  console.log(`captcha=${captcha} ctx.session.captcha=${ctx.session.captcha}`)
   if (process.env.TEST_MODE !== 'true' &&
     (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase())) {
     errMsg = '错误的验证码'
@@ -235,6 +233,15 @@ router.post('/account/notification/read', async (ctx) => {
 
 // TODO 2.3 账户日志
 router.get('/account/logger', async (ctx) => {
+  if (!ctx.session.id) {
+    ctx.body = {
+      data: {
+        isOk: false,
+        errMsg: 'not login'
+      }
+    }
+    return
+  }
   let auth = await User.findById(ctx.session.id)
   let repositories: Model<Repository>[] = [...(<Model<Repository>[]>await auth.$get('ownedRepositories')), ...(<Model<Repository>[]>await auth.$get('joinedRepositories'))]
   let organizations: Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]>await auth.$get('joinedOrganizations'))]

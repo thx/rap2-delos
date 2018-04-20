@@ -54,6 +54,15 @@ router.get('/organization/list', async (ctx) => {
   }
 })
 router.get('/organization/owned', async (ctx) => {
+  if (!ctx.session.id) {
+    ctx.body = {
+      data: {
+        isOk: false,
+        errMsg: 'not login'
+      }
+    }
+    return
+  }
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -79,6 +88,15 @@ router.get('/organization/owned', async (ctx) => {
   }
 })
 router.get('/organization/joined', async (ctx) => {
+  if (!ctx.session.id) {
+    ctx.body = {
+      data: {
+        isOk: false,
+        errMsg: 'not login'
+      }
+    }
+    return
+  }
   let where = {}
   let { name } = ctx.query
   if (name) {
