@@ -1,5 +1,6 @@
 import { PoolOptions } from "sequelize";
 import { ISequelizeConfig } from "sequelize-typescript";
+import { RedisOptions } from "koa-redis";
 
 declare interface IConfigOptions {
   version: string,
@@ -12,4 +13,5 @@ declare interface IConfigOptions {
   },
   keycenter?: string | boolean,
   db: ISequelizeConfig
+  redis: RedisOptions
 }

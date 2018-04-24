@@ -23,10 +23,24 @@ RAP2是在RAP1基础上重做的新项目，它包含两个组件(对应两个Gi
 ### enviaronment requirements 环境要求
 * Node.js 8.9.4+
 * MySQL 5.7+
+* Redis 4.0+
 
 ### development 开发模式
 
 ```sh
+
+# install mysql and redis server 安装MySQL和Redis服务器
+请自行查找搭建方法，mysql/redis配置在config.*.ts文件中，在不修改任何配置的情况下，redis会通过默认端口 + 本机即可正常访问，确保redis-server打开即可。
+
+启动redis-server的命令为
+```bash
+redis-server
+```
+
+后台执行可以使用nohup或pm2，若您全局安装了pm2，可使用以下命令启动redis服务器
+```bash
+npm run start:redis
+```
 
 # create database 先创建数据库
 mysql -e 'CREATE DATABASE IF NOT EXISTS RAP2_DELOS_APP DEFAULT CHARSET utf8 COLLATE utf8_general_ci'

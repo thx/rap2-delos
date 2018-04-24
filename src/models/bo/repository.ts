@@ -1,8 +1,23 @@
-import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey, BeforeUpdate, AfterBulkUpdate } from 'sequelize-typescript'
 import { User, Organization, Module, Interface, RepositoriesCollaborators } from '../'
+import RedisService, { CACHE_KEY } from '../../service/redis'
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export default class Repository extends Model<Repository> {
+
+  /** hooks */
+  @BeforeUpdate
+  static async cleanCache(instance: Repository) {
+    await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.id)
+  }
+
+  @AfterBulkUpdate
+  static async bulkDeleteCache(options: any) {
+    const id = options && options.attributes && options.attributes.id
+    if (id) {
+     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, id)
+    }
+  }
 
   @AutoIncrement
   @PrimaryKey

@@ -7,6 +7,8 @@ import { Sequelize } from 'sequelize-typescript'
 import Tree from './utils/tree'
 import { AccessUtils, ACCESS_TYPE } from './utils/access';
 import * as Consts from './utils/const'
+import RedisService, { CACHE_KEY } from '../service/redis'
+
 const { initRepository, initModule } = require('./utils/helper')
 const Op = Sequelize.Op
 
@@ -168,18 +170,25 @@ router.get('/repository/get', async (ctx) => {
     }
     return
   }
-  let repository = await Repository.findById(ctx.query.id, {
-    attributes: { exclude: [] },
-    include: [
-      QueryInclude.Creator,
-      QueryInclude.Owner,
-      QueryInclude.Locker,
-      QueryInclude.Members,
-      QueryInclude.Organization,
-      QueryInclude.RepositoryHierarchy,
-      QueryInclude.Collaborators,
-    ],
-  } as any)
+  const tryCache = await RedisService.getCache(CACHE_KEY.REPOSITORY_GET, ctx.query.id)
+  let repository: Repository
+  if (tryCache) {
+    repository = JSON.parse(tryCache)
+  } else {
+    repository = await Repository.findById(ctx.query.id, {
+      attributes: { exclude: [] },
+      include: [
+        QueryInclude.Creator,
+        QueryInclude.Owner,
+        QueryInclude.Locker,
+        QueryInclude.Members,
+        QueryInclude.Organization,
+        QueryInclude.RepositoryHierarchy,
+        QueryInclude.Collaborators
+      ]
+    })
+    await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
+  }
   ctx.body = {
     data: repository,
   }
@@ -553,6 +562,16 @@ router.get('/interface/remove', async (ctx, next) => {
     interfaceId: itf.id,
   })
 })
+
+router.get('/__test__', async (ctx) => {
+  const itf = await Interface.findById(5331)
+  itf.name = itf.name + '+'
+  await itf.save()
+  ctx.body = {
+    data: itf.name
+  }
+})
+
 router.post('/interface/lock', async (ctx, next) => {
   if (!ctx.session.id) {
     ctx.body = { data: 0 }
@@ -568,14 +587,15 @@ router.post('/interface/lock', async (ctx, next) => {
     return
   }
 
-  let result = await Interface.update({ lockerId: ctx.session.id }, {
-    where: { id },
-  })
+  const itf2 = await Interface.findById(id)
+  itf2.lockerId = ctx.session.id
+  await itf2.save()
   ctx.body = {
-    data: result[0],
+    data: itf2
   }
   return next()
 })
+
 router.post('/interface/unlock', async (ctx, next) => {
   if (!ctx.session.id) {
     ctx.body = { data: 0 }
@@ -589,12 +609,12 @@ router.post('/interface/unlock', async (ctx, next) => {
     return
   }
 
+  const itf2 = await Interface.findById(id)
   // tslint:disable-next-line:no-null-keyword
-  let result = await Interface.update({ lockerId: null }, {
-    where: { id },
-  })
+  itf2.lockerId = null
+  await itf2.save()
   ctx.body = {
-    data: result[0],
+    data: itf2
   }
   return next()
 })
@@ -613,7 +633,7 @@ router.post('/interface/sort', async (ctx) => {
 //
 router.get('/property/count', async (ctx) => {
   ctx.body = {
-    data: await Property.count(),
+    data: 0
   }
 })
 router.get('/property/list', async (ctx) => {
@@ -700,7 +720,7 @@ router.post('/properties/update', async (ctx, next) => {
     let created = await Property.create(Object.assign({}, item, {
       id: undefined,
       parentId: -1,
-      priority: item.priority || ((await Property.count()) + 1),
+      priority: item.priority || Date.now()
     }))
     memoryIdsMap[item.id] = created.id
     item.id = created.id

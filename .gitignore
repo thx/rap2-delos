@@ -1,8 +1,11 @@
+.nyc_output
 /dist
+/bin
 .DS_Store
 node_modules
 bower_components
 coverage
 npm-debug.log
 tmp
-.nyc_output
+package-lock.json
+dump.rdb

@@ -1,10 +1,26 @@
-import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey, AfterUpdate, AfterBulkUpdate } from 'sequelize-typescript'
 import { User, Module, Repository, Property } from '../';
+import RedisService, { CACHE_KEY } from '../../service/redis'
 
 enum methods { GET= 'GET', POST= 'POST', PUT= 'PUT', DELETE= 'DELETE' }
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export default class Interface extends Model<Interface> {
+
+  /** hooks */
+  @AfterUpdate
+  static async deleteCache(instance: Interface) {
+     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.repositoryId)
+  }
+
+  @AfterBulkUpdate
+  static async bulkDeleteCache(options: any) {
+    const id = options && options.attributes && options.attributes.id
+    if (id) {
+      const itf = await Interface.findById(id)
+     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, itf.repositoryId)
+    }
+  }
 
   public static METHODS = methods
 
@@ -68,3 +84,4 @@ export default class Interface extends Model<Interface> {
   properties: Property[]
 
 }
+

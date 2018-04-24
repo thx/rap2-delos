@@ -23,6 +23,8 @@ let config: IConfigOptions = {
     },
     logging: false,
   },
+  redis: {
+  }
 }
 
 export default config

@@ -1,6 +1,5 @@
 import { Sequelize } from 'sequelize-typescript'
 import config from '../config'
-import { Organization, Logger } from '.';
 import MigrateService from '../service/migrate'
 
 const chalk = require('chalk')
@@ -26,16 +25,6 @@ const sequelize = new Sequelize({
 sequelize.addModels([__dirname + '/bo'])
 sequelize.authenticate()
   .then((/* err */) => {
-
-    // initialize hooks
-    Organization.hook('afterCreate', async(instance: Organization) => {
-      await Logger.create({
-        userId: instance.creatorId,
-        type: 'create',
-        organizationId: instance.id,
-      })
-    })
-
     console.log('----------------------------------------')
     console.log('DATABASE √')
     console.log('    HOST     %s', config.db.host)

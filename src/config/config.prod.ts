@@ -22,8 +22,9 @@ let config: IConfigOptions =  {
       idle: 20000,
       acquire: 20000,
     },
-    logging: false,
+    logging: true
   },
+  redis: {}
 }
 
 export default config
