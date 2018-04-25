@@ -1,4 +1,4 @@
-import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey, AfterUpdate, AfterBulkUpdate } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey, BeforeBulkDelete, BeforeBulkCreate, BeforeBulkUpdate, BeforeCreate, BeforeUpdate, BeforeDelete } from 'sequelize-typescript'
 import { User, Module, Repository, Property } from '../';
 import RedisService, { CACHE_KEY } from '../../service/redis'
 
@@ -8,14 +8,21 @@ enum methods { GET= 'GET', POST= 'POST', PUT= 'PUT', DELETE= 'DELETE' }
 export default class Interface extends Model<Interface> {
 
   /** hooks */
-  @AfterUpdate
+  @BeforeCreate
+  @BeforeUpdate
+  @BeforeDelete
   static async deleteCache(instance: Interface) {
      await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.repositoryId)
   }
 
-  @AfterBulkUpdate
+  @BeforeBulkCreate
+  @BeforeBulkUpdate
+  @BeforeBulkDelete
   static async bulkDeleteCache(options: any) {
-    const id = options && options.attributes && options.attributes.id
+    let id: number = options && options.attributes && options.attributes.id
+    if (!id) {
+      id = options.where && +options.where.id
+    }
     if (id) {
       const itf = await Interface.findById(id)
      await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, itf.repositoryId)

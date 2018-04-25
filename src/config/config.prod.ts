@@ -22,7 +22,7 @@ let config: IConfigOptions =  {
       idle: 20000,
       acquire: 20000,
     },
-    logging: true
+    logging: false
   },
   redis: {}
 }

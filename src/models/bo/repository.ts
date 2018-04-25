@@ -1,4 +1,4 @@
-import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey, BeforeUpdate, AfterBulkUpdate } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, BelongsToMany, ForeignKey, BeforeUpdate, BeforeCreate, BeforeDelete, BeforeBulkCreate, BeforeBulkUpdate, BeforeBulkDelete } from 'sequelize-typescript'
 import { User, Organization, Module, Interface, RepositoriesCollaborators } from '../'
 import RedisService, { CACHE_KEY } from '../../service/redis'
 
@@ -6,12 +6,16 @@ import RedisService, { CACHE_KEY } from '../../service/redis'
 export default class Repository extends Model<Repository> {
 
   /** hooks */
+  @BeforeCreate
   @BeforeUpdate
+  @BeforeDelete
   static async cleanCache(instance: Repository) {
     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.id)
   }
 
-  @AfterBulkUpdate
+  @BeforeBulkCreate
+  @BeforeBulkUpdate
+  @BeforeBulkDelete
   static async bulkDeleteCache(options: any) {
     const id = options && options.attributes && options.attributes.id
     if (id) {
