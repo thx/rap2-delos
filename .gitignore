@@ -9,3 +9,4 @@ npm-debug.log
 tmp
 package-lock.json
 dump.rdb
+/mysql
