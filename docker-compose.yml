@@ -6,9 +6,9 @@ services:
   delos:
     container_name: rap2-delos
     # build from ./Dockerfile
-    build: .
+#    build: .
     # build from images
-    #image: blackdog1987/rap2-delos
+    image: blackdog1987/rap2-delos:1.0.0
     environment:
       # if you have your own mysql, config it here, and disable the 'mysql' config blow
       - MYSQL_URL=rap2-mysql # links will maintain /etc/hosts, just use 'container_name'
