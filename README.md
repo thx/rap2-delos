@@ -82,6 +82,25 @@ npm start
 
 ```
 
+## Dockerfile (本地源码通过docker运行）
+```sh
+# 1. 安装docker
+# 2. 修改docker-compose.xml中的配置。默认使用mysql和redis的镜像。可修改为自己的配置
+# 3. 通过源码运行。
+        docker-compose up -d
+# 4. 第一次运行需要手动初始化mysql数据库。分别执行以下命令：
+        docker exec -it rap2-delos sh
+    // 登录成功以后执行：
+        node scripts/init
+    // 执行完毕后退出
+        exit
+    // 如果仍然有问题，重新启动
+        docker-compose down
+    // 重新运行
+        docker-compose up -d
+```
+
+
 ## Author
 
 * Owner: Alimama FE Team
