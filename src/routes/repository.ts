@@ -378,7 +378,7 @@ router.get('/module/get', async (ctx) => {
 router.post('/module/create', async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
-  body.priority = (await Module.count()) + 1
+  body.priority = Date.now()
   let created = await Module.create(body)
   await initModule(created)
   ctx.body = {
@@ -435,9 +435,10 @@ router.get('/module/remove', async (ctx, next) => {
 })
 router.post('/module/sort', async (ctx) => {
   let { ids } = ctx.request.body
+  let counter = 1
   for (let index = 0; index < ids.length; index++) {
-    await Module.update({ priority: index + 1 }, {
-      where: { id: ids[index] },
+    await Module.update({ priority: counter++ }, {
+      where: { id: ids[index] }
     })
   }
   ctx.body = {
@@ -505,7 +506,7 @@ router.get('/interface/get', async (ctx) => {
 router.post('/interface/create', async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
-  body.priority = (await Interface.count()) + 1
+  body.priority = Date.now()
   let created = await Interface.create(body)
   // await initInterface(created)
   ctx.body = {
@@ -620,9 +621,10 @@ router.post('/interface/unlock', async (ctx, next) => {
 })
 router.post('/interface/sort', async (ctx) => {
   let { ids } = ctx.request.body
+  let counter = 1
   for (let index = 0; index < ids.length; index++) {
-    await Interface.update({ priority: index + 1 }, {
-      where: { id: ids[index] },
+    await Interface.update({ priority: counter++ }, {
+      where: { id: ids[index] }
     })
   }
   ctx.body = {
