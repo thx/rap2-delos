@@ -5,9 +5,10 @@ import Pagination from './utils/pagination'
 import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
 import { Sequelize } from 'sequelize-typescript'
 import Tree from './utils/tree'
-import { AccessUtils, ACCESS_TYPE } from './utils/access';
+import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import * as Consts from './utils/const'
 import RedisService, { CACHE_KEY } from '../service/redis'
+import MigrateService from '../service/migrate';
 
 const { initRepository, initModule } = require('./utils/helper')
 const Op = Sequelize.Op
@@ -758,5 +759,24 @@ router.get('/property/remove', async (ctx) => {
     data: await Property.destroy({
       where: { id },
     }),
+  }
+})
+
+router.post('/repository/import', async (ctx) => {
+  if (!ctx.session || !ctx.session.id) {
+    ctx.body = {
+      isOk: false,
+      message: 'NOT LOGIN'
+    }
+    return
+  }
+  const { docUrl, orgId } = ctx.request.body
+  const result = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl)
+  ctx.body = {
+    isOk: result,
+    message: result ? '导入成功' : '导入失败',
+    repository: {
+      id: 1,
+    }
   }
 })

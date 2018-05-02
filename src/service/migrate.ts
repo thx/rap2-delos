@@ -2,6 +2,8 @@ import { Repository, Module, Interface, Property, User } from "../models";
 import { SCOPES, TYPES } from "../models/bo/property";
 import * as md5 from 'md5'
 const isMd5 = require('is-md5')
+import * as querystring from 'querystring'
+import * as rp from 'request-promise'
 
 export default class MigrateService {
   public static async importRepoFromRAP1ProjectData(orgId: number, curUserId: number, projectData: any): Promise<boolean> {
@@ -46,9 +48,9 @@ export default class MigrateService {
           async function processParam(p: any, scope: SCOPES, parentId?: number) {
             const pCreated = await Property.create({
               scope,
-              name: p.name,
+              name: p.identifier,
               type: getTypeFromRAP1DataType(p.dataType),
-              description: `${p.remark}`,
+              description: `${p.remark}${p.name ? ', ' + p.name : ''}`,
               priority: pCounter++,
               interfaceId: itf.id,
               creatorId: curUserId,
@@ -84,6 +86,21 @@ export default class MigrateService {
         console.log(`handle user ${user.id}`)
       }
     }
+  }
+
+  public static async importRepoFromRAP1DocUrl(orgId: number, curUserId: number, docUrl: string): Promise<boolean> {
+    const { projectId } = querystring.parse(docUrl.substring(docUrl.indexOf('?') + 1))
+    let domain = docUrl
+    if (domain.indexOf('http') === -1) {
+      domain = 'http://' + domain
+    }
+    domain = domain.substring(0, domain.indexOf('/', domain.indexOf('.')))
+    const result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
+      json: true,
+    })
+    let json = result.modelJSON
+    const projectData = JSON.parse(json)
+    return await this.importRepoFromRAP1ProjectData(orgId, curUserId, projectData)
   }
 }
 
