@@ -110,8 +110,8 @@ npm start
 * 作者:
   * RAP2 2017/10前版本作者为[墨智(@Nuysoft)](https://github.com/nuysoft/), [mockjs](mockjs.com)的作者。
   * 2017/10之后版本开发者
-    * [霍雍(Bosn)](http://github.com/bosn/)([RAP1](http://github.com/thx/RAP)作者，RAP最早的创始人。)
-    * [承虎(alvarto)](http://github.com/alvarto/)。
+    * [霍雍(Bosn)](http://github.com/bosn/)，[RAP1](http://github.com/thx/RAP)作者，RAP最早的创始人。
+    * [承虎(alvarto)](http://github.com/alvarto/)
 
 ### Tech Arch
 
