@@ -52,7 +52,7 @@ export default class Property extends Model<Property> {
 
   @AllowNull(false)
   @Default(1)
-  @Column
+  @Column(DataType.BIGINT(11))
   priority: number
 
   @ForeignKey(() => Interface)

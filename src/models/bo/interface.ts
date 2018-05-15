@@ -56,7 +56,7 @@ export default class Interface extends Model<Interface> {
 
   @AllowNull(false)
   @Default(1)
-  @Column({ comment: 'Priority used for ordering' })
+  @Column(DataType.BIGINT(11))
   priority: number
 
   @ForeignKey(() => User)
