@@ -42,14 +42,16 @@ router.get('/repository/count', async (ctx) => {
 router.get('/repository/list', async (ctx) => {
   let where = {}
   let { name, user, organization } = ctx.query
-  const access = await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organization)
+  if (organization) {
+      const access = await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organization)
 
-  if (access === false) {
-    ctx.body = {
-      isOk: false,
-      errMsg: Consts.COMMON_MSGS.ACCESS_DENY
-    }
-    return
+      if (access === false) {
+          ctx.body = {
+              isOk: false,
+              errMsg: Consts.COMMON_MSGS.ACCESS_DENY
+          }
+          return
+      }
   }
 
   // tslint:disable-next-line:no-null-keyword
