@@ -80,10 +80,10 @@ export default class Repository extends Model<Repository> {
   @HasMany(() => Module, 'repositoryId')
   interfaces: Interface[]
 
-  @BelongsToMany(() => Repository, () => RepositoriesCollaborators, 'collaboratorId')
+  @BelongsToMany(() => Repository, () => RepositoriesCollaborators, 'repositoryId', 'collaboratorId')
   collaborators: Repository[]
 
-  @BelongsToMany(() => Repository, () => RepositoriesCollaborators, 'repositoryId')
+  @BelongsToMany(() => Repository, () => RepositoriesCollaborators, 'collaboratorId')
   repositories: Repository[]
 
 }
