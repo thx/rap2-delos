@@ -102,15 +102,28 @@ router.get('/app/plugin/:repositories', async (ctx) => {
   ctx.body = result.join('\n')
 })
 
+const REG_URL_METHOD = /^\/?(get|post|delete|put)/i
+
 // /app/mock/:repository/:method/:url
 // X DONE 2.2 支持 GET POST PUT DELETE 请求
 // DONE 2.2 忽略请求地址中的前缀斜杠
 // DONE 2.3 支持所有类型的请求，这样从浏览器中发送跨越请求时不需要修改 method
-router.all('/app/mock/(\\d+)/(.+)', async (ctx) => {
+router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   let app: any = ctx.app
   app.counter.mock++
 
-  let [ repositoryId, method, url ] = [+ctx.params[0], ctx.request.method, ctx.params[1]]
+  let { repositoryId, url } = ctx.params
+  let method = ctx.request.method
+  repositoryId = +repositoryId
+  if (REG_URL_METHOD.test(url)) {
+    REG_URL_METHOD.lastIndex = -1
+    method = REG_URL_METHOD.exec(url)[1].toUpperCase()
+    REG_URL_METHOD.lastIndex = -1
+    url = url.replace(REG_URL_METHOD, '')
+  }
+  // if(process.env.NODE_ENV === 'development') {
+  //   console.log({repositoryId, url, method})
+  // }
 
   let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
   let urlWithoutSearch
