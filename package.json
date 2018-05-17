@@ -46,6 +46,7 @@
     "mysql2": "^1.5.1",
     "node-fetch": "^2.1.2",
     "node-print": "0.0.4",
+    "notevil": "^1.1.0",
     "path-to-regexp": "^2.1.0",
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.10",

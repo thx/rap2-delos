@@ -7,6 +7,5 @@ require('./repository')
 require('./mock')
 require('./analytics')
 require('./foreign')
-// require('./migrate')
 
 export default router

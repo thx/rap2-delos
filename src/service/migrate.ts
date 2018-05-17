@@ -95,12 +95,15 @@ export default class MigrateService {
       domain = 'http://' + domain
     }
     domain = domain.substring(0, domain.indexOf('/', domain.indexOf('.')))
-    const result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
-      json: true,
+    let result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
+      json: false,
     })
-    let json = result.modelJSON
-    const projectData = JSON.parse(json)
-    return await this.importRepoFromRAP1ProjectData(orgId, curUserId, projectData)
+    result = JSON.parse(result)
+
+    result =  unescape(result.modelJSON)
+    const safeEval = require('notevil')
+    result = safeEval('(' + result + ')')
+    return await this.importRepoFromRAP1ProjectData(orgId, curUserId, result)
   }
 }
 
