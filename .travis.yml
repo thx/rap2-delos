@@ -13,7 +13,7 @@ notifications:
   email: false
 
 node_js:
-  - '8'
+  - '10.1.0'
 
 before_install:
   - npm i -g npm@^5.5.1
