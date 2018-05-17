@@ -17,7 +17,7 @@ app.keys = config.keys
 app.use(session({
   store: redisStore(config.redis)
 }))
-app.use(logger())
+if (process.env.NODE_ENV === 'development' && process.env.TEST_MODE !== 'true') app.use(logger())
 app.use(async(ctx, next) => {
   await next()
   if (ctx.path === '/favicon.ico') return

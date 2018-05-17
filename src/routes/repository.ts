@@ -42,16 +42,17 @@ router.get('/repository/count', async (ctx) => {
 router.get('/repository/list', async (ctx) => {
   let where = {}
   let { name, user, organization } = ctx.query
-  if (organization) {
-      const access = await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organization)
 
-      if (access === false) {
-          ctx.body = {
-              isOk: false,
-              errMsg: Consts.COMMON_MSGS.ACCESS_DENY
-          }
-          return
+  if (+organization > 0) {
+    const access = await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organization)
+
+    if (access === false) {
+      ctx.body = {
+        isOk: false,
+        errMsg: Consts.COMMON_MSGS.ACCESS_DENY
       }
+      return
+    }
   }
 
   // tslint:disable-next-line:no-null-keyword
@@ -526,6 +527,7 @@ router.post('/interface/create', async (ctx, next) => {
     interfaceId: itf.id,
   })
 })
+
 router.post('/interface/update', async (ctx, next) => {
   let body = ctx.request.body
   let result = await Interface.update(body, {
@@ -546,6 +548,7 @@ router.post('/interface/update', async (ctx, next) => {
     interfaceId: itf.id,
   })
 })
+
 router.get('/interface/remove', async (ctx, next) => {
   let { id } = ctx.query
   let result = await Interface.destroy({ where: { id } })

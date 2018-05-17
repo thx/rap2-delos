@@ -217,7 +217,7 @@ router.get('/app/mock/template/:interfaceId', async (ctx) => {
     attributes,
     where: { interfaceId, scope },
   })
-  pt(properties.map(item => item.toJSON()))
+  // pt(properties.map(item => item.toJSON()))
   let template = Tree.ArrayToTreeToTemplate(properties)
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp(template)

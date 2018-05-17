@@ -37,7 +37,6 @@ export default class RedisService {
   }
 
   public static delCache(key: CACHE_KEY, entityId?: number): Promise<boolean> {
-    console.log(`delCache key=${key} entityId=${entityId}`)
     let cacheKey = this.getCacheKey(key, entityId)
     return new Promise((resolve, reject) => {
       RedisService.client.del(cacheKey, (error) => {

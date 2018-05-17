@@ -16,7 +16,8 @@ describe('Organization', () => {
       name: Random.ctitle(6) + Math.random(),
       description: Random.cparagraph(),
       logo: Random.url(),
-      memberIds: users.slice(2).map(item => item.id)
+      memberIds: users.slice(2).map(item => item.id),
+      visibility: 1,
     }
     done()
   })
@@ -59,13 +60,13 @@ describe('Organization', () => {
   })
   it('/organization/list', done => {
     request.get('/organization/list')
-      .query({ name: organization.name, cursor: 1, limit: 1 })
+      .query({ name: organization.id, cursor: 1, limit: 1 })
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
         let { data, pagination } = res.body
-        data.should.be.a('array').have.length.within(1, 1)
+        data.should.be.a('array').have.lengthOf(1)
         data.forEach(item => {
           validOrganization(item)
         })
