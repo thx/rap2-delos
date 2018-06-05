@@ -21,7 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/kcors": "^2.2.2",
-    "@types/koa": "^2.0.43",
+    "@types/koa": "2.0.43",
     "@types/koa-router": "^7.0.27",
     "@types/mocha": "^2.2.46",
     "chalk": "^2.4.1",
