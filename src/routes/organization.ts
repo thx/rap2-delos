@@ -67,10 +67,10 @@ router.get('/organization/owned', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      $or: [
-        { name: { $like: `%${name}%` } },
-        { id: name }, // name => id
-      ],
+      [Op.or]: [
+        { name: { [Op.like]: `%${name}%` } },
+        { id: name } // name => id
+      ]
     })
   }
 
@@ -101,10 +101,10 @@ router.get('/organization/joined', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      $or: [
-        { name: { $like: `%${name}%` } },
-        { id: name }, // name => id
-      ],
+      [Op.or]: [
+        { name: { [Op.like]: `%${name}%` } },
+        { id: name } // name => id
+      ]
     })
   }
 

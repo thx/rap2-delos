@@ -1,10 +1,11 @@
 import * as svgCaptcha from 'svg-captcha'
 import { User, Notification, Logger, Organization, Repository } from '../models'
 import router from './router'
-import { Model } from 'sequelize-typescript';
+import { Model, Sequelize } from 'sequelize-typescript';
 import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
 import * as md5 from 'md5'
+const Op = Sequelize.Op
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -36,7 +37,7 @@ router.get('/account/list', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      $or: [
+      [Op.or]: [
         { fullname: { $like: `%${name}%` } },
       ],
     })
@@ -247,7 +248,7 @@ router.get('/account/logger', async (ctx) => {
   let organizations: Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]>await auth.$get('joinedOrganizations'))]
 
   let where: any = {
-    $or: [
+    [Op.or]: [
       { userId: ctx.session.id },
       { repositoryId: repositories.map(item => item.id) },
       { organizationId: organizations.map(item => item.id) },

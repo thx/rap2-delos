@@ -2,7 +2,7 @@ import { Table, Column, Model, AutoIncrement, PrimaryKey, DataType, ForeignKey }
 import { Repository } from '../'
 
 
-@Table({ paranoid: true, freezeTableName: false, timestamps: true, tableName: 'foreign_room'})
+@Table({ paranoid: true, freezeTableName: false, timestamps: false, tableName: 'foreign_room'})
 export default class Room extends Model<Room> {
 
   @AutoIncrement

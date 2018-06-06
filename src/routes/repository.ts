@@ -60,10 +60,10 @@ router.get('/repository/list', async (ctx) => {
   if (organization) Object.assign(where, { organizationId: organization })
   if (name) {
     Object.assign(where, {
-      $or: [
-        { name: { $like: `%${name}%` } },
-        { id: name }, // name => id
-      ],
+      [Op.or]: [
+        { name: { [Op.like]: `%${name}%` } },
+        { id: name } // name => id
+      ]
     })
   }
   let total = await Repository.count({
@@ -101,10 +101,10 @@ router.get('/repository/owned', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      $or: [
-        { name: { $like: `%${name}%` } },
-        { id: name }, // name => id
-      ],
+      [Op.or]: [
+        { name: { [Op.like]: `%${name}%` } },
+        { id: name } // name => id
+      ]
     })
   }
 
@@ -135,10 +135,10 @@ router.get('/repository/joined', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      $or: [
-        { name: { $like: `%${name}%` } },
-        { id: name }, // name => id
-      ],
+      [Op.or]: [
+        { name: { [Op.like]: `%${name}%` } },
+        { id: name } // name => id
+      ]
     })
   }
 
@@ -364,7 +364,7 @@ router.get('/module/list', async (ctx) => {
   let where: any = {}
   let { repositoryId, name } = ctx.query
   if (repositoryId) where.repositoryId = repositoryId
-  if (name) where.name = { $like: `%${name}%` }
+  if (name) where.name = { [Op.like]: `%${name}%` }
   ctx.body = {
     data: await Module.findAll({
       attributes: { exclude: [] },
@@ -461,7 +461,7 @@ router.get('/interface/list', async (ctx) => {
   let { repositoryId, moduleId, name } = ctx.query
   if (repositoryId) where.repositoryId = repositoryId
   if (moduleId) where.moduleId = moduleId
-  if (name) where.name = { $like: `%${name}%` }
+  if (name) where.name = { [Op.like]: `%${name}%` }
   ctx.body = {
     data: await Interface.findAll({
       attributes: { exclude: [] },
@@ -650,7 +650,7 @@ router.get('/property/list', async (ctx) => {
   if (repositoryId) where.repositoryId = repositoryId
   if (moduleId) where.moduleId = moduleId
   if (interfaceId) where.interfaceId = interfaceId
-  if (name) where.name = { $like: `%${name}%` }
+  if (name) where.name = { [Op.like]: `%${name}%` }
   ctx.body = {
     data: await Property.findAll({ where }),
   }
@@ -710,9 +710,9 @@ router.post('/properties/update', async (ctx, next) => {
   let existingProperties = properties.filter((item: any) => !item.memory)
   let result = await Property.destroy({
     where: {
-      id: { $notIn: existingProperties.map((item: any) => item.id) },
-      interfaceId: itf,
-    },
+      id: { [Op.notIn]: existingProperties.map((item: any) => item.id) },
+      interfaceId: itf
+    }
   })
   // 更新已存在的属性
   for (let item of existingProperties) {
