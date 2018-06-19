@@ -1,9 +1,9 @@
 import { Repository, Module, Interface, Property, User } from "../models";
-import { SCOPES, TYPES } from "../models/bo/property";
+import { SCOPES } from "../models/bo/property";
 import * as md5 from 'md5'
-const isMd5 = require('is-md5')
 import * as querystring from 'querystring'
 import * as rp from 'request-promise'
+const isMd5 = require('is-md5')
 
 export default class MigrateService {
   public static async importRepoFromRAP1ProjectData(orgId: number, curUserId: number, projectData: any): Promise<boolean> {
@@ -45,11 +45,32 @@ export default class MigrateService {
           for (const p of action.responseParameterList) {
             await processParam(p, SCOPES.RESPONSE)
           }
-          async function processParam(p: any, scope: SCOPES, parentId?: number) {
+          async function processParam(p: OldParameter, scope: SCOPES, parentId?: number) {
+            const RE_REMARK_MOCK = /@mock=(.+)$/
+            const ramarkMatchMock = RE_REMARK_MOCK.exec(p.remark)
+            const remarkWithoutMock = p.remark.replace(RE_REMARK_MOCK, '')
+            const name = p.identifier.split('|')[0]
+            let rule = p.identifier.split('|')[1] || ''
+            let type = (p.dataType || 'string').split('<')[0] // array<number|string|object|boolean> => Array
+            type = type[0].toUpperCase() + type.slice(1) // foo => Foo
+            let value = (ramarkMatchMock && ramarkMatchMock[1]) || ''
+            if (/^function/.test(value)) type = 'Function' // @mock=function(){} => Function
+            if (/^\$order/.test(value)) { // $order => Array|+1
+              type = 'Array'
+              rule = '+1'
+              let orderArgs = /\$order\((.+)\)/.exec(value)
+              if (orderArgs) value = `[${orderArgs[1]}]`
+            }
+            let description = []
+            if (p.name) description.push(p.name)
+            if (p.remark && remarkWithoutMock) description.push(remarkWithoutMock)
+
             const pCreated = await Property.create({
               scope,
-              name: p.identifier,
-              type: getTypeFromRAP1DataType(p.dataType),
+              name,
+              rule,
+              value,
+              type,
               description: `${p.remark}${p.name ? ', ' + p.name : ''}`,
               priority: pCounter++,
               interfaceId: itf.id,
@@ -88,6 +109,7 @@ export default class MigrateService {
     }
   }
 
+  /** RAP1 property */
   public static async importRepoFromRAP1DocUrl(orgId: number, curUserId: number, docUrl: string): Promise<boolean> {
     const { projectId } = querystring.parse(docUrl.substring(docUrl.indexOf('?') + 1))
     let domain = docUrl
@@ -122,21 +144,31 @@ function getMethodFromRAP1RequestType(type: number) {
   }
 }
 
-function getTypeFromRAP1DataType(dataType: string) {
-  switch (dataType) {
-    case 'number':
-      return TYPES.NUMBER
-    case 'string':
-      return TYPES.STRING
-    case 'boolean':
-      return TYPES.BOOLEAN
-    case 'object':
-      return TYPES.OBJECT
-    default:
-      if (dataType && dataType.indexOf('array') > -1) {
-        return TYPES.ARRAY
-      } else {
-        return TYPES.STRING
-      }
-  }
+// function getTypeFromRAP1DataType(dataType: string) {
+//   switch (dataType) {
+//     case 'number':
+//       return TYPES.NUMBER
+//     case 'string':
+//       return TYPES.STRING
+//     case 'boolean':
+//       return TYPES.BOOLEAN
+//     case 'object':
+//       return TYPES.OBJECT
+//     default:
+//       if (dataType && dataType.indexOf('array') > -1) {
+//         return TYPES.ARRAY
+//       } else {
+//         return TYPES.STRING
+//       }
+//   }
+// }
+
+interface OldParameter {
+  id: number
+  name: string
+  mockData: string
+  identifier: string
+  remark: string
+  dataType: string
+  parameterList: OldParameter[]
 }

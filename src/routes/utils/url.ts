@@ -19,13 +19,16 @@ export default class UrlUtils {
     if (url.indexOf('?') > -1) {
       url = url.substring(0, url.indexOf('?'))
     }
+    if (url[0] !== '/') url = '/' + url
     return url
   }
 
   public static urlMatchesPattern = (url: string, pattern: string) => {
     url = UrlUtils.getRelative(url)
     pattern = UrlUtils.getRelative(pattern)
+    console.log(`url=${url} pattern=${pattern}`)
     let re = pathToRegexp(pattern)
+    console.log(url, re)
     return re.test(url)
   }
 

@@ -4,10 +4,12 @@ import { QueryInclude } from '../models';
 import Tree from './utils/tree'
 import urlUtils from './utils/url'
 import * as querystring from 'querystring'
+import { Sequelize } from 'sequelize-typescript';
 
 const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
+const Op = Sequelize.Op
 
 // 检测是否存在重复接口，会在返回的插件 JS 中提示。同时也会在编辑器中提示。
 const parseDuplicatedInterfaces = (repository: Repository) => {
@@ -121,9 +123,6 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     REG_URL_METHOD.lastIndex = -1
     url = url.replace(REG_URL_METHOD, '')
   }
-  // if(process.env.NODE_ENV === 'development') {
-  //   console.log({repositoryId, url, method})
-  // }
 
   let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
   let urlWithoutSearch
@@ -140,14 +139,17 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   let repository = await Repository.findById(repositoryId)
   let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
   let itf
+  console.log([urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch])
 
   itf = await Interface.findOne({
     attributes,
     where: {
       repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
       method,
-      url: [urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch],
-    },
+      url: {
+        [Op.like]: `%${urlWithoutPrefixSlash}%`,
+      }
+    }
   })
 
   if (!itf) {
