@@ -21,6 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^2.4.1",
+    "cluster": "^0.7.7",
     "cross-env": "^5.1.1",
     "graceful": "^1.0.1",
     "is-md5": "^0.0.2",
@@ -86,7 +87,7 @@
     "standard": "^11.0.1",
     "supertest": "^3.0.0",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.2"
+    "typescript": "^2.9.2"
   },
   "pre-commit": [
     "check"

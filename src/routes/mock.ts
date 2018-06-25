@@ -132,6 +132,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   } catch (e) {
     urlWithoutSearch = url
   }
+  urlWithoutSearch
   // DONE 2.3 腐烂的 KISSY
   // KISSY 1.3.2 会把路径中的 // 替换为 /。在浏览器端拦截跨域请求时，需要 encodeURIComponent(url) 以防止 http:// 被替换为 http:/。但是同时也会把参数一起编码，导致 route 的 url 部分包含了参数。
   // 所以这里重新解析一遍！！！
@@ -139,7 +140,6 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   let repository = await Repository.findById(repositoryId)
   let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
   let itf
-  console.log([urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch])
 
   itf = await Interface.findOne({
     attributes,

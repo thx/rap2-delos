@@ -284,7 +284,10 @@ router.get('/account/logger', async (ctx) => {
 router.get('/captcha', async (ctx) => {
   const captcha = svgCaptcha.create()
   ctx.session.captcha = captcha.text
-  console.log(`ctx.session.captcha=${ctx.session.captcha}`)
   ctx.set('Content-Type', 'image/svg+xml')
   ctx.body = captcha.data
+})
+
+router.get('/worker', async (ctx) => {
+  ctx.body = process.env.NODE_APP_INSTANCE || 'NOT FOUND'
 })
