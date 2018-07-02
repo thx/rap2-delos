@@ -1,5 +1,6 @@
 import { PostmanCollection, Folder, Item } from "../types/postman"
 import { Repository, Interface, Module, Property } from "../models"
+import * as url from 'url'
 
 const SCHEMA_V_2_1_0 = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 
@@ -41,12 +42,18 @@ export default class PostmanService {
         const responseParams = await Property.findAll({
           where: { interfaceId, scope: 'response' }
         })
+
+        const parseResult = url.parse(itf.url)
         const itfItem: Item = {
           name: itf.name,
           request: {
             method: itf.method as any,
             url: {
               raw: itf.url,
+              protocol: parseResult.protocol,
+              host: parseResult.hostname ? parseResult.hostname.split('.') : [],
+              port: parseResult.port || '80',
+              hash: parseResult.hash,
               query: requestParams.map(x => ({ key: x.name, value: x.value })),
             },
             description: itf.description,
