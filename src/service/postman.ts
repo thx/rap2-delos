@@ -1,6 +1,7 @@
 import { PostmanCollection, Folder, Item } from "../types/postman"
 import { Repository, Interface, Module, Property } from "../models"
 import * as url from 'url'
+import { REQUEST_PARAMS_TYPE } from "../models/bo/property";
 
 const SCHEMA_V_2_1_0 = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 
@@ -48,17 +49,20 @@ export default class PostmanService {
           name: itf.name,
           request: {
             method: itf.method as any,
+            header: getHeader(requestParams),
+            body: getBody(requestParams),
             url: {
               raw: itf.url,
-              protocol: parseResult.protocol,
+              protocol: parseResult.protocol || 'http',
               host: parseResult.hostname ? parseResult.hostname.split('.') : [],
-              port: parseResult.port || '80',
+              port: parseResult.port || '',
               hash: parseResult.hash,
-              query: requestParams.map(x => ({ key: x.name, value: x.value })),
+              path: [parseResult.path],
+              query: getQuery(requestParams),
             },
             description: itf.description,
           },
-          response: responseParams.map(x => ({ key: x.name, vlaue: x.value })),
+          response: responseParams.map(x => ({ key: x.name, value: x.value })),
         }
         modItem.item.push(itfItem)
       }
@@ -66,4 +70,22 @@ export default class PostmanService {
     }
     return result
   }
+}
+
+function getBody(pList: Property[]) {
+  return {
+    "mode": "formdata" as "formdata",
+    "formdata": pList.filter(x => x.pos === REQUEST_PARAMS_TYPE.BODY_PARAMS)
+      .map(x => ({ key: x.name, value: x.value, description: x.description, type: "text" as "text"})),
+  }
+}
+
+function getQuery(pList: Property[]) {
+  return pList.filter(x => x.pos === null || x.pos === REQUEST_PARAMS_TYPE.QUERY_PARAMS)
+    .map(x => ({ key: x.name, value: x.value, description: x.description }))
+}
+
+function getHeader(pList: Property[]) {
+  return pList.filter(x => x.pos === REQUEST_PARAMS_TYPE.HEADERS)
+    .map(x => ({ key: x.name, value: x.value, description: x.description }))
 }

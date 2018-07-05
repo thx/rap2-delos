@@ -1,0 +1,2 @@
+ALTER TABLE `properties`
+  ADD COLUMN `pos` INT(10) NULL DEFAULT 2;

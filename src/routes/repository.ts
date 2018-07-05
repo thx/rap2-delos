@@ -689,9 +689,26 @@ router.post('/property/update', async (ctx) => {
   }
 })
 router.post('/properties/update', async (ctx, next) => {
-  let { itf } = ctx.query
-  let properties = ctx.request.body // JSON.parse(ctx.request.body)
+  const itfId = +ctx.query.itf
+  let { properties, summary } = ctx.request.body // JSON.parse(ctx.request.body)
   properties = Array.isArray(properties) ? properties : [properties]
+
+  const itf = await Interface.findById(itfId)
+
+  if (typeof summary.name !== 'undefined') {
+    itf.name = summary.name
+  }
+  if (typeof summary.url !== 'undefined') {
+    itf.url = summary.url
+  }
+  if (typeof summary.method !== 'undefined') {
+    itf.method = summary.method
+  }
+  if (typeof summary.description !== 'undefined') {
+    itf.description = summary.description
+  }
+
+  await itf.save()
 
   // 删除不在更新列表中的属性
   // DONE 2.2 清除幽灵属性：子属性的父属性不存在（原因：前端删除父属性后，没有一并删除后代属性，依然传给了后端）
@@ -711,7 +728,7 @@ router.post('/properties/update', async (ctx, next) => {
   let result = await Property.destroy({
     where: {
       id: { [Op.notIn]: existingProperties.map((item: any) => item.id) },
-      interfaceId: itf
+      interfaceId: itfId
     }
   })
   // 更新已存在的属性
