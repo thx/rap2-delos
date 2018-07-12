@@ -250,6 +250,9 @@ router.get('/app/mock/data/:interfaceId', async (ctx) => {
 
   let data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
+  if (data._root_) {
+    data = data._root_
+  }
   ctx.body = JSON.stringify(data, undefined, 2)
 })
 
