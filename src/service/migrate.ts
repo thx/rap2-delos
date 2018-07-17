@@ -32,7 +32,7 @@ export default class MigrateService {
           const itf = await Interface.create({
             moduleId: mod.id,
             name: `${page.name}-${action.name}`,
-            description: action.introduction,
+            description: action.description,
             url: action.requestUrl || '',
             priority: iCounter++,
             creatorId: curUserId,
@@ -122,7 +122,8 @@ export default class MigrateService {
     })
     result = JSON.parse(result)
 
-    result =  unescape(result.modelJSON)
+    // result =  unescape(result.modelJSON)
+    result = result.modelJSON
     const safeEval = require('notevil')
     result = safeEval('(' + result + ')')
     return await this.importRepoFromRAP1ProjectData(orgId, curUserId, result)

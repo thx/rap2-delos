@@ -59,6 +59,10 @@ export default class Interface extends Model<Interface> {
   @Column(DataType.BIGINT(11))
   priority: number
 
+  @Default(200)
+  @Column
+  status: number
+
   @ForeignKey(() => User)
   @Column
   creatorId: number
