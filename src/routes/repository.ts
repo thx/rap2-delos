@@ -109,6 +109,12 @@ router.get('/repository/owned', async (ctx) => {
   }
 
   let auth: User = await User.findById(ctx.query.user || ctx.session.id)
+  if (!auth) {
+    ctx.body = {
+      isOk: false,
+      errMsg: '登陆过期了，请重新登陆。',
+    }
+  }
   // let total = await auth.countOwnedRepositories({ where })
   // let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let repositories = await auth.$get('ownedRepositories', {
