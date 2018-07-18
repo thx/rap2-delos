@@ -155,7 +155,11 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   if (matchedItfList) {
     for (const item of matchedItfList) {
       itf = item
-      if (item.url === urlWithoutPrefixSlash) {
+      let url = item.url
+      if (url.charAt(0) === '/') {
+        url = url.substring(1)
+      }
+      if (url === urlWithoutPrefixSlash) {
         break
       }
     }
