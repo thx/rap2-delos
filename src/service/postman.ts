@@ -2,6 +2,7 @@ import { PostmanCollection, Folder, Item } from "../types/postman"
 import { Repository, Interface, Module, Property } from "../models"
 import * as url from 'url'
 import { REQUEST_PARAMS_TYPE } from "../models/bo/property";
+import UrlUtils from "../routes/utils/url"
 
 const SCHEMA_V_2_1_0 = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 
@@ -44,6 +45,7 @@ export default class PostmanService {
           where: { interfaceId, scope: 'response' }
         })
 
+        const relativeUrl = UrlUtils.getRelative(itf.url)
         const parseResult = url.parse(itf.url)
         const itfItem: Item = {
           name: itf.name,
@@ -52,9 +54,8 @@ export default class PostmanService {
             header: getHeader(requestParams),
             body: getBody(requestParams),
             url: {
-              raw: itf.url,
-              protocol: parseResult.protocol || 'http',
-              host: parseResult.hostname ? parseResult.hostname.split('.') : [],
+              raw: `{{url}}${relativeUrl}`,
+              host: '{{url}}',
               port: parseResult.port || '',
               hash: parseResult.hash,
               path: [parseResult.path],

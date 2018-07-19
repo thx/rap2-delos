@@ -183,8 +183,10 @@ router.get('/repository/get', async (ctx) => {
   const tryCache = await RedisService.getCache(CACHE_KEY.REPOSITORY_GET, ctx.query.id)
   let repository: Repository
   if (tryCache) {
+    console.log(`from cache`)
     repository = JSON.parse(tryCache)
   } else {
+    console.log(`from db`)
     repository = await Repository.findById(ctx.query.id, {
       attributes: { exclude: [] },
       include: [
@@ -195,7 +197,8 @@ router.get('/repository/get', async (ctx) => {
         QueryInclude.Organization,
         QueryInclude.RepositoryHierarchy,
         QueryInclude.Collaborators
-      ]
+      ],
+      order: [[{ model: Module, as: 'modules' }, 'priority', 'asc']]
     })
     await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
   }
@@ -450,6 +453,10 @@ router.post('/module/sort', async (ctx) => {
     await Module.update({ priority: counter++ }, {
       where: { id: ids[index] }
     })
+  }
+  if (ids && ids.length) {
+    const mod = await Module.findById(ids[0])
+    await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, mod.repositoryId)
   }
   ctx.body = {
     data: ids.length,
