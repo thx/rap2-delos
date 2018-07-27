@@ -1,8 +1,11 @@
 import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey, BeforeBulkDelete, BeforeBulkCreate, BeforeBulkUpdate, BeforeCreate, BeforeUpdate, BeforeDelete } from 'sequelize-typescript'
 import { User, Module, Repository, Property } from '../';
 import RedisService, { CACHE_KEY } from '../../service/redis'
+import * as Sequelize from 'sequelize'
 
-enum methods { GET= 'GET', POST= 'POST', PUT= 'PUT', DELETE= 'DELETE' }
+const Op = Sequelize.Op
+
+enum methods { GET = 'GET', POST = 'POST', PUT = 'PUT', DELETE = 'DELETE' }
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export default class Interface extends Model<Interface> {
@@ -12,7 +15,7 @@ export default class Interface extends Model<Interface> {
   @BeforeUpdate
   @BeforeDelete
   static async deleteCache(instance: Interface) {
-     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.repositoryId)
+    await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.repositoryId)
   }
 
   @BeforeBulkCreate
@@ -23,9 +26,15 @@ export default class Interface extends Model<Interface> {
     if (!id) {
       id = options.where && +options.where.id
     }
+    if (options.where && options.where[Op.and]) {
+      const arr = options.where[Op.and]
+      if (arr && arr[1] && arr[1].id) {
+        id = arr[1].id
+      }
+    }
     if (id) {
       const itf = await Interface.findById(id)
-     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, itf.repositoryId)
+      await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, itf.repositoryId)
     }
   }
 
@@ -48,7 +57,7 @@ export default class Interface extends Model<Interface> {
   url: string
 
   @AllowNull(false)
-  @Column({ type: DataType.ENUM(methods.GET, methods.POST, methods.PUT, methods.DELETE), comment: 'API method' })
+  @Column({ comment: 'API method' })
   method: string
 
   @Column(DataType.TEXT)
