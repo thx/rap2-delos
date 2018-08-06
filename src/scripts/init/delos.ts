@@ -1,5 +1,5 @@
 import sequelize from '../../models/sequelize'
-import { User, Organization, Repository, Module, Interface, Property } from '../../models/index'
+import { User, Organization, Repository, Module, Interface, Property, Room } from '../../models/index'
 import { BO_ADMIN, BO_MOZHI } from './bo'
 import { BO_USER_FN, BO_ORGANIZATION_FN, BO_REPOSITORY_FN, BO_MODULE_FN, BO_INTERFACE_FN, BO_PROPERTY_FN } from './bo'
 import { BO_USER_COUNT, BO_ORGANIZATION_COUNT, BO_REPOSITORY_COUNT, BO_MODULE_COUNT, BO_INTERFACE_COUNT, BO_PROPERTY_COUNT } from './bo'
@@ -12,12 +12,14 @@ export async function init () {
     force: true,
     logging: console.log,
   })
+  await Room.destroy(EMPTY_WHERE)
   await User.destroy(EMPTY_WHERE)
   await Organization.destroy(EMPTY_WHERE)
   await Repository.destroy(EMPTY_WHERE)
   await Module.destroy(EMPTY_WHERE)
   await Interface.destroy(EMPTY_WHERE)
   await Property.destroy(EMPTY_WHERE)
+
 
   // 用户
   await User.create(BO_ADMIN)

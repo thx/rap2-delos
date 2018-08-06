@@ -22,7 +22,7 @@ export default class Interface extends Model<Interface> {
   @BeforeBulkUpdate
   @BeforeBulkDelete
   static async bulkDeleteCache(options: any) {
-    let id: number = options && options.attributes && options.attributes.id
+    let id: number = +(options && options.attributes && options.attributes.id)
     if (!id) {
       id = options.where && +options.where.id
     }
@@ -32,7 +32,8 @@ export default class Interface extends Model<Interface> {
         id = arr[1].id
       }
     }
-    if (id) {
+    if (+id) {
+      id = +id
       const itf = await Interface.findById(id)
       await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, itf.repositoryId)
     }

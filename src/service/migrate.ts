@@ -89,11 +89,11 @@ export default class MigrateService {
     return true
   }
   public static checkAndFix(): void {
-    console.log('checkAndFix')
-    this.checkPasswordMd5().then()
+    // console.log('checkAndFix')
+    // this.checkPasswordMd5().then()
   }
 
-  public static async checkPasswordMd5() {
+  static async checkPasswordMd5() {
     console.log('  checkPasswordMd5')
     const users = await User.findAll()
     if (users.length === 0 || isMd5(users[0].password)) {
