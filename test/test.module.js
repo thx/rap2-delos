@@ -83,7 +83,8 @@ describe('Module', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        res.body.data.should.eq(1)
+        res.body.data.name.should.be.a('string')
+        res.body.data.description.should.be.a('string')
         done()
       })
   })

@@ -10,7 +10,7 @@ describe('Account', () => {
     user.should.be.a('object').have.all.keys(['id', 'fullname', 'email'])
   }
   let validUserForSearch = (user) => {
-    user.should.be.a('object').have.all.keys(['id', 'fullname'])
+    user.should.be.a('object').have.all.keys(['id', 'fullname', 'email'])
   }
   let validPagination = (pagination) => {
     pagination.should.be.a('object').contain.all.keys(['cursor', 'limit', 'total'])

@@ -41,8 +41,8 @@ describe('Interface', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        validInterface(res.body.data)
-        itf = res.body.data
+        validInterface(res.body.data.itf)
+        itf = res.body.data.itf
         done()
       })
   })
@@ -89,7 +89,7 @@ describe('Interface', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        res.body.data.should.eq(1)
+        res.body.data.itf.id.should.not.be.null
         done()
       })
   })
@@ -100,7 +100,7 @@ describe('Interface', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        res.body.data.lockerId.should.not.be.null
+        res.body.data.id.should.not.be.null
         done()
       })
   })
@@ -111,7 +111,7 @@ describe('Interface', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        expect(res.body.data.lockerId).to.be.null
+        expect(res.body.data.isOk).to.be.true
         done()
       })
   })
