@@ -19,11 +19,27 @@ let config: IConfigOptions = {
     pool: {
       max: 5,
       min: 0,
-      idle: 10000,
+      idle: 10000
     },
-    logging: false,
+    logging: true
   },
   redis: {
+    // isRedisCluster: true,
+    // nodes: [{
+    //   port: 6379,
+    //   host: '*.*.*',
+    // },
+    // {
+    //   port: 6380,
+    //   host: '*.*.*',
+    // },
+    // {
+    //   port: 6381,
+    //   host: '*.*.*',
+    // }],
+    // redisOptions: {
+    //   password: '*',
+    // }
   }
 }
 
