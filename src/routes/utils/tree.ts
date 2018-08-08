@@ -1,13 +1,13 @@
 import { Property } from "../../models";
+import * as _ from 'underscore'
 const vm = require('vm')
-const _ = require('underscore')
 import * as Mock from 'mockjs'
 const { RE_KEY } = require('mockjs/src/mock/constant')
 
 
 export default class Tree {
 
-  public static ArrayToTree (list: Property[]) {
+  public static ArrayToTree(list: Property[]) {
     let result: any = {
       name: 'root',
       children: [],
@@ -17,7 +17,7 @@ export default class Tree {
     let mapped: any = {}
     list.forEach(item => { mapped[item.id] = item })
 
-    function _parseChildren (parentId: any, children: any, depth: any) {
+    function _parseChildren(parentId: any, children: any, depth: any) {
       for (let id in mapped) {
         let item = mapped[id]
         if (typeof parentId === 'function' ? parentId(item.parentId) : item.parentId === parentId) {
@@ -43,8 +43,8 @@ export default class Tree {
   }
 
   // TODO 2.x 和前端重复了
-  public static TreeToTemplate (tree: any) {
-    function parse (item: any, result: any) {
+  public static TreeToTemplate(tree: any) {
+    function parse(item: any, result: any) {
       let rule = item.rule ? ('|' + item.rule) : ''
       let value = item.value
       switch (item.type) {
@@ -110,7 +110,7 @@ export default class Tree {
     return result
   }
 
-  public static TemplateToData (template: any) {
+  public static TemplateToData(template: any) {
     // 数据模板 template 中可能含有攻击代码，例如死循环，所以在沙箱中生成最终数据
     // https://nodejs.org/dist/latest-v7.x/docs/api/vm.html
     const sandbox = { Mock, template, data: {} }
@@ -137,9 +137,8 @@ export default class Tree {
 
   public static ArrayToTreeToTemplateToData(list: Property[], extra?: any) {
     let tree = Tree.ArrayToTree(list)
-    let template = Tree.TreeToTemplate(tree)
+    let template: { [key: string]: any } = Tree.TreeToTemplate(tree)
     let data
-
     if (extra) {
       // DONE 2.2 支持引用请求参数
       let keys = Object.keys(template).map(item => item.replace(RE_KEY, '$1'))
@@ -147,6 +146,17 @@ export default class Tree {
       let scopedData = Tree.TemplateToData(
         Object.assign({}, _.pick(extra, extraKeys), template),
       )
+      for (const key in scopedData) {
+        if (!scopedData.hasOwnProperty(key)) continue
+        let data = scopedData[key]
+        for (const eKey in extra) {
+          if (!extra.hasOwnProperty(eKey)) continue
+          const pattern = new RegExp(`\\$${eKey}\\$`, 'g')
+          if (data && pattern.test(data)) {
+            data = scopedData[key] = data.replace(pattern, extra[eKey])
+          }
+        }
+      }
       data = _.pick(scopedData, keys)
     } else {
       data = Tree.TemplateToData(template)

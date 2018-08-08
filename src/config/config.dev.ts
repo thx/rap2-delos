@@ -19,9 +19,9 @@ let config: IConfigOptions = {
     pool: {
       max: 5,
       min: 0,
-      idle: 10000
+      idle: 10000,
     },
-    logging: true
+    logging: false,
   },
   redis: {
     // isRedisCluster: true,

@@ -12,6 +12,8 @@ RAP2是在RAP1基础上重做的新项目，它包含两个组件(对应两个Gi
 * [Official Site 官网: rap2.taobao.org](http://rap2.taobao.org)
 * 钉钉群ID: 11789704
 * [热心网友提供的部署文档，供参考](https://github.com/thx/rap2-delos/issues/119)
+* [用户手册](https://github.com/thx/rap2-delos/wiki/user_manual)
+* [常见问题](https://github.com/thx/rap2-delos/wiki/faq)
 
 ## 部署
 

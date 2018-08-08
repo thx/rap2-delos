@@ -1,5 +1,4 @@
 /// <reference path="custom-typings.d.ts" />
-
 import { PoolOptions } from "sequelize";
 import { ISequelizeConfig } from "sequelize-typescript";
 import { RedisOptions } from "koa-redis";
@@ -9,6 +8,7 @@ declare interface RedisAndClusterOptions extends RedisOptions {
   nodes?: object[];
   redisOptions?: any;
 }
+
 
 declare interface IConfigOptions {
   version: string,

@@ -113,7 +113,6 @@ const REG_URL_METHOD = /^\/?(get|post|delete|put)/i
 router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   let app: any = ctx.app
   app.counter.mock++
-
   let { repositoryId, url } = ctx.params
   let method = ctx.request.method
   repositoryId = +repositoryId
