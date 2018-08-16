@@ -32,7 +32,7 @@
     "koa-body": "^4.0.1",
     "koa-generic-session": "^2.0.1",
     "koa-logger": "^3.2.0",
-    "koa-redis": "git://github.com/galaxybing/koa-redis.git#feature-add-redis-cluster",
+    "koa-redis": "^3.1.2",
     "koa-router": "^7.1.1",
     "koa-send": "^4.0.0",
     "koa-static": "^4.0.2",
