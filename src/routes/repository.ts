@@ -200,7 +200,10 @@ router.get('/repository/get', async (ctx) => {
         QueryInclude.RepositoryHierarchy,
         QueryInclude.Collaborators
       ],
-      order: [[{ model: Module, as: 'modules' }, 'priority', 'asc']]
+      order: [
+        [{ model: Module, as: 'modules' }, 'priority', 'asc'],
+        [{ model: Module, as: 'modules' }, {model: Interface, as: 'interfaces'}, 'priority', 'asc']
+    ]
     })
     await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
   }
