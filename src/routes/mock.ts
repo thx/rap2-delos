@@ -170,6 +170,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
       attributes: ['id', 'url', 'method'],
       where: {
         repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
+        method
       },
     })
 
