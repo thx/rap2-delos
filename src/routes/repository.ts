@@ -200,7 +200,10 @@ router.get('/repository/get', async (ctx) => {
         QueryInclude.RepositoryHierarchy,
         QueryInclude.Collaborators
       ],
-      order: [[{ model: Module, as: 'modules' }, 'priority', 'asc']]
+      order: [
+        [{ model: Module, as: 'modules' }, 'priority', 'asc'],
+        [{ model: Module, as: 'modules' }, { model: Interface, as: 'interfaces' }, 'priority', 'asc']
+      ]
     })
     await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
   }
@@ -412,7 +415,7 @@ router.post('/module/create', async (ctx, next) => {
 })
 router.post('/module/update', async (ctx, next) => {
   const { id, name, description } = ctx.request.body
-  await Module.update({ name, description }, {
+  await Module.update({ name, description, id }, {
     where: { id }
   })
   ctx.body = {
@@ -579,6 +582,13 @@ router.post('/interface/move', async (ctx) => {
   const itf = await Interface.findById(itfId)
   if (op === OP_MOVE) {
     itf.moduleId = modId
+    await Property.update({
+      moduleId: modId,
+    }, {
+      where: {
+        interfaceId: itf.id,
+      }
+    })
     await itf.save()
   } else if (op === OP_COPY) {
     const { id, name, ...otherProps } = itf.dataValues
@@ -775,16 +785,16 @@ router.post('/properties/update', async (ctx, next) => {
 
   let itf = await Interface.findById(itfId)
 
-  if (typeof summary.name !== 'undefined') {
+  if (summary.name) {
     itf.name = summary.name
   }
-  if (typeof summary.url !== 'undefined') {
+  if (summary.url) {
     itf.url = summary.url
   }
-  if (typeof summary.method !== 'undefined') {
+  if (summary.method) {
     itf.method = summary.method
   }
-  if (typeof summary.description !== 'undefined') {
+  if (summary.description) {
     itf.description = summary.description
   }
 

@@ -126,10 +126,10 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
   // let urlWithoutSearch
   // try {
-    // let urlParts = new URL(url)
-    // urlWithoutSearch = `${urlParts.origin}${urlParts.pathname}`
+  // let urlParts = new URL(url)
+  // urlWithoutSearch = `${urlParts.origin}${urlParts.pathname}`
   // } catch (e) {
-    // urlWithoutSearch = url
+  // urlWithoutSearch = url
   // }
   // DONE 2.3 腐烂的 KISSY
   // KISSY 1.3.2 会把路径中的 // 替换为 /。在浏览器端拦截跨域请求时，需要 encodeURIComponent(url) 以防止 http:// 被替换为 http:/。但是同时也会把参数一起编码，导致 route 的 url 部分包含了参数。
@@ -170,7 +170,8 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
       attributes: ['id', 'url', 'method'],
       where: {
         repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
-      },
+        method,
+      }
     })
 
     let listMatched = []
@@ -181,7 +182,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     }
 
     if (listMatched.length > 1) {
-      ctx.body = { isOk: false, errMsg: '匹配到多个接口，请修改规则确保接口规则唯一性。 Matched duplicate interfaces, please ensure pattern to be unique.' }
+      ctx.body = { isOk: false, errMsg: '匹配到多个接口，请修改规则确保接口规则唯一性。 Matched multiple interfaces, please ensure pattern to be unique.' }
       return
     } else if (listMatched.length === 0) {
       ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
@@ -196,6 +197,32 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     attributes,
     where: { interfaceId, scope: 'response' },
   })
+  // check required
+  if (~['GET', 'POST'].indexOf(method)) {
+    let requiredProperties = await Property.findAll({
+      attributes,
+      where: { interfaceId, scope: 'request', required: true },
+    })
+    let passed = true
+    let pFailed: Property | undefined
+    let params = method === 'GET' ? ctx.query : ctx.body
+    for (const p of requiredProperties) {
+      if (typeof params[p.name] === 'undefined') {
+        passed = false
+        pFailed = p
+        break
+      }
+    }
+    if (!passed) {
+      ctx.body = {
+        isOk: false,
+        errMsg: `必选参数${pFailed.name}未传值。 Required parameter ${pFailed.name} has no value.`,
+      }
+      ctx.status = 500
+      return
+    }
+  }
+
   properties = properties.map(item => item.toJSON())
 
   // DONE 2.2 支持引用请求参数
