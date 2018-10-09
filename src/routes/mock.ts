@@ -138,7 +138,6 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   let repository = await Repository.findById(repositoryId)
   let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
   let itf
-  // console.log([urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash, urlWithoutSearch])
 
   const matchedItfList = await Interface.findAll({
     attributes,
@@ -205,7 +204,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     })
     let passed = true
     let pFailed: Property | undefined
-    let params = method === 'GET' ? ctx.query : ctx.body
+    let params = method === 'GET' ? ctx.request.query : ctx.request.body
     for (const p of requiredProperties) {
       if (typeof params[p.name] === 'undefined') {
         passed = false
