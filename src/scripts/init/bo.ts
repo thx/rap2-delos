@@ -1,4 +1,5 @@
 import { mock } from 'mockjs'
+import md5 from 'md5'
 
 const scopes = ['request', 'response']
 const methods = ['GET', 'POST', 'PUT', 'DELETE']
@@ -12,9 +13,9 @@ let MODULE_ID = 1
 let INTERFACE_ID = 1
 let PROPERTY_ID = 1
 
-export const  BO_ADMIN =  { id: USER_ID++, fullname: 'admin', email: 'admin@rap2.com', password: 'admin' }
+export const  BO_ADMIN =  { id: USER_ID++, fullname: 'admin', email: 'admin@rap2.com', password: md5(md5('admin')) }
 
-export const BO_MOZHI = { id: USER_ID++, fullname: '墨智', email: 'mozhi@rap2.com', password: 'mozhi' }
+export const BO_MOZHI = { id: USER_ID++, fullname: '墨智', email: 'mozhi@rap2.com', password: md5(md5('mozhi')) }
 
 export const BO_USER_COUNT = 10
 
