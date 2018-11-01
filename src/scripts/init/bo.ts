@@ -1,5 +1,5 @@
 import { mock } from 'mockjs'
-import md5 from 'md5'
+import * as md5 from 'md5'
 
 const scopes = ['request', 'response']
 const methods = ['GET', 'POST', 'PUT', 'DELETE']
