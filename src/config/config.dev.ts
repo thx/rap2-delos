@@ -23,24 +23,19 @@ let config: IConfigOptions = {
     },
     logging: false,
   },
-  redis: {
-    // isRedisCluster: true,
-    // nodes: [{
-    //   port: 6379,
-    //   host: '*.*.*',
-    // },
-    // {
-    //   port: 6380,
-    //   host: '*.*.*',
-    // },
-    // {
-    //   port: 6381,
-    //   host: '*.*.*',
-    // }],
-    // redisOptions: {
-    //   password: '*',
-    // }
-  }
+  redis: {},
+  mail: {
+    host: 'smtp-mail.outlook.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'rap2_notify@outlook.com',
+      pass: ''
+    }
+  },
+  mailSender: 'rap2_notify@outlook.com',
+
+
 }
 
 export default config

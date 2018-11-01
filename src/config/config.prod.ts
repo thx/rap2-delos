@@ -28,7 +28,17 @@ let config: IConfigOptions =  {
     redis: {
         host: process.env.REDIS_URL || 'localhost',
         port: (process.env.REDIS_PORT && parseInt(process.env.REDIS_PORT)) || 6379
-    }
+    },
+    mail: {
+      host: 'smtp-mail.outlook.com',
+      port: 587,
+      secure: false,
+      auth: {
+          user: 'rap2_notify@outlook.com',
+          pass: ''
+      }
+    },
+    mailSender: 'rap2_notify@outlook.com',
 }
 
 export default config

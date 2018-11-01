@@ -23,7 +23,17 @@ let config: IConfigOptions = {
     },
     logging: false
   },
-  redis: {}
+  redis: {},
+  mail: {
+    host: 'smtp-mail.outlook.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: '',
+      pass: ''
+    }
+  },
+  mailSender: '',
 }
 
 export default config

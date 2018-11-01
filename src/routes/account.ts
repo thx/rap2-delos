@@ -5,6 +5,7 @@ import { Model, Sequelize } from 'sequelize-typescript';
 import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
 import * as md5 from 'md5'
+import MailService from '../service/mail'
 const Op = Sequelize.Op
 
 router.get('/app/get', async (ctx, next) => {
@@ -290,4 +291,38 @@ router.get('/captcha', async (ctx) => {
 
 router.get('/worker', async (ctx) => {
   ctx.body = process.env.NODE_APP_INSTANCE || 'NOT FOUND'
+})
+
+router.post('/account/reset', async (ctx) => {
+  const email = ctx.request.body.email
+  const password = ctx.request.body.password
+  if (password && ctx.session.resetCode && password === ctx.session.resetCode + '') {
+    const newPassword = String(Math.floor(Math.random() * 99999999))
+    const user = await User.findOne({ where: { email } })
+    if (!user) {
+      ctx.body = {
+        data: {
+          isOk: false,
+          errMsg: '您的邮箱没被注册过。',
+        }
+      }
+      return
+    }
+    user.password = md5(md5(newPassword))
+    await user.save()
+    ctx.body = {
+      data: {
+        isOk: true,
+        data: newPassword,
+      }
+    }
+  } else {
+    const resetCode = ctx.session.resetCode = Math.floor(Math.random() * 999999)
+    MailService.send(email, 'RAP重置账户验证码', `您的验证码为：${resetCode}`)
+    ctx.body = {
+      data: {
+        isOk: true,
+      }
+    }
+  }
 })
