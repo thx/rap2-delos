@@ -2,7 +2,7 @@ import { mock } from 'mockjs'
 
 const scopes = ['request', 'response']
 const methods = ['GET', 'POST', 'PUT', 'DELETE']
-const types = ['String', 'Number', 'Boolean', 'Object', 'Array', 'Function', 'RegExp']
+const types = ['String', 'Number', 'Boolean', 'Object', 'Array', 'Function', 'RegExp', 'Null']
 const values = ['@INT', '@FLOAT', '@TITLE', '@NAME']
 
 let USER_ID = 100000000
