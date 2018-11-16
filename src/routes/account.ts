@@ -155,7 +155,7 @@ router.post('/account/update', async (ctx) => {
     errMsg = '密码长度过短'
   } else {
     const user = await User.findById(ctx.session.id)
-    user.password = md5(md5(password))
+    user.password = md5(password)
     await user.save()
     isOk = true
   }
