@@ -67,6 +67,11 @@ npm run build
 npm run create-db
 ```
 
+#### 连接数据库，修改RAP2管理员账号密码
+```
+update users set password = md5('admin') where fullname = 'admin';
+```
+
 #### 执行mocha测试用例和js代码规范检查
 ```bash
 npm run check
