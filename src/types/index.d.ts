@@ -22,6 +22,10 @@ declare interface IConfigOptions {
   keycenter?: string | boolean,
   db: ISequelizeConfig,
   redis: RedisAndClusterOptions
+  ldap: {
+    url: string,
+    dn: string
+  }
   mail: SMTPTransport
   mailSender: string
 }

@@ -36,6 +36,7 @@
     "koa-router": "^7.1.1",
     "koa-send": "^4.0.0",
     "koa-static": "^4.0.2",
+    "ldapjs": "^1.0.2",
     "lodash": "^4.17.5",
     "md5": "^2.2.1",
     "mockjs": "^1.0.1-beta3",

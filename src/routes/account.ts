@@ -6,6 +6,7 @@ import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
 import * as md5 from 'md5'
 import MailService from '../service/mail'
+import ld from '../models/ldap'
 const Op = Sequelize.Op
 
 router.get('/app/get', async (ctx, next) => {
@@ -68,24 +69,47 @@ router.get('/account/info', async (ctx) => {
 })
 
 router.post('/account/login', async (ctx) => {
-  let { email, password, captcha } = ctx.request.body
-  let result, errMsg
+  let { email, password, isldap, captcha } = ctx.request.body
+  let result, errMsg, ldap_exist, user
+
   if (process.env.TEST_MODE !== 'true' &&
     (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase())) {
     errMsg = '错误的验证码'
   } else {
-    result = await User.findOne({
-      attributes: QueryInclude.User.attributes,
-      where: { email, password: md5(md5(password)) },
-    })
+    if ( !isldap ) {
+
+      result = await User.findOne({
+        attributes: QueryInclude.User.attributes,
+        where: { email, password: md5(md5(password)) },
+      })
+    } else {
+      ldap_exist = await ld(email, password)
+
+      user = await User.findOne({
+        where: { email: email },
+      })
+
+      // console.log('user_exist: ' + user)
+      // console.log('ldap_exist: ' + ldap_exist)
+
+      if (ldap_exist) {
+        // console.log("user  :"+ user)
+        user = user ? user : await User.create({ fullname: email, email: email })
+        result = user
+      }
+      // console.log('search: ' + result)
+    }
+
     if (result) {
+      console.log('result exist')
       ctx.session.id = result.id
       ctx.session.fullname = result.fullname
       ctx.session.email = result.email
       let app: any = ctx.app
       app.counter.users[result.fullname] = true
     } else {
-      errMsg = '账号或密码错误'
+      console.log('账号或密码错误!!!!!!!!!!!!!')
+      errMsg = '账号或密码错误!!!!!!!!!!!!!'
     }
   }
   ctx.body = {
