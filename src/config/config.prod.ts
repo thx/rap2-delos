@@ -30,7 +30,7 @@ let config: IConfigOptions =  {
         port: (process.env.REDIS_PORT && parseInt(process.env.REDIS_PORT)) || 6379
     },
     ldap: {
-      url: '',
+      url: 'ldap://127.0.0.1:389',
       dn: '',
     },
     mail: {

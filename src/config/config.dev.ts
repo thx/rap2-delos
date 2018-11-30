@@ -25,7 +25,7 @@ let config: IConfigOptions = {
   },
   redis: {},
   ldap: {
-    url: '',
+    url: 'ldap://127.0.0.1:389',
     dn: '',
   },
   mail: {
