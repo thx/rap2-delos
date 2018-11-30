@@ -13,7 +13,7 @@ let config: IConfigOptions = {
     dialect: 'mysql',
     host: 'localhost',
     port: 3306,
-    username: '',
+    username: 'root',
     password: '',
     database: 'RAP2_DELOS_APP',
     pool: {
@@ -25,8 +25,8 @@ let config: IConfigOptions = {
   },
   redis: {},
   ldap: {
-    url: '', // ldap://xxx.xxx.xxx.xx:389,
-    dn: '', // ou=xxxxx,dc=xxxxxx,dc=com,
+    url: '',
+    dn: '',
   },
   mail: {
     host: 'smtp-mail.outlook.com',
