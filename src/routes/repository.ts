@@ -601,15 +601,26 @@ router.post('/interface/move', async (ctx) => {
     const properties = await Property.findAll({
       where: {
         interfaceId: itf.id,
-      }
+      },
+      // parentId从小到大排，小的是parent，大的是child
+      order: [['parentId', 'asc']]
     })
+    // 解决parentId丢失的问题
+    let idMap = {}
     for (const property of properties) {
-      const { id, ...props } = property.dataValues
-      await Property.create({
+      const { id, parentId, ...props } = property.dataValues
+      // @ts-ignore
+      const newParentId = idMap[parentId+''] ? idMap[parentId+''] : -1
+      const newProperty = await Property.create({
         ...props,
         interfaceId: newItf.id,
+        parentId: newParentId,
         moduleId: modId,
       })
+
+      // @ts-ignore
+      idMap[id+''] = newProperty.id
+
     }
   }
   ctx.body = {
