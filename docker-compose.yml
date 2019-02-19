@@ -8,7 +8,8 @@ services:
     # build from ./Dockerfile
 #    build: .
     # build from images
-    image: blackdog1987/rap2-delos:1.0.0
+    # you can find last tag from https://hub.docker.com/r/blackdog1987/rap2-delos
+    image: blackdog1987/rap2-delos:2.6.aa3be03
     environment:
       # if you have your own mysql, config it here, and disable the 'mysql' config blow
       - MYSQL_URL=rap2-mysql # links will maintain /etc/hosts, just use 'container_name'
