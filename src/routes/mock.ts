@@ -5,6 +5,7 @@ import Tree from './utils/tree'
 import urlUtils from './utils/url'
 import * as querystring from 'querystring'
 import { Sequelize } from 'sequelize-typescript';
+import * as urlPkg from 'url'
 
 const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
@@ -137,9 +138,9 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
 
   let repository = await Repository.findById(repositoryId)
   let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
-  let itf
+  let itf: Interface
 
-  const matchedItfList = await Interface.findAll({
+  let matchedItfList = await Interface.findAll({
     attributes,
     where: {
       repositoryId: [repositoryId, ...collaborators.map(item => item.id)],
@@ -150,16 +151,61 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     }
   })
 
-  if (matchedItfList) {
-    for (const item of matchedItfList) {
-      itf = item
-      let url = item.url
-      if (url.charAt(0) === '/') {
-        url = url.substring(1)
+  function getRelativeURLWithoutParams(url: string) {
+    if (url.indexOf('http://') > -1) {
+      url = url.substring('http://'.length)
+    }
+    if (url.indexOf('https://') > -1) {
+      url = url.substring('https://'.length)
+    }
+    if (url.indexOf('/') > -1) {
+      url = url.substring(url.indexOf('/') + 1)
+    }
+    if (url.indexOf('?') > -1) {
+      url = url.substring(0, url.indexOf('?'))
+    }
+    return url
+  }
+
+  // matching by path
+  if (matchedItfList.length > 1) {
+    matchedItfList = matchedItfList.filter(x => {
+      const urlDoc = getRelativeURLWithoutParams(x.url)
+      const urlRequest = urlWithoutPrefixSlash
+      return urlDoc === urlRequest
+    })
+  }
+
+  // matching by params
+  if (matchedItfList.length > 1) {
+    matchedItfList = matchedItfList.filter(x => {
+      const params = {
+       ... ctx.request.query,
+       ...ctx.request.body,
       }
-      if (url === urlWithoutPrefixSlash) {
-        break
+      const parsedUrl = urlPkg.parse(x.url)
+      const pairs = parsedUrl.query.split('&').map(x => x.split('='))
+      for (const p of pairs) {
+        const key = p[0]
+        const val = p[1]
+        if (params[key] == val) {
+          return true
+        }
       }
+      // for (let key in query) {
+      // }
+      return false
+    })
+  }
+
+  for (const item of matchedItfList) {
+    itf = item
+    let url = item.url
+    if (url.charAt(0) === '/') {
+      url = url.substring(1)
+    }
+    if (url === urlWithoutPrefixSlash) {
+      break
     }
   }
 
