@@ -29,5 +29,9 @@ export default class UrlUtils {
     let re = pathToRegexp(pattern)
     return re.test(url)
   }
+  public static getUrlPattern = (pattern: string) => {
+    pattern = UrlUtils.getRelative(pattern);
+    return pathToRegexp(pattern);
+  }
 
 }

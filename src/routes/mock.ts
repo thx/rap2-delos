@@ -219,22 +219,40 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
       }
     })
 
-    let listMatched = []
+    let listMatched = [];
+    let relativeUrl = urlUtils.getRelative(url);
+
     for (let item of list) {
-      if (urlUtils.urlMatchesPattern(url, item.url)) {
-        listMatched.push(item)
+      let regExp = urlUtils.getUrlPattern(item.url); // 获取地址匹配正则
+      if (regExp.test(relativeUrl)) { // 检查地址是否匹配
+        let regMatchLength = regExp.exec(relativeUrl).length; // 执行地址匹配
+        if (listMatched[regMatchLength]) { // 检查匹配地址中，是否具有同group数量的数据
+          ctx.body = {
+            isOk: false,
+            errMsg: "匹配到多个同级别接口，请修改规则确保接口规则唯一性。"
+          };
+          return;
+        }
+        listMatched[regMatchLength] = item; // 写入数据
       }
     }
 
+    let loadDataId = 0;
     if (listMatched.length > 1) {
-      ctx.body = { isOk: false, errMsg: '匹配到多个接口，请修改规则确保接口规则唯一性。 Matched multiple interfaces, please ensure pattern to be unique.' }
-      return
+      for (let matchedItem of listMatched) { // 循环匹配内的数据
+        if (matchedItem) { // 忽略为空的数据
+          loadDataId = matchedItem.id; // 设置需查询的id
+          break;
+        }
+      }
     } else if (listMatched.length === 0) {
-      ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
+      ctx.body = {isOk: false, errMsg: '未匹配到任何接口 No matched interface'}
       return
     } else {
-      itf = await Interface.findById(listMatched[0].id)
+      loadDataId = listMatched[0].id;
     }
+
+    itf = itf = await Interface.findById(loadDataId);
   }
 
   let interfaceId = itf.id
