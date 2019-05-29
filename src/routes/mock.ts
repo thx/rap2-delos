@@ -280,6 +280,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   Object.assign(requestData, ctx.query)
   const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
+  ctx.status = itf.status
   ctx.body = JSON.stringify(data, undefined, 2)
   if (itf && itf.url.indexOf('[callback]=') > -1) {
     const query = querystring.parse(itf.url.substring(itf.url.indexOf('?') + 1))
