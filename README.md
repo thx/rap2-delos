@@ -40,10 +40,10 @@ npm install -g pm2
 npm run start:redis
 ```
 
-#### 先创建数据库
+#### 先创建创建数据库
 
 ```bash
-CREATE DATABASE IF NOT EXISTS RAP2_DELOS_APP DEFAULT CHARSET utf8 COLLATE utf8_general_ci
+mysql -e 'CREATE DATABASE IF NOT EXISTS RAP2_DELOS_APP DEFAULT CHARSET utf8 COLLATE utf8_general_ci'
 ```
 
 #### 初始化
