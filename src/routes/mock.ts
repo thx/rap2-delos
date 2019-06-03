@@ -250,6 +250,8 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     let passed = true
     let pFailed: Property | undefined
     let params = method === 'GET' ? ctx.request.query : ctx.request.body
+    // http request中head的参数未添加，会造成head中的参数必填勾选后即使header中有值也会检查不通过
+    params = Object.assign(params, ctx.request.headers)
     for (const p of requiredProperties) {
       if (typeof params[p.name] === 'undefined') {
         passed = false
