@@ -1,6 +1,6 @@
 
 --allow-uncaught
 --exit
---timeout 5000
+--timeout 15000
 --slow 200
 test/**/*.js

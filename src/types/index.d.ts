@@ -2,6 +2,7 @@
 import { PoolOptions } from "sequelize";
 import { ISequelizeConfig } from "sequelize-typescript";
 import { RedisOptions } from "koa-redis";
+import { PoolOptions } from "sequelize"
 
 declare interface RedisAndClusterOptions extends RedisOptions {
   isRedisCluster?: boolean;

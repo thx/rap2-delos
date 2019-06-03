@@ -1,7 +1,7 @@
 import router from './router'
-import Repository from "../models/bo/repository";
-import Logger from "../models/bo/logger";
-import User from "../models/bo/user";
+import Repository from "../models/bo/repository"
+import Logger from "../models/bo/logger"
+import User from "../models/bo/user"
 const moment = require('moment')
 const Sequelize = require('sequelize')
 const SELECT = { type: Sequelize.QueryTypes.SELECT }
@@ -23,7 +23,7 @@ router.get('/app/analytics/repositories/created', async (ctx) => {
     GROUP BY label
     ORDER BY label ASC;
   `
-  let result = await sequelize.query(sql, SELECT)
+  let result: any = await sequelize.query(sql, SELECT)
   result = result.map((item: any) => ({
     label: moment(item.label).format(YYYY_MM_DD),
     value: item.value,
@@ -48,7 +48,7 @@ router.get('/app/analytics/repositories/updated', async (ctx) => {
     GROUP BY label
     ORDER BY label ASC;
   `
-  let result = await sequelize.query(sql, SELECT)
+  let result: any = await sequelize.query(sql, SELECT)
   result = result.map((item: any) => ({
     label: moment(item.label).format(YYYY_MM_DD),
     value: item.value,

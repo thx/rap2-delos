@@ -134,12 +134,12 @@ export async function after () {
   // console.log(JSON.stringify(repositories, null, 2))
   console.log(repositories.map(item => item.toJSON()))
 
-  let admin = await User.findById(BO_ADMIN.id)
+  let admin = await User.findByPk(BO_ADMIN.id)
   // for (let k in admin) console.log(k)
   let owned: any = await admin.$get('ownedOrganizations')
   console.log(owned.map((item: any) => item.toJSON()))
 
-  let mozhi = await User.findById(BO_MOZHI.id)
+  let mozhi = await User.findByPk(BO_MOZHI.id)
   for (let k in mozhi) console.log(k)
   let joined: any = await mozhi.$get('joinedOrganizations')
   console.log(joined.map((item: any) => item.toJSON()))

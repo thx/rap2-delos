@@ -1,4 +1,4 @@
-import { IConfigOptions } from "../types";
+import { IConfigOptions } from "../types"
 
 // local or development or production
 let configObj: IConfigOptions =

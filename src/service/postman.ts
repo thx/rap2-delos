@@ -1,14 +1,14 @@
 import { PostmanCollection, Folder, Item } from "../types/postman"
 import { Repository, Interface, Module, Property } from "../models"
 import * as url from 'url'
-import { REQUEST_PARAMS_TYPE } from "../models/bo/property";
+import { REQUEST_PARAMS_TYPE } from "../models/bo/property"
 import UrlUtils from "../routes/utils/url"
 
 const SCHEMA_V_2_1_0 = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
 
 export default class PostmanService {
   public static async export(repositoryId: number): Promise<PostmanCollection> {
-    const repo = await Repository.findById(repositoryId, {
+    const repo = await Repository.findByPk(repositoryId, {
       include: [{
         model: Module,
         as: 'modules',

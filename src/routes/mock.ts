@@ -1,16 +1,15 @@
 import router from './router'
 import { Repository, Interface, Property } from '../models'
-import { QueryInclude } from '../models';
+import { QueryInclude } from '../models'
 import Tree from './utils/tree'
 import urlUtils from './utils/url'
 import * as querystring from 'querystring'
-import { Sequelize } from 'sequelize-typescript';
 import * as urlPkg from 'url'
+import { Op }  from 'sequelize'
 
 const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
-const Op = Sequelize.Op
 
 // 检测是否存在重复接口，会在返回的插件 JS 中提示。同时也会在编辑器中提示。
 const parseDuplicatedInterfaces = (repository: Repository) => {
@@ -65,7 +64,7 @@ router.get('/app/plugin/:repositories', async (ctx) => {
   let repositoryIds = new Set<number>(ctx.params.repositories.split(',').map((item: string) => +item).filter((item: any) => item)) // _.uniq() => Set
   let result = []
   for (let id of repositoryIds) {
-    let repository = await Repository.findById(id, {
+    let repository = await Repository.findByPk(id, {
       attributes: { exclude: [] },
       include: [
         QueryInclude.Creator,
@@ -136,7 +135,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   // KISSY 1.3.2 会把路径中的 // 替换为 /。在浏览器端拦截跨域请求时，需要 encodeURIComponent(url) 以防止 http:// 被替换为 http:/。但是同时也会把参数一起编码，导致 route 的 url 部分包含了参数。
   // 所以这里重新解析一遍！！！
 
-  let repository = await Repository.findById(repositoryId)
+  let repository = await Repository.findByPk(repositoryId)
   let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
   let itf: Interface
 
@@ -233,12 +232,12 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
       ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
       return
     } else {
-      itf = await Interface.findById(listMatched[0].id)
+      itf = await Interface.findByPk(listMatched[0].id)
     }
   }
 
   let interfaceId = itf.id
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'response' },
   })
@@ -268,14 +267,14 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     }
   }
 
-  properties = properties.map(item => item.toJSON())
+  properties = properties.map((item: any) => item.toJSON())
 
   // DONE 2.2 支持引用请求参数
-  let requestProperties = await Property.findAll({
+  let requestProperties: any  = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'request' },
   })
-  requestProperties = requestProperties.map(item => item.toJSON())
+  requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
   Object.assign(requestData, ctx.query)
   const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
@@ -316,19 +315,19 @@ router.get('/app/mock/data/:interfaceId', async (ctx) => {
   app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope },
   })
-  properties = properties.map(item => item.toJSON())
+  properties = properties.map((item: any) => item.toJSON())
   // pt(properties)
 
   // DONE 2.2 支持引用请求参数
-  let requestProperties = await Property.findAll({
+  let requestProperties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'request' },
   })
-  requestProperties = requestProperties.map(item => item.toJSON())
+  requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
   Object.assign(requestData, ctx.query)
 
@@ -345,12 +344,12 @@ router.get('/app/mock/schema/:interfaceId', async (ctx) => {
   app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope },
   })
-  pt(properties.map(item => item.toJSON()))
-  properties = properties.map(item => item.toJSON())
+  pt(properties.map((item: any) => item.toJSON()))
+  properties = properties.map((item: any) => item.toJSON())
   let schema = Tree.ArrayToTreeToTemplateToJSONSchema(properties)
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp(schema)
@@ -361,12 +360,12 @@ router.get('/app/mock/tree/:interfaceId', async (ctx) => {
   app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope },
   })
-  pt(properties.map(item => item.toJSON()))
-  properties = properties.map(item => item.toJSON())
+  pt(properties.map((item: any) => item.toJSON()))
+  properties = properties.map((item: any) => item.toJSON())
   let tree = Tree.ArrayToTree(properties)
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp(tree)

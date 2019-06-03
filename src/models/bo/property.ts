@@ -20,7 +20,7 @@ export default class Property extends Model<Property> {
   @Column
   id: number
 
-  static attributes: any;
+  static attributes: any
 
 
   @AllowNull(false)
@@ -65,7 +65,7 @@ export default class Property extends Model<Property> {
 
   @AllowNull(false)
   @Default(1)
-  @Column(DataType.BIGINT(11))
+  @Column(DataType.BIGINT())
   priority: number
 
   @ForeignKey(() => Interface)

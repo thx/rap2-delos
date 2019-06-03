@@ -1,4 +1,4 @@
-import { IConfigOptions } from "../types";
+import { IConfigOptions } from "../types"
 
 // 先从环境变量取配置
 let config: IConfigOptions =  {
@@ -35,7 +35,7 @@ let config: IConfigOptions =  {
       secure: false,
       auth: {
           user: 'rap2_notify@outlook.com',
-          pass: ''
+          pass: 'P}6}Rp?J83mB3pm2wXtNLBECPX,qDyEnEW['
       }
     },
     mailSender: 'rap2_notify@outlook.com',
