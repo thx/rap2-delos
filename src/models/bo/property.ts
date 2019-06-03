@@ -2,7 +2,7 @@ import { Table, Column, Model, AutoIncrement, PrimaryKey, AllowNull, DataType, D
 import { User, Interface, Module, Repository } from '../'
 
 export enum SCOPES { REQUEST = 'request', RESPONSE = 'response' }
-export enum TYPES { STRING = 'String', NUMBER = 'Number', BOOLEAN = 'Boolean', OBJECT = 'Object', ARRAY = 'Array', FUNCTION = 'Function', REGEXP = 'RegExp' }
+export enum TYPES { STRING = 'String', NUMBER = 'Number', BOOLEAN = 'Boolean', OBJECT = 'Object', ARRAY = 'Array', FUNCTION = 'Function', REGEXP = 'RegExp', Null = 'Null' }
 
 export enum REQUEST_PARAMS_TYPE {
   HEADERS = 1,
