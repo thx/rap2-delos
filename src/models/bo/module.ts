@@ -16,7 +16,7 @@ export default class Module extends Model<Module> {
   @BeforeBulkUpdate
   @BeforeBulkDestroy
   static async bulkDeleteCache(options: any) {
-    let id: number = options && options.rawAttributes && options.rawAttributes.id
+    let id: number = options && options.attributes && options.attributes.id
     if (!id) {
       id = options.where && +options.where.id
     }

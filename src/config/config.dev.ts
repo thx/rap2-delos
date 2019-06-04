@@ -30,7 +30,7 @@ let config: IConfigOptions = {
     secure: false,
     auth: {
       user: 'rap2_notify@outlook.com',
-      pass: 'P}6}Rp?J83mB3pm2wXtNLBECPX,qDyEnEW['
+      pass: ''
     }
   },
   mailSender: 'rap2_notify@outlook.com',

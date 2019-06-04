@@ -8,7 +8,7 @@ import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import * as Consts from './utils/const'
 import RedisService, { CACHE_KEY } from '../service/redis'
 import MigrateService from '../service/migrate'
-import { Op }  from 'sequelize'
+import { Op } from 'sequelize'
 
 const { initRepository, initModule } = require('./utils/helper')
 
@@ -576,10 +576,10 @@ router.post('/interface/move', async (ctx) => {
     await Property.update({
       moduleId: modId,
     }, {
-      where: {
-        interfaceId: itf.id,
-      }
-    })
+        where: {
+          interfaceId: itf.id,
+        }
+      })
     await itf.save()
   } else if (op === OP_COPY) {
     const { id, name, ...otherProps } = itf
@@ -592,16 +592,26 @@ router.post('/interface/move', async (ctx) => {
     const properties = await Property.findAll({
       where: {
         interfaceId: itf.id,
-      }
+      },
+      order: [['parentId', 'asc']],
     })
+    // 解决parentId丢失的问题
+    let idMap = {}
     for (const property of properties) {
-      const { id, ...props } = property
-      await Property.create({
+      const { id, parentId, ...props } = property
+      // @ts-ignore
+      const newParentId = idMap[parentId + ''] ? idMap[parentId + ''] : -1
+      const newProperty = await Property.create({
         ...props,
         interfaceId: newItf.id,
+        parentId: newParentId,
         moduleId: modId,
       })
+
+      // @ts-ignore
+      idMap[id + ''] = newProperty.id
     }
+
   }
   ctx.body = {
     data: {

@@ -1,1 +1,1 @@
-declare module 'ioredis';
+declare module 'ioredis'

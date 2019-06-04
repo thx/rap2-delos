@@ -22,7 +22,7 @@ export default class Interface extends Model<Interface> {
   @BeforeBulkUpdate
   @BeforeBulkDestroy
   static async bulkDeleteCache(options: any) {
-    let id: number = options && options.rawAttributes && options.rawAttributes.id
+    let id: number = options && options.attributes && options.attributes.id
     if (!id) {
       id = options.where && +options.where.id
     }
@@ -31,6 +31,9 @@ export default class Interface extends Model<Interface> {
       if (arr && arr[1] && arr[1].id) {
         id = arr[1].id
       }
+    }
+    if ((id as any) instanceof Array) {
+      id = (id as any)[0]
     }
     if (id) {
       const itf = await Interface.findByPk(id)

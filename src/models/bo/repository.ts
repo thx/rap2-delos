@@ -17,7 +17,7 @@ export default class Repository extends Model<Repository> {
   @BeforeBulkUpdate
   @BeforeBulkDestroy
   static async bulkDeleteCache(options: any) {
-    const id = options && options.rawAttributes && options.rawAttributes.id
+    const id = options && options.attributes && options.attributes.id
     if (id) {
      await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, id)
     }

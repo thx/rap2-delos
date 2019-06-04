@@ -5,7 +5,7 @@ import Tree from './utils/tree'
 import urlUtils from './utils/url'
 import * as querystring from 'querystring'
 import * as urlPkg from 'url'
-import { Op }  from 'sequelize'
+import { Op } from 'sequelize'
 
 const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
@@ -43,10 +43,10 @@ const generatePlugin = (protocol: any, host: any, repository: Repository) => {
   let repositoryId = ${repository.id}
   let interfaces = [
     ${repository.interfaces.map((itf: Interface) =>
-      `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
+    `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
       request: ${JSON.stringify(itf.request)},
-      response: ${JSON.stringify(itf.response)} }`,
-    ).join(',\n    ')}
+      response: ${JSON.stringify(itf.response)} }`
+  ).join(',\n    ')}
   ]
   ${duplicated.length ? `console.warn('检测到重复接口，请访问 ${editor} 修复警告！')\n` : ''}
   let RAP = window.RAP || {
@@ -179,8 +179,8 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   if (matchedItfList.length > 1) {
     matchedItfList = matchedItfList.filter(x => {
       const params = {
-       ... ctx.request.query,
-       ...ctx.request.body,
+        ...ctx.request.query,
+        ...ctx.request.body,
       }
       const parsedUrl = urlPkg.parse(x.url)
       const pairs = parsedUrl.query.split('&').map(x => x.split('='))
@@ -219,21 +219,39 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     })
 
     let listMatched = []
+    let relativeUrl = urlUtils.getRelative(url)
+
     for (let item of list) {
-      if (urlUtils.urlMatchesPattern(url, item.url)) {
-        listMatched.push(item)
+      let regExp = urlUtils.getUrlPattern(item.url) // 获取地址匹配正则
+      if (regExp.test(relativeUrl)) { // 检查地址是否匹配
+        let regMatchLength = regExp.exec(relativeUrl).length // 执行地址匹配
+        if (listMatched[regMatchLength]) { // 检查匹配地址中，是否具有同group数量的数据
+          ctx.body = {
+            isOk: false,
+            errMsg: "匹配到多个同级别接口，请修改规则确保接口规则唯一性。"
+          }
+          return
+        }
+        listMatched[regMatchLength] = item // 写入数据
       }
     }
 
+    let loadDataId = 0
     if (listMatched.length > 1) {
-      ctx.body = { isOk: false, errMsg: '匹配到多个接口，请修改规则确保接口规则唯一性。 Matched multiple interfaces, please ensure pattern to be unique.' }
-      return
+      for (let matchedItem of listMatched) { // 循环匹配内的数据
+        if (matchedItem) { // 忽略为空的数据
+          loadDataId = matchedItem.id // 设置需查询的id
+          break
+        }
+      }
     } else if (listMatched.length === 0) {
       ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
       return
     } else {
-      itf = await Interface.findByPk(listMatched[0].id)
+      loadDataId = listMatched[0].id
     }
+
+    itf = itf = await Interface.findByPk(loadDataId)
   }
 
   let interfaceId = itf.id
@@ -272,7 +290,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   properties = properties.map((item: any) => item.toJSON())
 
   // DONE 2.2 支持引用请求参数
-  let requestProperties: any  = await Property.findAll({
+  let requestProperties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'request' },
   })
