@@ -27,7 +27,7 @@ describe('Interface', () => {
   })
   let validInterface = (itf, extras = []) => {
     itf.should.be.a('object').have.all.keys(
-      Object.keys(Interface.attributes).concat(extras)
+      Object.keys(Interface.rawAttributes).concat(extras)
     )
     itf.creatorId.should.be.a('number')
     itf.repositoryId.should.be.a('number')

@@ -1,4 +1,4 @@
-import { IConfigOptions } from "../types";
+import { IConfigOptions } from "../types"
 
 let config: IConfigOptions = {
   version: '2.3',

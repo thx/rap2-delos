@@ -1,16 +1,15 @@
 import router from './router'
 import { Repository, Interface, Property } from '../models'
-import { QueryInclude } from '../models';
+import { QueryInclude } from '../models'
 import Tree from './utils/tree'
 import urlUtils from './utils/url'
 import * as querystring from 'querystring'
-import { Sequelize } from 'sequelize-typescript';
 import * as urlPkg from 'url'
+import { Op } from 'sequelize'
 
 const attributes: any = { exclude: [] }
 const pt = require('node-print').pt
 const beautify = require('js-beautify').js_beautify
-const Op = Sequelize.Op
 
 // 检测是否存在重复接口，会在返回的插件 JS 中提示。同时也会在编辑器中提示。
 const parseDuplicatedInterfaces = (repository: Repository) => {
@@ -44,10 +43,10 @@ const generatePlugin = (protocol: any, host: any, repository: Repository) => {
   let repositoryId = ${repository.id}
   let interfaces = [
     ${repository.interfaces.map((itf: Interface) =>
-      `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
+    `{ id: ${itf.id}, name: '${itf.name}', method: '${itf.method}', url: '${itf.url}',
       request: ${JSON.stringify(itf.request)},
-      response: ${JSON.stringify(itf.response)} }`,
-    ).join(',\n    ')}
+      response: ${JSON.stringify(itf.response)} }`
+  ).join(',\n    ')}
   ]
   ${duplicated.length ? `console.warn('检测到重复接口，请访问 ${editor} 修复警告！')\n` : ''}
   let RAP = window.RAP || {
@@ -65,7 +64,7 @@ router.get('/app/plugin/:repositories', async (ctx) => {
   let repositoryIds = new Set<number>(ctx.params.repositories.split(',').map((item: string) => +item).filter((item: any) => item)) // _.uniq() => Set
   let result = []
   for (let id of repositoryIds) {
-    let repository = await Repository.findById(id, {
+    let repository = await Repository.findByPk(id, {
       attributes: { exclude: [] },
       include: [
         QueryInclude.Creator,
@@ -136,7 +135,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   // KISSY 1.3.2 会把路径中的 // 替换为 /。在浏览器端拦截跨域请求时，需要 encodeURIComponent(url) 以防止 http:// 被替换为 http:/。但是同时也会把参数一起编码，导致 route 的 url 部分包含了参数。
   // 所以这里重新解析一遍！！！
 
-  let repository = await Repository.findById(repositoryId)
+  let repository = await Repository.findByPk(repositoryId)
   let collaborators: Repository[] = (await repository.$get('collaborators')) as Repository[]
   let itf: Interface
 
@@ -180,8 +179,8 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   if (matchedItfList.length > 1) {
     matchedItfList = matchedItfList.filter(x => {
       const params = {
-       ... ctx.request.query,
-       ...ctx.request.body,
+        ...ctx.request.query,
+        ...ctx.request.body,
       }
       const parsedUrl = urlPkg.parse(x.url)
       const pairs = parsedUrl.query.split('&').map(x => x.split('='))
@@ -219,44 +218,44 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
       }
     })
 
-    let listMatched = [];
-    let relativeUrl = urlUtils.getRelative(url);
+    let listMatched = []
+    let relativeUrl = urlUtils.getRelative(url)
 
     for (let item of list) {
-      let regExp = urlUtils.getUrlPattern(item.url); // 获取地址匹配正则
+      let regExp = urlUtils.getUrlPattern(item.url) // 获取地址匹配正则
       if (regExp.test(relativeUrl)) { // 检查地址是否匹配
-        let regMatchLength = regExp.exec(relativeUrl).length; // 执行地址匹配
+        let regMatchLength = regExp.exec(relativeUrl).length // 执行地址匹配
         if (listMatched[regMatchLength]) { // 检查匹配地址中，是否具有同group数量的数据
           ctx.body = {
             isOk: false,
             errMsg: "匹配到多个同级别接口，请修改规则确保接口规则唯一性。"
-          };
-          return;
+          }
+          return
         }
-        listMatched[regMatchLength] = item; // 写入数据
+        listMatched[regMatchLength] = item // 写入数据
       }
     }
 
-    let loadDataId = 0;
+    let loadDataId = 0
     if (listMatched.length > 1) {
       for (let matchedItem of listMatched) { // 循环匹配内的数据
         if (matchedItem) { // 忽略为空的数据
-          loadDataId = matchedItem.id; // 设置需查询的id
-          break;
+          loadDataId = matchedItem.id // 设置需查询的id
+          break
         }
       }
     } else if (listMatched.length === 0) {
       ctx.body = {isOk: false, errMsg: '未匹配到任何接口 No matched interface'}
       return
     } else {
-      loadDataId = listMatched[0].id;
+      loadDataId = listMatched[0].id
     }
 
-    itf = itf = await Interface.findById(loadDataId);
+    itf = itf = await Interface.findByPk(loadDataId)
   }
 
   let interfaceId = itf.id
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'response' },
   })
@@ -269,6 +268,8 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     let passed = true
     let pFailed: Property | undefined
     let params = method === 'GET' ? ctx.request.query : ctx.request.body
+    // http request中head的参数未添加，会造成head中的参数必填勾选后即使header中有值也会检查不通过
+    params = Object.assign(params, ctx.request.headers)
     for (const p of requiredProperties) {
       if (typeof params[p.name] === 'undefined') {
         passed = false
@@ -286,18 +287,19 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     }
   }
 
-  properties = properties.map(item => item.toJSON())
+  properties = properties.map((item: any) => item.toJSON())
 
   // DONE 2.2 支持引用请求参数
-  let requestProperties = await Property.findAll({
+  let requestProperties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'request' },
   })
-  requestProperties = requestProperties.map(item => item.toJSON())
+  requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
   Object.assign(requestData, ctx.query)
   const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
+  ctx.status = itf.status
   ctx.body = JSON.stringify(data, undefined, 2)
   if (itf && itf.url.indexOf('[callback]=') > -1) {
     const query = querystring.parse(itf.url.substring(itf.url.indexOf('?') + 1))
@@ -334,19 +336,19 @@ router.get('/app/mock/data/:interfaceId', async (ctx) => {
   app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope },
   })
-  properties = properties.map(item => item.toJSON())
+  properties = properties.map((item: any) => item.toJSON())
   // pt(properties)
 
   // DONE 2.2 支持引用请求参数
-  let requestProperties = await Property.findAll({
+  let requestProperties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'request' },
   })
-  requestProperties = requestProperties.map(item => item.toJSON())
+  requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
   Object.assign(requestData, ctx.query)
 
@@ -363,12 +365,12 @@ router.get('/app/mock/schema/:interfaceId', async (ctx) => {
   app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope },
   })
-  pt(properties.map(item => item.toJSON()))
-  properties = properties.map(item => item.toJSON())
+  pt(properties.map((item: any) => item.toJSON()))
+  properties = properties.map((item: any) => item.toJSON())
   let schema = Tree.ArrayToTreeToTemplateToJSONSchema(properties)
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp(schema)
@@ -379,12 +381,12 @@ router.get('/app/mock/tree/:interfaceId', async (ctx) => {
   app.counter.mock++
   let { interfaceId } = ctx.params
   let { scope = 'response' } = ctx.query
-  let properties = await Property.findAll({
+  let properties: any = await Property.findAll({
     attributes,
     where: { interfaceId, scope },
   })
-  pt(properties.map(item => item.toJSON()))
-  properties = properties.map(item => item.toJSON())
+  pt(properties.map((item: any) => item.toJSON()))
+  properties = properties.map((item: any) => item.toJSON())
   let tree = Tree.ArrayToTree(properties)
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp(tree)

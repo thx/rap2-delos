@@ -3,15 +3,14 @@ import router from './router'
 import * as _ from 'underscore'
 import Pagination from './utils/pagination'
 import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
-import { Sequelize } from 'sequelize-typescript'
 import Tree from './utils/tree'
 import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import * as Consts from './utils/const'
 import RedisService, { CACHE_KEY } from '../service/redis'
-import MigrateService from '../service/migrate';
+import MigrateService from '../service/migrate'
+import { Op } from 'sequelize'
 
 const { initRepository, initModule } = require('./utils/helper')
-const Op = Sequelize.Op
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -24,7 +23,7 @@ router.get('/app/get', async (ctx, next) => {
   }
   for (let name in hooks) {
     if (!query[name]) continue
-    data[name] = await hooks[name].findById(query[name])
+    data[name] = await hooks[name].findByPk(query[name])
   }
   ctx.body = {
     data: Object.assign({}, ctx.body && ctx.body.data, data),
@@ -109,13 +108,7 @@ router.get('/repository/owned', async (ctx) => {
     })
   }
 
-  let auth: User = await User.findById(ctx.query.user || ctx.session.id)
-  if (!auth) {
-    ctx.body = {
-      isOk: false,
-      errMsg: '登陆过期了，请重新登陆。',
-    }
-  }
+  let auth: User = await User.findByPk(ctx.query.user || ctx.session.id)
   // let total = await auth.countOwnedRepositories({ where })
   // let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let repositories = await auth.$get('ownedRepositories', {
@@ -149,7 +142,7 @@ router.get('/repository/joined', async (ctx) => {
     })
   }
 
-  let auth = await User.findById(ctx.query.user || ctx.session.id)
+  let auth = await User.findByPk(ctx.query.user || ctx.session.id)
   // let total = await auth.countJoinedRepositories({ where })
   // let pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
   let repositories = await auth.$get('joinedRepositories', {
@@ -185,11 +178,9 @@ router.get('/repository/get', async (ctx) => {
   const tryCache = await RedisService.getCache(CACHE_KEY.REPOSITORY_GET, ctx.query.id)
   let repository: Repository
   if (tryCache) {
-    console.log(`from cache`)
     repository = JSON.parse(tryCache)
   } else {
-    console.log(`from db`)
-    repository = await Repository.findById(ctx.query.id, {
+    repository = await Repository.findByPk(ctx.query.id, {
       attributes: { exclude: [] },
       include: [
         QueryInclude.Creator,
@@ -203,7 +194,7 @@ router.get('/repository/get', async (ctx) => {
       order: [
         [{ model: Module, as: 'modules' }, 'priority', 'asc'],
         [{ model: Module, as: 'modules' }, { model: Interface, as: 'interfaces' }, 'priority', 'asc']
-      ]
+      ] as any
     })
     await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
   }
@@ -226,7 +217,7 @@ router.post('/repository/create', async (ctx, next) => {
   }
   await initRepository(created)
   ctx.body = {
-    data: await Repository.findById(created.id, {
+    data: await Repository.findByPk(created.id, {
       attributes: { exclude: [] },
       include: [
         QueryInclude.Creator,
@@ -255,7 +246,7 @@ router.post('/repository/update', async (ctx, next) => {
   delete body.organizationId
   let result = await Repository.update(body, { where: { id: body.id } })
   if (body.memberIds) {
-    let reloaded = await Repository.findById(body.id, {
+    let reloaded = await Repository.findByPk(body.id, {
       include: [{
         model: User,
         as: 'members',
@@ -274,7 +265,7 @@ router.post('/repository/update', async (ctx, next) => {
     ctx.nextAssociations = reloaded.members
   }
   if (body.collaboratorIds) {
-    let reloaded = await Repository.findById(body.id)
+    let reloaded = await Repository.findByPk(body.id)
     let collaborators = await Repository.findAll({
       where: {
         id: {
@@ -316,7 +307,7 @@ router.post('/repository/transfer', async (ctx) => {
   if (ownerId) body.ownerId = ownerId // 转移给其他用户
   if (organizationId) {
     body.organizationId = organizationId // 转移给其他团队，同时转移给该团队拥有者
-    body.ownerId = (await Organization.findById(organizationId)).ownerId
+    body.ownerId = (await Organization.findByPk(organizationId)).ownerId
   }
   let result = await Repository.update(body, { where: { id } })
   ctx.body = {
@@ -389,9 +380,9 @@ router.get('/module/list', async (ctx) => {
 })
 router.get('/module/get', async (ctx) => {
   ctx.body = {
-    data: await Module.findById(ctx.query.id, {
-      attributes: { exclude: [] },
-    }),
+    data: await Module.findByPk(ctx.query.id, {
+      attributes: { exclude: [] }
+    })
   }
 })
 router.post('/module/create', async (ctx, next) => {
@@ -401,7 +392,7 @@ router.post('/module/create', async (ctx, next) => {
   let created = await Module.create(body)
   await initModule(created)
   ctx.body = {
-    data: await Module.findById(created.id),
+    data: await Module.findByPk(created.id)
   }
   return next()
 }, async (ctx) => {
@@ -447,7 +438,7 @@ router.get('/module/remove', async (ctx, next) => {
 }, async (ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
-  let mod = await Module.findById(id, { paranoid: false })
+  let mod = await Module.findByPk(id, { paranoid: false })
   await Logger.create({
     userId: ctx.session.id,
     type: 'delete',
@@ -464,7 +455,7 @@ router.post('/module/sort', async (ctx) => {
     })
   }
   if (ids && ids.length) {
-    const mod = await Module.findById(ids[0])
+    const mod = await Module.findByPk(ids[0])
     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, mod.repositoryId)
   }
   ctx.body = {
@@ -494,15 +485,15 @@ router.get('/interface/list', async (ctx) => {
 router.get('/interface/get', async (ctx) => {
   let { id, repositoryId, method, url } = ctx.query
 
-  let itf
+  let itf: any
   if (id) {
-    itf = await Interface.findById(id, {
-      attributes: { exclude: [] },
+    itf = await Interface.findByPk(id, {
+      attributes: { exclude: [] }
     })
   } else if (repositoryId && method && url) {
     // 同 /app/mock/:repository/:method/:url
     let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
-    let repository = await Repository.findById(repositoryId)
+    let repository = await Repository.findByPk(repositoryId)
     let collaborators = await repository.$get('collaborators')
 
     itf = await Interface.findOne({
@@ -518,11 +509,11 @@ router.get('/interface/get', async (ctx) => {
 
   let scopes = ['request', 'response']
   for (let i = 0; i < scopes.length; i++) {
-    let properties = await Property.findAll({
+    let properties: any = await Property.findAll({
       attributes: { exclude: [] },
       where: { interfaceId: itf.id, scope: scopes[i] },
     })
-    properties = properties.map(item => item.toJSON())
+    properties = properties.map((item: any) => item.toJSON())
     itf[scopes[i] + 'Properties'] = Tree.ArrayToTree(properties).children
   }
 
@@ -537,7 +528,7 @@ router.post('/interface/create', async (ctx, next) => {
   // await initInterface(created)
   ctx.body = {
     data: {
-      itf: await Interface.findById(created.id),
+      itf: await Interface.findByPk(created.id),
     }
   }
   return next()
@@ -559,7 +550,7 @@ router.post('/interface/update', async (ctx, next) => {
   })
   ctx.body = {
     data: {
-      itf: await Interface.findById(body.id),
+      itf: await Interface.findByPk(body.id),
     }
   }
   return next()
@@ -579,19 +570,19 @@ router.post('/interface/move', async (ctx) => {
   const OP_MOVE = 1
   const OP_COPY = 2
   const { modId, itfId, op } = ctx.request.body
-  const itf = await Interface.findById(itfId)
+  const itf = await Interface.findByPk(itfId)
   if (op === OP_MOVE) {
     itf.moduleId = modId
     await Property.update({
       moduleId: modId,
     }, {
-      where: {
-        interfaceId: itf.id,
-      }
-    })
+        where: {
+          interfaceId: itf.id,
+        }
+      })
     await itf.save()
   } else if (op === OP_COPY) {
-    const { id, name, ...otherProps } = itf.dataValues
+    const { id, name, ...otherProps } = itf.toJSON() as Interface
     const newItf = await Interface.create({
       name: name + '副本',
       ...otherProps,
@@ -601,16 +592,26 @@ router.post('/interface/move', async (ctx) => {
     const properties = await Property.findAll({
       where: {
         interfaceId: itf.id,
-      }
+      },
+      order: [['parentId', 'asc']],
     })
+    // 解决parentId丢失的问题
+    let idMap = {}
     for (const property of properties) {
-      const { id, ...props } = property.dataValues
-      await Property.create({
+      const { id, parentId, ...props } = property.toJSON() as Property
+      // @ts-ignore
+      const newParentId = idMap[parentId + ''] ? idMap[parentId + ''] : -1
+      const newProperty = await Property.create({
         ...props,
         interfaceId: newItf.id,
+        parentId: newParentId,
         moduleId: modId,
       })
+
+      // @ts-ignore
+      idMap[id + ''] = newProperty.id
     }
+
   }
   ctx.body = {
     data: {
@@ -630,7 +631,7 @@ router.get('/interface/remove', async (ctx, next) => {
 }, async (ctx) => {
   if (ctx.body.data === 0) return
   let { id } = ctx.query
-  let itf = await Interface.findById(id, { paranoid: false })
+  let itf = await Interface.findByPk(id, { paranoid: false })
   await Logger.create({
     userId: ctx.session.id,
     type: 'delete',
@@ -641,7 +642,7 @@ router.get('/interface/remove', async (ctx, next) => {
 })
 
 router.get('/__test__', async (ctx) => {
-  const itf = await Interface.findById(5331)
+  const itf = await Interface.findByPk(5331)
   itf.name = itf.name + '+'
   await itf.save()
   ctx.body = {
@@ -656,7 +657,7 @@ router.post('/interface/lock', async (ctx, next) => {
   }
 
   let { id } = ctx.request.body
-  let itf = await Interface.findById(id, {
+  let itf = await Interface.findByPk(id, {
     attributes: ['lockerId'],
     include: [
       QueryInclude.Locker,
@@ -670,7 +671,7 @@ router.post('/interface/lock', async (ctx, next) => {
   }
 
   await Interface.update({ lockerId: ctx.session.id }, { where: { id } })
-  itf = await Interface.findById(id, {
+  itf = await Interface.findByPk(id, {
     attributes: ['lockerId'],
     include: [
       QueryInclude.Locker,
@@ -689,7 +690,7 @@ router.post('/interface/unlock', async (ctx) => {
   }
 
   let { id } = ctx.request.body
-  let itf = await Interface.findById(id, { attributes: ['lockerId'] })
+  let itf = await Interface.findByPk(id, { attributes: ['lockerId'] })
   if (itf.lockerId !== ctx.session.id) { // DONE 2.3 BUG 接口可能被其他人解锁。如果不是同一个用户，则忽略。
     ctx.body = {
       isOk: false,
@@ -745,9 +746,9 @@ router.get('/property/list', async (ctx) => {
 router.get('/property/get', async (ctx) => {
   let { id } = ctx.query
   ctx.body = {
-    data: await Property.findById(id, {
-      attributes: { exclude: [] },
-    }),
+    data: await Property.findByPk(id, {
+      attributes: { exclude: [] }
+    })
   }
 })
 
@@ -756,9 +757,9 @@ router.post('/property/create', async (ctx) => {
   let body = Object.assign(ctx.request.body, { creatorId })
   let created = await Property.create(body)
   ctx.body = {
-    data: await Property.findById(created.id, {
-      attributes: { exclude: [] },
-    }),
+    data: await Property.findByPk(created.id, {
+      attributes: { exclude: [] }
+    })
   }
 })
 
@@ -767,7 +768,7 @@ router.post('/property/update', async (ctx) => {
   properties = Array.isArray(properties) ? properties : [properties]
   let result = 0
   for (let item of properties) {
-    let property = _.pick(item, Object.keys(Property.attributes))
+    let property = _.pick(item, Object.keys(Property.rawAttributes))
     let affected = await Property.update(property, {
       where: { id: property.id },
     })
@@ -783,7 +784,7 @@ router.post('/properties/update', async (ctx, next) => {
   let { properties, summary } = ctx.request.body // JSON.parse(ctx.request.body)
   properties = Array.isArray(properties) ? properties : [properties]
 
-  let itf = await Interface.findById(itfId)
+  let itf = await Interface.findByPk(itfId)
 
   if (summary.name) {
     itf.name = summary.name
@@ -848,7 +849,7 @@ router.post('/properties/update', async (ctx, next) => {
       where: { id: item.id },
     })
   }
-  itf = await Interface.findById(itfId, {
+  itf = await Interface.findByPk(itfId, {
     include: (QueryInclude.RepositoryHierarchy as any).include[0].include,
   })
   ctx.body = {
@@ -860,8 +861,8 @@ router.post('/properties/update', async (ctx, next) => {
   return next()
 }, async (ctx) => {
   if (ctx.body.data === 0) return
-  let itf = await Interface.findById(ctx.query.itf, {
-    attributes: { exclude: [] },
+  let itf = await Interface.findByPk(ctx.query.itf, {
+    attributes: { exclude: [] }
   })
   await Logger.create({
     userId: ctx.session.id,

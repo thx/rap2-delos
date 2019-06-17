@@ -1,7 +1,6 @@
 import seq from '../models/sequelize'
 import Pagination from '../routes/utils/pagination'
-import Utils from './utils';
-
+import Utils from './utils'
 export default class OrganizationService {
   public static canUserAccessOrganization(userId: number, organizationId: number): Promise<boolean> {
     const sql = `

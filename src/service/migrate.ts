@@ -1,5 +1,5 @@
-import { Repository, Module, Interface, Property, User } from "../models";
-import { SCOPES } from "../models/bo/property";
+import { Repository, Module, Interface, Property, User } from "../models"
+import { SCOPES } from "../models/bo/property"
 import * as md5 from 'md5'
 import * as querystring from 'querystring'
 import * as rp from 'request-promise'

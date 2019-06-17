@@ -293,22 +293,6 @@ CREATE TABLE `users` (
 ) COMMENT='用户';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
---
--- Table structure for table `foreign_room`
---
-
-DROP TABLE IF EXISTS `foreign_room`;
-CREATE TABLE `foreign_room` (
-  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `repositoryId` bigint(11) unsigned DEFAULT NULL COMMENT '-',
-  `roomProjectId` bigint(11) unsigned DEFAULT NULL COMMENT '-',
-  PRIMARY KEY (`id`),
-  KEY `idx_repositoryId` (`repositoryId`),
-  KEY `idx_roomProjectId` (`roomProjectId`),
-  CONSTRAINT `interfaces_1` FOREIGN KEY (`repositoryId`) REFERENCES `repositories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-);
-
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

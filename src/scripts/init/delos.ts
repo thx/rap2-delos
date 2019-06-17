@@ -1,5 +1,5 @@
 import sequelize from '../../models/sequelize'
-import { User, Organization, Repository, Module, Interface, Property, Room } from '../../models/index'
+import { User, Organization, Repository, Module, Interface, Property } from '../../models/index'
 import { BO_ADMIN, BO_MOZHI } from './bo'
 import { BO_USER_FN, BO_ORGANIZATION_FN, BO_REPOSITORY_FN, BO_MODULE_FN, BO_INTERFACE_FN, BO_PROPERTY_FN } from './bo'
 import { BO_USER_COUNT, BO_ORGANIZATION_COUNT, BO_REPOSITORY_COUNT, BO_MODULE_COUNT, BO_INTERFACE_COUNT, BO_PROPERTY_COUNT } from './bo'
@@ -12,7 +12,6 @@ export async function init () {
     force: true,
     logging: console.log,
   })
-  await Room.destroy(EMPTY_WHERE)
   await User.destroy(EMPTY_WHERE)
   await Organization.destroy(EMPTY_WHERE)
   await Repository.destroy(EMPTY_WHERE)
@@ -134,12 +133,12 @@ export async function after () {
   // console.log(JSON.stringify(repositories, null, 2))
   console.log(repositories.map(item => item.toJSON()))
 
-  let admin = await User.findById(BO_ADMIN.id)
+  let admin = await User.findByPk(BO_ADMIN.id)
   // for (let k in admin) console.log(k)
   let owned: any = await admin.$get('ownedOrganizations')
   console.log(owned.map((item: any) => item.toJSON()))
 
-  let mozhi = await User.findById(BO_MOZHI.id)
+  let mozhi = await User.findByPk(BO_MOZHI.id)
   for (let k in mozhi) console.log(k)
   let joined: any = await mozhi.$get('joinedOrganizations')
   console.log(joined.map((item: any) => item.toJSON()))

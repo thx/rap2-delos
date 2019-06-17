@@ -1,4 +1,4 @@
-import { Property } from "../../models";
+import { Property } from "../../models"
 import * as _ from 'underscore'
 const vm = require('vm')
 import * as Mock from 'mockjs'

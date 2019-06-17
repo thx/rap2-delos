@@ -23,7 +23,7 @@ describe('Organization', () => {
   })
   let validOrganization = (organization) => {
     organization.should.be.a('object').have.all.keys(
-      [...Object.keys(Organization.attributes), 'creator', 'owner', 'members']
+      [...Object.keys(Organization.rawAttributes), 'creator', 'owner', 'members']
     )
     let { creator, owner, members } = organization
     creator.should.be.a('object').have.all.keys(['id', 'fullname', 'email'])

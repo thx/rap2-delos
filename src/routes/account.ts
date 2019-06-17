@@ -1,12 +1,15 @@
 import * as svgCaptcha from 'svg-captcha'
 import { User, Notification, Logger, Organization, Repository } from '../models'
 import router from './router'
-import { Model, Sequelize } from 'sequelize-typescript';
+import { Model } from 'sequelize-typescript'
 import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
-import * as md5 from 'md5'
+import { Op } from 'sequelize'
 import MailService from '../service/mail'
-const Op = Sequelize.Op
+import * as md5 from 'md5'
+
+
+
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -16,8 +19,8 @@ router.get('/app/get', async (ctx, next) => {
   }
   for (let name in hooks) {
     if (!query[name]) continue
-    data[name] = await hooks[name].findById(query[name], {
-      attributes: { exclude: [] },
+    data[name] = await hooks[name].findByPk(query[name], {
+      attributes: { exclude: [] }
     })
   }
   ctx.body = {
@@ -38,9 +41,11 @@ router.get('/account/list', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      [Op.or]: [
-        { fullname: { $like: `%${name}%` } },
-      ],
+      [Op.or]: [{
+        fullname: {
+          [Op.like]: `%${name}%`
+        },
+      }],
     })
   }
   let options = { where }
@@ -61,9 +66,9 @@ router.get('/account/list', async (ctx) => {
 
 router.get('/account/info', async (ctx) => {
   ctx.body = {
-    data: ctx.session.id ? await User.findById(ctx.session.id, {
-      attributes: QueryInclude.User.attributes,
-    }) : undefined,
+    data: ctx.session.id ? await User.findByPk(ctx.session.id, {
+      attributes: QueryInclude.User.attributes
+    }) : undefined
   }
 })
 
@@ -154,7 +159,7 @@ router.post('/account/update', async (ctx) => {
   } else if (password.length < 6) {
     errMsg = '密码长度过短'
   } else {
-    const user = await User.findById(ctx.session.id)
+    const user = await User.findByPk(ctx.session.id)
     user.password = md5(md5(password))
     await user.save()
     isOk = true
@@ -244,7 +249,7 @@ router.get('/account/logger', async (ctx) => {
     }
     return
   }
-  let auth = await User.findById(ctx.session.id)
+  let auth = await User.findByPk(ctx.session.id)
   let repositories: Model<Repository>[] = [...(<Model<Repository>[]>await auth.$get('ownedRepositories')), ...(<Model<Repository>[]>await auth.$get('joinedRepositories'))]
   let organizations: Model<Organization>[] = [...(<Model<Organization>[]>await auth.$get('ownedOrganizations')), ...(<Model<Organization>[]>await auth.$get('joinedOrganizations'))]
 

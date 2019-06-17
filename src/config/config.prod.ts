@@ -1,4 +1,4 @@
-import { IConfigOptions } from "../types";
+import { IConfigOptions } from "../types"
 
 // 先从环境变量取配置
 let config: IConfigOptions =  {

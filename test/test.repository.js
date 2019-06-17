@@ -23,7 +23,7 @@ describe('Repository', () => {
   })
   let validRepository = (repository, deep) => {
     repository.should.be.a('object').have.all.keys(
-      [...Object.keys(Repository.attributes), 'creator', 'owner', 'members', 'locker', 'organization', 'collaborators']
+      [...Object.keys(Repository.rawAttributes), 'creator', 'owner', 'members', 'locker', 'organization', 'collaborators']
         .concat(deep ? ['modules'] : [])
     )
     let { creator, owner, members } = repository

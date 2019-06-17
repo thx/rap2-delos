@@ -1,5 +1,5 @@
-import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey, BeforeBulkDelete, BeforeBulkCreate, BeforeBulkUpdate, BeforeCreate, BeforeUpdate, BeforeDelete } from 'sequelize-typescript'
-import { User, Module, Repository, Property } from '../';
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey, BeforeBulkDestroy, BeforeBulkCreate, BeforeBulkUpdate, BeforeCreate, BeforeUpdate, BeforeDestroy } from 'sequelize-typescript'
+import { User, Module, Repository, Property } from '../'
 import RedisService, { CACHE_KEY } from '../../service/redis'
 import * as Sequelize from 'sequelize'
 
@@ -13,16 +13,16 @@ export default class Interface extends Model<Interface> {
   /** hooks */
   @BeforeCreate
   @BeforeUpdate
-  @BeforeDelete
+  @BeforeDestroy
   static async deleteCache(instance: Interface) {
     await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, instance.repositoryId)
   }
 
   @BeforeBulkCreate
   @BeforeBulkUpdate
-  @BeforeBulkDelete
+  @BeforeBulkDestroy
   static async bulkDeleteCache(options: any) {
-    let id: number = +(options && options.attributes && options.attributes.id)
+    let id: number = options && options.attributes && options.attributes.id
     if (!id) {
       id = options.where && +options.where.id
     }
@@ -32,9 +32,11 @@ export default class Interface extends Model<Interface> {
         id = arr[1].id
       }
     }
-    if (+id) {
-      id = +id
-      const itf = await Interface.findById(id)
+    if ((id as any) instanceof Array) {
+      id = (id as any)[0]
+    }
+    if (id) {
+      const itf = await Interface.findByPk(id)
       await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, itf.repositoryId)
     }
   }
@@ -66,7 +68,7 @@ export default class Interface extends Model<Interface> {
 
   @AllowNull(false)
   @Default(1)
-  @Column(DataType.BIGINT(11))
+  @Column(DataType.BIGINT())
   priority: number
 
   @Default(200)

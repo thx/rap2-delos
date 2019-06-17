@@ -6,7 +6,7 @@ export default class MailService {
   public static send(to: string, subject: string, html: string) {
 
     nodemailer.createTestAccount((_err, _account) => {
-      const transporter = nodemailer.createTransport(config.mail);
+      const transporter = nodemailer.createTransport(config.mail)
 
       // setup email data with unicode symbols
       const mailOptions = {
@@ -14,7 +14,7 @@ export default class MailService {
         to,
         subject,
         html,
-      };
+      }
 
       // send mail with defined transport object
       transporter.sendMail(mailOptions)
