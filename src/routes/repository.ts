@@ -582,7 +582,7 @@ router.post('/interface/move', async (ctx) => {
       })
     await itf.save()
   } else if (op === OP_COPY) {
-    const { id, name, ...otherProps } = itf
+    const { id, name, ...otherProps } = itf.toJSON() as Interface
     const newItf = await Interface.create({
       name: name + '副本',
       ...otherProps,
@@ -598,7 +598,7 @@ router.post('/interface/move', async (ctx) => {
     // 解决parentId丢失的问题
     let idMap = {}
     for (const property of properties) {
-      const { id, parentId, ...props } = property
+      const { id, parentId, ...props } = property.toJSON() as Property
       // @ts-ignore
       const newParentId = idMap[parentId + ''] ? idMap[parentId + ''] : -1
       const newProperty = await Property.create({

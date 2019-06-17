@@ -4,7 +4,7 @@ import router from './router'
 import { Model } from 'sequelize-typescript'
 import Pagination from './utils/pagination'
 import { QueryInclude } from '../models'
-import { Op }  from 'sequelize'
+import { Op } from 'sequelize'
 import MailService from '../service/mail'
 import * as md5 from 'md5'
 
@@ -41,9 +41,11 @@ router.get('/account/list', async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      [Op.or]: [
-        { fullname: { $like: `%${name}%` } },
-      ],
+      [Op.or]: [{
+        fullname: {
+          [Op.like]: `%${name}%`
+        },
+      }],
     })
   }
   let options = { where }
