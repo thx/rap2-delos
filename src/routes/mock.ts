@@ -245,7 +245,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
         }
       }
     } else if (listMatched.length === 0) {
-      ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
+      ctx.body = {isOk: false, errMsg: '未匹配到任何接口 No matched interface'}
       return
     } else {
       loadDataId = listMatched[0].id
