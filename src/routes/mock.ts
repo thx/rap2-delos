@@ -100,7 +100,8 @@ router.get('/app/plugin/:repositories', async (ctx) => {
     result.push(generatePlugin(protocol, ctx.host, repository))
   }
 
-  ctx.type = 'application/x-javascript'
+  ctx.enco
+  ctx.type = 'application/x-javascript; charset=utf-8'
   ctx.body = result.join('\n')
 })
 
