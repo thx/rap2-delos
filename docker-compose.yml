@@ -5,13 +5,17 @@ version: "3"
 
 services:
   # frontend
-  dolores:
+  nginx:
+    # image: nginx:stable-alpine
     build:
       # will use image from the frontend repo in the future
       context: docker/frontend
-    command: serve -s /app -p 80
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
     ports:
-      - 38081:80
+      - 38080:38080
+      - 38081:38081
+
   # backend
   delos:
     # build from ./Dockerfile
@@ -43,8 +47,6 @@ services:
     depends_on:
       - redis
       - mysql
-    ports:
-      - "38080:8080" # expose 38080
 
   redis:
     image: redis:4
