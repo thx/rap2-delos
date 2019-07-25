@@ -1,55 +1,57 @@
 # mail@dongguochao.com
+# llitfkitfk@gmail.com
 
-version: '2.2'
+version: "3"
 
 services:
+  # frontend
+  dolores:
+    build:
+      # will use image from the frontend repo in the future
+      context: docker/frontend
+    command: serve -s /app -p 80
+    ports:
+      - 38081:80
+  # backend
   delos:
-    container_name: rap2-delos
     # build from ./Dockerfile
-#    build: .
+    build: .
     # build from images
     # you can find last tag from https://hub.docker.com/r/blackdog1987/rap2-delos
-    image: blackdog1987/rap2-delos:2.6.aa3be03
+    # image: blackdog1987/rap2-delos:2.6.aa3be03
     environment:
       # if you have your own mysql, config it here, and disable the 'mysql' config blow
-      - MYSQL_URL=rap2-mysql # links will maintain /etc/hosts, just use 'container_name'
+      - MYSQL_URL=mysql # links will maintain /etc/hosts, just use 'container_name'
       - MYSQL_PORT=3306
       - MYSQL_USERNAME=root
       - MYSQL_PASSWD=
       - MYSQL_SCHEMA=rap2
 
       # redis config
-      - REDIS_URL=rap2-redis
+      - REDIS_URL=redis
       - REDIS_PORT=6379
 
       # production / development
       - NODE_ENV=production
-    working_dir: /app
-    privileged: true
     ###### 'sleep 30 && node scripts/init' will drop the tables
     ###### RUN ONLY ONCE THEN REMOVE 'sleep 30 && node scripts/init'
-    command: /bin/sh -c 'sleep 30; node scripts/init; node dispatch.js'
+    command: /bin/sh -c 'node dispatch.js'
     # init the databases
-#    command: sleep 30 && node scripts/init && node dispatch.js
+    # command: sleep 30 && node scripts/init && node dispatch.js
     # without init
-#    command: node dispatch.js
-    links:
-      - redis
-      - mysql
+    # command: node dispatch.js
     depends_on:
       - redis
       - mysql
     ports:
-      - "38080:8080"  # expose 38080
+      - "38080:8080" # expose 38080
 
   redis:
-    container_name: rap2-redis
-    image: redis:4.0.9
+    image: redis:4
 
   # disable this if you have your own mysql
   mysql:
-    container_name: rap2-mysql
-    image: mysql:5.7.22
+    image: mysql:5.7
     # expose 33306 to client (navicat)
     #ports:
     #   - 33306:3306
