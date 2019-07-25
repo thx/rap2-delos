@@ -6,14 +6,12 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 RUN git clone --depth 1 https://github.com/thx/rap2-dolores.git ./
+RUN yarn install 
+COPY config/config.prod.ts ./src/config/config.prod.ts
+RUN yarn run lint
+RUN yarn run build
 
-RUN yarn install && yarn run lint && yarn run build
+# nginx
+FROM nginx:stable-alpine
 
-# RUNNING 
-FROM node:lts-alpine
-LABEL maintainer="llitfkitfk@gmail.com"
-RUN npm install -g serve
-WORKDIR /app
-COPY --from=builder /app/build/* ./
-
-CMD [ "serve", "-s", "/app", "-p", "80" ]
+COPY --from=builder /app/build /app
