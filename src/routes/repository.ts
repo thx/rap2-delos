@@ -191,7 +191,6 @@ router.get('/repository/get', async (ctx) => {
           QueryInclude.Members,
           QueryInclude.Organization,
           QueryInclude.Collaborators,
-          QueryInclude.Domains
         ]
       }),
       Repository.findByPk(ctx.query.id, {
