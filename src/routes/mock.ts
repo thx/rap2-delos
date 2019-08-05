@@ -100,7 +100,6 @@ router.get('/app/plugin/:repositories', async (ctx) => {
     result.push(generatePlugin(protocol, ctx.host, repository))
   }
 
-  ctx.enco
   ctx.type = 'application/x-javascript; charset=utf-8'
   ctx.body = result.join('\n')
 })
@@ -246,7 +245,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
         }
       }
     } else if (listMatched.length === 0) {
-      ctx.body = {isOk: false, errMsg: '未匹配到任何接口 No matched interface'}
+      ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
       return
     } else {
       loadDataId = listMatched[0].id
@@ -302,6 +301,11 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   ctx.type = 'json'
   ctx.status = itf.status
   ctx.body = JSON.stringify(data, undefined, 2)
+  const Location = data.Location
+  if (Location && itf.status === 301) {
+    ctx.redirect(Location)
+    return
+  }
   if (itf && itf.url.indexOf('[callback]=') > -1) {
     const query = querystring.parse(itf.url.substring(itf.url.indexOf('?') + 1))
     const cbName = query['[callback]']

@@ -14,8 +14,8 @@ declare interface RedisAndClusterOptions extends RedisOptions {
 declare interface IConfigOptions {
   version: string
   serve: {
-    port: number,
-    path: string
+    port: number
+    path: string // Context Path
   },
   keys: string[]
   session: {

@@ -176,26 +176,47 @@ router.get('/repository/get', async (ctx) => {
     return
   }
   const tryCache = await RedisService.getCache(CACHE_KEY.REPOSITORY_GET, ctx.query.id)
-  let repository: Repository
+  let repository: Partial<Repository>
   if (tryCache) {
     repository = JSON.parse(tryCache)
   } else {
-    repository = await Repository.findByPk(ctx.query.id, {
-      attributes: { exclude: [] },
-      include: [
-        QueryInclude.Creator,
-        QueryInclude.Owner,
-        QueryInclude.Locker,
-        QueryInclude.Members,
-        QueryInclude.Organization,
-        QueryInclude.RepositoryHierarchy,
-        QueryInclude.Collaborators
-      ],
-      order: [
-        [{ model: Module, as: 'modules' }, 'priority', 'asc'],
-        [{ model: Module, as: 'modules' }, { model: Interface, as: 'interfaces' }, 'priority', 'asc']
-      ] as any
-    })
+    // 分开查询减少
+    let [repositoryOmitModules, repositoryModules] = await Promise.all([
+      Repository.findByPk(ctx.query.id, {
+        attributes: { exclude: [] },
+        include: [
+          QueryInclude.Creator,
+          QueryInclude.Owner,
+          QueryInclude.Locker,
+          QueryInclude.Members,
+          QueryInclude.Organization,
+          QueryInclude.Collaborators,
+          QueryInclude.Domains
+        ]
+      }),
+      Repository.findByPk(ctx.query.id, {
+        attributes: { exclude: [] },
+        include: [QueryInclude.RepositoryHierarchy],
+        order: [
+          [{ model: Module, as: 'modules' }, 'priority', 'asc'],
+          [
+            { model: Module, as: 'modules' },
+            { model: Interface, as: 'interfaces' },
+            'priority',
+            'asc'
+          ]
+        ]
+      })
+    ])
+    repository = {
+      ...repositoryOmitModules.toJSON(),
+      ...repositoryModules.toJSON()
+    }
+    await RedisService.setCache(
+      CACHE_KEY.REPOSITORY_GET,
+      JSON.stringify(repository),
+      ctx.query.id
+    )
     await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
   }
   ctx.body = {

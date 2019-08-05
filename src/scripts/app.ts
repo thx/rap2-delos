@@ -8,6 +8,7 @@ import * as cors from 'kcors'
 import * as bodyParser from 'koa-body'
 import router from '../routes'
 import config from '../config'
+import { startTask } from '../service/task'
 
 const app = new Koa()
 let appAny: any = app
@@ -53,5 +54,7 @@ app.use(serve('test'))
 app.use(bodyParser({ multipart: true }))
 
 app.use(router.routes())
+
+startTask()
 
 export default app

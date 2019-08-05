@@ -1,10 +1,10 @@
 import { IConfigOptions } from "../types"
 
 let config: IConfigOptions = {
-  version: '2.3',
+  version: 'v2.1.0',
   serve: {
     port: 8080,
-    path: "", // 服务context path
+    path: '',
   },
   keys: ['some secret hurr'],
   session: {
