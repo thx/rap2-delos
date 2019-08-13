@@ -155,7 +155,7 @@ router.post('/account/update', async (ctx) => {
   let isOk = false
 
   if (!ctx.session || !ctx.session.id) {
-    errMsg = '登陆超时'
+    errMsg = '登录超时'
   } else if (password.length < 6) {
     errMsg = '密码长度过短'
   } else {
