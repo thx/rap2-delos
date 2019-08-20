@@ -177,25 +177,39 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
 
   // matching by params
   if (matchedItfList.length > 1) {
+    const params = {
+      ...ctx.request.query,
+      ...ctx.request.body,
+    }
+    const paramsKeysCnt = Object.keys(params).length
     matchedItfList = matchedItfList.filter(x => {
-      const params = {
-        ...ctx.request.query,
-        ...ctx.request.body,
-      }
       const parsedUrl = urlPkg.parse(x.url)
-      const pairs = parsedUrl.query.split('&').map(x => x.split('='))
+      const pairs = parsedUrl.query ? parsedUrl.query.split('&').map(x => x.split('=')) : []
+      // 接口没有定义参数时看请求是否有参数
+      if (pairs.length === 0) {
+        return paramsKeysCnt === 0
+      }
+      // 接口定义参数时看每一项的参数是否一致
       for (const p of pairs) {
         const key = p[0]
         const val = p[1]
-        if (params[key] == val) {
-          return true
+        if (params[key] != val) {
+          return false
         }
       }
-      // for (let key in query) {
-      // }
-      return false
+      return true
     })
   }
+
+  // 多个协同仓库的结果优先返回当前仓库的
+  if (matchedItfList.length > 1) {
+    const currProjMatchedItfList = matchedItfList.filter(x => x.repositoryId === repositoryId)
+    // 如果直接存在当前仓库的就当做结果集，否则放弃
+    if (currProjMatchedItfList.length > 0) {
+      matchedItfList = currProjMatchedItfList
+    }
+  }
+
 
   for (const item of matchedItfList) {
     itf = item
@@ -245,7 +259,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
         }
       }
     } else if (listMatched.length === 0) {
-      ctx.body = { isOk: false, errMsg: '未匹配到任何接口 No matched interface' }
+      ctx.body = { isOk: false, errMsg: '未匹配到任何接口，请检查请求类型是否一致。' }
       return
     } else {
       loadDataId = listMatched[0].id
@@ -267,7 +281,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     })
     let passed = true
     let pFailed: Property | undefined
-    let params = method === 'GET' ? ctx.request.query : ctx.request.body
+    let params = method === 'GET' ? {...ctx.request.query} : {...ctx.request.body}
     // http request中head的参数未添加，会造成head中的参数必填勾选后即使header中有值也会检查不通过
     params = Object.assign(params, ctx.request.headers)
     for (const p of requiredProperties) {
@@ -282,7 +296,6 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
         isOk: false,
         errMsg: `必选参数${pFailed.name}未传值。 Required parameter ${pFailed.name} has no value.`,
       }
-      ctx.status = 500
       return
     }
   }
@@ -296,7 +309,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   })
   requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
-  Object.assign(requestData, ctx.query)
+  Object.assign(requestData, ctx.params)
   const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
   ctx.status = itf.status
