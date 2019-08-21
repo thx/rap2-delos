@@ -7,6 +7,9 @@ import { QueryInclude } from '../models'
 import { Op } from 'sequelize'
 import MailService from '../service/mail'
 import * as md5 from 'md5'
+import { isLoggedIn } from './base'
+import { AccessUtils } from './utils/access'
+import { COMMON_ERROR_RES } from './utils/const'
 
 
 
@@ -36,7 +39,11 @@ router.get('/account/count', async (ctx) => {
   }
 })
 
-router.get('/account/list', async (ctx) => {
+router.get('/account/list', isLoggedIn, async (ctx) => {
+  if (!AccessUtils.isAdmin(ctx.session.id)) {
+    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -172,7 +179,11 @@ router.post('/account/update', async (ctx) => {
   }
 })
 
-router.get('/account/remove', async (ctx) => {
+router.get('/account/remove', isLoggedIn, async (ctx) => {
+  if (!AccessUtils.isAdmin(ctx.session.id)) {
+    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   if (process.env.TEST_MODE === 'true') {
     ctx.body = {
       data: await User.destroy({
