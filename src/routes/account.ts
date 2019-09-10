@@ -40,10 +40,10 @@ router.get('/account/count', async (ctx) => {
 })
 
 router.get('/account/list', isLoggedIn, async (ctx) => {
-  if (!AccessUtils.isAdmin(ctx.session.id)) {
-    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
-    return
-  }
+  // if (!AccessUtils.isAdmin(ctx.session.id)) {
+  //   ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+  //   return
+  // }
   let where = {}
   let { name } = ctx.query
   if (name) {
