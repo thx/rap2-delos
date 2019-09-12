@@ -4,7 +4,7 @@ const inTestMode = process.env.TEST_MODE === 'true'
 
 
 export async function isLoggedIn(ctx: ParameterizedContext<any, any>, next: () => Promise<any>) {
-  if (!inTestMode && (!ctx.session || !ctx.session.id)) {
+  if (!inTestMode && (!ctx.session || ctx.session.id == undefined)) {
     ctx.body = {
       isOk: false,
       errMsg: 'need login',
