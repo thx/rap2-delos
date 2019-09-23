@@ -5,6 +5,9 @@ import * as _ from 'lodash'
 import Pagination from './utils/pagination'
 import OrganizationService from '../service/organization'
 import { Op, FindOptions }  from 'sequelize'
+import { isLoggedIn } from './base'
+import { AccessUtils, ACCESS_TYPE } from './utils/access'
+import { COMMON_ERROR_RES } from './utils/const'
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -56,16 +59,7 @@ router.get('/organization/list', async (ctx) => {
     pagination,
   }
 })
-router.get('/organization/owned', async (ctx) => {
-  if (!ctx.session.id) {
-    ctx.body = {
-      data: {
-        isOk: false,
-        errMsg: 'not login'
-      }
-    }
-    return
-  }
+router.get('/organization/owned', isLoggedIn, async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -90,16 +84,7 @@ router.get('/organization/owned', async (ctx) => {
     pagination: undefined,
   }
 })
-router.get('/organization/joined', async (ctx) => {
-  if (!ctx.session.id) {
-    ctx.body = {
-      data: {
-        isOk: false,
-        errMsg: 'not login'
-      }
-    }
-    return
-  }
+router.get('/organization/joined', isLoggedIn, async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -127,7 +112,12 @@ router.get('/organization/joined', async (ctx) => {
   }
 })
 router.get('/organization/get', async (ctx) => {
-  let organization = await Organization.findByPk(ctx.query.id, {
+  const organizationId = +ctx.query.id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+  const organization = await Organization.findByPk(ctx.query.id, {
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
   } as any)
@@ -135,7 +125,7 @@ router.get('/organization/get', async (ctx) => {
     data: organization,
   }
 })
-router.post('/organization/create', async (ctx) => {
+router.post('/organization/create', isLoggedIn, async (ctx) => {
   let creatorId = ctx.session.id
   let body = Object.assign({}, ctx.request.body, { creatorId, ownerId: creatorId })
   let created = await Organization.create(body)
@@ -151,8 +141,13 @@ router.post('/organization/create', async (ctx) => {
     data: filled,
   }
 })
-router.post('/organization/update', async (ctx, next) => {
+router.post('/organization/update', isLoggedIn, async (ctx, next) => {
   let body = Object.assign({}, ctx.request.body)
+  const organizationId = +body.id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   delete body.creatorId
   // DONE 2.2 支持转移团队
   // delete body.ownerId
@@ -190,16 +185,26 @@ router.post('/organization/update', async (ctx, next) => {
     await Logger.create({ creatorId, userId, type: 'exit', organizationId: id })
   }
 })
-router.post('/organization/transfer', async (ctx) => {
+router.post('/organization/transfer',  isLoggedIn, async (ctx) => {
   let { id, ownerId } = ctx.request.body
+  const organizationId = +id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let body = { ownerId }
   let result = await Organization.update(body, { where: { id } })
   ctx.body = {
     data: result[0],
   }
 })
-router.get('/organization/remove', async (ctx, next) => {
+router.get('/organization/remove', isLoggedIn, async (ctx, next) => {
   let { id } = ctx.query
+  const organizationId = +id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+    ctx.body = COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let result = await Organization.destroy({ where: { id } })
   let repositories = await Repository.findAll({
     where: { organizationId: id },
