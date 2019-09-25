@@ -27,11 +27,12 @@ services:
     privileged: true
     ###### 'sleep 30 && node scripts/init' will drop the tables
     ###### RUN ONLY ONCE THEN REMOVE 'sleep 30 && node scripts/init'
-    command: /bin/sh -c 'sleep 30; node scripts/init; node dispatch.js'
+    
+    ##choose for command: without init (default)
     # init the databases
 #    command: sleep 30 && node scripts/init && node dispatch.js
     # without init
-#    command: node dispatch.js
+    command: node dispatch.js
     links:
       - redis
       - mysql
