@@ -1,7 +1,7 @@
 import { IConfigOptions } from "../types"
 
 let config: IConfigOptions = {
-  version: 'v2.4.0',
+  version: 'v2.7.0',
   serve: {
     port: 8080,
     path: '',
