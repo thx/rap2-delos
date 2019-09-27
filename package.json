@@ -1,6 +1,6 @@
 {
   "name": "rap2-delos",
-  "version": "1.0.0",
+  "version": "2.4.0",
   "repository": {
     "url": "https://github.com/thx/rap2-delos"
   },
@@ -20,6 +20,7 @@
   "author": "bosn, nuysoft",
   "license": "ISC",
   "dependencies": {
+    "@types/treeify": "^1.0.0",
     "chalk": "^2.4.2",
     "cross-env": "^5.2.0",
     "graceful": "^1.0.2",
@@ -53,6 +54,7 @@
     "sequelize": "^5.10.1",
     "sequelize-typescript": "^1.0.0-beta.3",
     "svg-captcha": "^1.4.0",
+    "treeify": "^1.1.0",
     "underscore": "^1.9.1",
     "urllib": "^2.34.0"
   },

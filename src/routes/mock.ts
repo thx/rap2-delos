@@ -281,7 +281,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
     })
     let passed = true
     let pFailed: Property | undefined
-    let params = method === 'GET' ? {...ctx.request.query} : {...ctx.request.body}
+    let params = method === 'GET' ? { ...ctx.request.query } : { ...ctx.request.body }
     // http request中head的参数未添加，会造成head中的参数必填勾选后即使header中有值也会检查不通过
     params = Object.assign(params, ctx.request.headers)
     for (const p of requiredProperties) {
@@ -309,7 +309,7 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   })
   requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
-  Object.assign(requestData, ctx.params)
+  Object.assign(requestData, { ...ctx.params, ...ctx.query, ...ctx.body })
   const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
   ctx.type = 'json'
   ctx.status = itf.status
@@ -349,7 +349,7 @@ router.get('/app/mock/template/:interfaceId', async (ctx) => {
   // ctx.body = JSON.stringify(template, null, 2)
 })
 
-router.get('/app/mock/data/:interfaceId', async (ctx) => {
+router.all('/app/mock/data/:interfaceId', async (ctx) => {
   let app: any = ctx.app
   app.counter.mock++
   let { interfaceId } = ctx.params

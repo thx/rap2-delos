@@ -147,6 +147,10 @@ export default class Tree {
     let tree = Tree.ArrayToTree(list)
     let template: { [key: string]: any } = Tree.TreeToTemplate(tree)
     let data
+    const propertyMap: { [key: string]: Property } = {}
+    for (const p of list) {
+      propertyMap[p.name] = p
+    }
     if (extra) {
       // DONE 2.2 支持引用请求参数
       let keys = Object.keys(template).map(item => item.replace(RE_KEY, '$1'))
@@ -161,7 +165,16 @@ export default class Tree {
           if (!extra.hasOwnProperty(eKey)) continue
           const pattern = new RegExp(`\\$${eKey}\\$`, 'g')
           if (data && pattern.test(data)) {
-            data = scopedData[key] = data.replace(pattern, extra[eKey])
+            let result = data.replace(pattern, extra[eKey])
+            const p = propertyMap[key]
+            if (p) {
+            if (p.type === 'Number') {
+              result = +result || 1
+            } else if (p.type === 'Boolean') {
+              result = result === 'true' || !!+result
+            }
+          }
+            data = scopedData[key] = result
           }
         }
       }

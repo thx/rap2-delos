@@ -16,3 +16,9 @@ export enum DATE_CONST {
   MONTH = 1000 * 60 * 60 * 24 * 30,
   YEAR = 1000 * 60 * 60 * 24 * 365,
 }
+
+export enum ENTITY_TYPE {
+  REPOSITORY,
+  INTERFACE,
+  PARAMETER,
+}

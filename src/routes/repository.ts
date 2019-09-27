@@ -9,6 +9,7 @@ import * as Consts from './utils/const'
 import RedisService, { CACHE_KEY } from '../service/redis'
 import MigrateService from '../service/migrate'
 import { Op } from 'sequelize'
+import { isLoggedIn } from './base'
 
 const { initRepository, initModule } = require('./utils/helper')
 
@@ -96,7 +97,7 @@ router.get('/repository/list', async (ctx) => {
   }
 })
 
-router.get('/repository/owned', async (ctx) => {
+router.get('/repository/owned', isLoggedIn, async (ctx) => {
   let where = {}
   let { name } = ctx.query
   if (name) {
@@ -130,7 +131,7 @@ router.get('/repository/owned', async (ctx) => {
     pagination: undefined,
   }
 })
-router.get('/repository/joined', async (ctx) => {
+router.get('/repository/joined', isLoggedIn, async (ctx) => {
   let where: any = {}
   let { name } = ctx.query
   if (name) {
@@ -223,7 +224,7 @@ router.get('/repository/get', async (ctx) => {
   }
 })
 
-router.post('/repository/create', async (ctx, next) => {
+router.post('/repository/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign({}, ctx.request.body, { creatorId, ownerId: creatorId })
   let created = await Repository.create(body)
@@ -258,8 +259,12 @@ router.post('/repository/create', async (ctx, next) => {
     repositoryId: ctx.body.data.id,
   })
 })
-router.post('/repository/update', async (ctx, next) => {
-  let body = Object.assign({}, ctx.request.body)
+router.post('/repository/update', isLoggedIn, async (ctx, next) => {
+  const body = Object.assign({}, ctx.request.body)
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, body.id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   delete body.creatorId
   // DONE 2.2 支持转移仓库
   // delete body.ownerId
@@ -321,8 +326,12 @@ router.post('/repository/update', async (ctx, next) => {
     await Logger.create({ creatorId, userId, type: 'exit', repositoryId: id })
   }
 })
-router.post('/repository/transfer', async (ctx) => {
+router.post('/repository/transfer', isLoggedIn, async (ctx) => {
   let { id, ownerId, organizationId } = ctx.request.body
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let body: any = {}
   if (ownerId) body.ownerId = ownerId // 转移给其他用户
   if (organizationId) {
@@ -334,8 +343,12 @@ router.post('/repository/transfer', async (ctx) => {
     data: result[0],
   }
 })
-router.get('/repository/remove', async (ctx, next) => {
-  let { id } = ctx.query
+router.get('/repository/remove', isLoggedIn, async (ctx, next) => {
+  const id = +ctx.query.id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let result = await Repository.destroy({ where: { id } })
   await Module.destroy({ where: { repositoryId: id } })
   await Interface.destroy({ where: { repositoryId: id } })
@@ -355,13 +368,17 @@ router.get('/repository/remove', async (ctx, next) => {
 })
 
 // TOEO 锁定/解锁仓库 待测试
-router.post('/repository/lock', async (ctx) => {
+router.post('/repository/lock', isLoggedIn, async (ctx) => {
+  const id = +ctx.request.body.id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let user = ctx.session.id
   if (!user) {
     ctx.body = { data: 0 }
     return
   }
-  let { id } = ctx.request.body
   let result = await Repository.update({ lockerId: user }, {
     where: { id },
   })
@@ -405,7 +422,7 @@ router.get('/module/get', async (ctx) => {
     })
   }
 })
-router.post('/module/create', async (ctx, next) => {
+router.post('/module/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
   body.priority = Date.now()
@@ -424,15 +441,20 @@ router.post('/module/create', async (ctx, next) => {
     moduleId: mod.id,
   })
 })
-router.post('/module/update', async (ctx, next) => {
+router.post('/module/update', isLoggedIn, async (ctx, next) => {
   const { id, name, description } = ctx.request.body
-  await Module.update({ name, description, id }, {
-    where: { id }
-  })
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, ctx.session.id, +id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+  let mod = await Module.findByPk(id)
+  await mod.update({name, description})
+  ctx.request.body.repositoryId = mod.repositoryId
   ctx.body = {
     data: {
+      id,
       name,
-      description,
+      description
     },
   }
   return next()
@@ -446,8 +468,12 @@ router.post('/module/update', async (ctx, next) => {
     moduleId: mod.id,
   })
 })
-router.get('/module/remove', async (ctx, next) => {
+router.get('/module/remove', isLoggedIn, async (ctx, next) => {
   let { id } = ctx.query
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, ctx.session.id, +id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let result = await Module.destroy({ where: { id } })
   await Interface.destroy({ where: { moduleId: id } })
   await Property.destroy({ where: { moduleId: id } })
@@ -466,7 +492,7 @@ router.get('/module/remove', async (ctx, next) => {
     moduleId: mod.id,
   })
 })
-router.post('/module/sort', async (ctx) => {
+router.post('/module/sort', isLoggedIn, async (ctx) => {
   let { ids } = ctx.request.body
   let counter = 1
   for (let index = 0; index < ids.length; index++) {
@@ -492,6 +518,10 @@ router.get('/interface/count', async (ctx) => {
 router.get('/interface/list', async (ctx) => {
   let where: any = {}
   let { repositoryId, moduleId, name } = ctx.query
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, +repositoryId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   if (repositoryId) where.repositoryId = repositoryId
   if (moduleId) where.moduleId = moduleId
   if (name) where.name = { [Op.like]: `%${name}%` }
@@ -504,6 +534,11 @@ router.get('/interface/list', async (ctx) => {
 })
 router.get('/interface/get', async (ctx) => {
   let { id, repositoryId, method, url } = ctx.query
+
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, repositoryId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
 
   let itf: any
   if (id) {
@@ -540,7 +575,7 @@ router.get('/interface/get', async (ctx) => {
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp({ data: itf })
 })
-router.post('/interface/create', async (ctx, next) => {
+router.post('/interface/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
   body.priority = Date.now()
@@ -563,8 +598,12 @@ router.post('/interface/create', async (ctx, next) => {
   })
 })
 
-router.post('/interface/update', async (ctx, next) => {
+router.post('/interface/update', isLoggedIn, async (ctx, next) => {
   let body = ctx.request.body
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, +body.id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   await Interface.update(body, {
     where: { id: body.id }
   })
@@ -586,11 +625,15 @@ router.post('/interface/update', async (ctx, next) => {
   })
 })
 
-router.post('/interface/move', async (ctx) => {
+router.post('/interface/move', isLoggedIn, async (ctx) => {
   const OP_MOVE = 1
   const OP_COPY = 2
   const { modId, itfId, op } = ctx.request.body
   const itf = await Interface.findByPk(itfId)
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, itfId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   if (op === OP_MOVE) {
     itf.moduleId = modId
     await Property.update({
@@ -642,6 +685,10 @@ router.post('/interface/move', async (ctx) => {
 
 router.get('/interface/remove', async (ctx, next) => {
   let { id } = ctx.query
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, +id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let result = await Interface.destroy({ where: { id } })
   await Property.destroy({ where: { interfaceId: id } })
   ctx.body = {
@@ -677,6 +724,10 @@ router.post('/interface/lock', async (ctx, next) => {
   }
 
   let { id } = ctx.request.body
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, +id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let itf = await Interface.findByPk(id, {
     attributes: ['lockerId'],
     include: [
@@ -710,6 +761,10 @@ router.post('/interface/unlock', async (ctx) => {
   }
 
   let { id } = ctx.request.body
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, +id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   let itf = await Interface.findByPk(id, { attributes: ['lockerId'] })
   if (itf.lockerId !== ctx.session.id) { // DONE 2.3 BUG 接口可能被其他人解锁。如果不是同一个用户，则忽略。
     ctx.body = {
@@ -772,7 +827,7 @@ router.get('/property/get', async (ctx) => {
   }
 })
 
-router.post('/property/create', async (ctx) => {
+router.post('/property/create', isLoggedIn, async (ctx) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
   let created = await Property.create(body)
@@ -783,7 +838,7 @@ router.post('/property/create', async (ctx) => {
   }
 })
 
-router.post('/property/update', async (ctx) => {
+router.post('/property/update', isLoggedIn, async (ctx) => {
   let properties = ctx.request.body // JSON.parse(ctx.request.body)
   properties = Array.isArray(properties) ? properties : [properties]
   let result = 0
@@ -799,12 +854,16 @@ router.post('/property/update', async (ctx) => {
   }
 })
 
-router.post('/properties/update', async (ctx, next) => {
+router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   const itfId = +ctx.query.itf
   let { properties, summary } = ctx.request.body // JSON.parse(ctx.request.body)
   properties = Array.isArray(properties) ? properties : [properties]
 
   let itf = await Interface.findByPk(itfId)
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, itfId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
 
   if (summary.name) {
     itf.name = summary.name
@@ -893,8 +952,12 @@ router.post('/properties/update', async (ctx, next) => {
   })
 })
 
-router.get('/property/remove', async (ctx) => {
+router.get('/property/remove', isLoggedIn, async (ctx) => {
   let { id } = ctx.query
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.PROPERTY, ctx.session.id, id)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
   ctx.body = {
     data: await Property.destroy({
       where: { id },
@@ -902,15 +965,12 @@ router.get('/property/remove', async (ctx) => {
   }
 })
 
-router.post('/repository/import', async (ctx) => {
-  if (!ctx.session || !ctx.session.id) {
-    ctx.body = {
-      isOk: false,
-      message: 'NOT LOGIN'
-    }
+router.post('/repository/import', isLoggedIn, async (ctx) => {
+  const { docUrl, orgId } = ctx.request.body
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, orgId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  const { docUrl, orgId } = ctx.request.body
   const result = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl)
   ctx.body = {
     isOk: result,

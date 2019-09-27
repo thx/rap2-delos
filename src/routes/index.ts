@@ -6,7 +6,6 @@ require('./organization')
 require('./repository')
 require('./mock')
 require('./analytics')
-// require('./foreign')
-require('./postman')
+require('./export')
 
 export default router
