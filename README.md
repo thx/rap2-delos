@@ -2,10 +2,12 @@
 
 [![Build Status](https://travis-ci.org/thx/rap2-delos.svg?branch=master)](https://travis-ci.org/thx/rap2-delos)
 
-RAP2是在RAP1基础上重做的新项目，它包含两个组件(对应两个Github Repository)。
+RAP2 包含两个组件(对应两个Github Repository)。
 
 * rap2-delos: 后端数据API服务器，基于Koa + MySQL[link](http://github.com/thx/rap2-delos)
 * rap2-dolores: 前端静态资源，基于React [link](http://github.com/thx/rap2-dolores)
+
+***2019-09-27：更新的用户请注意按照下面指引安装 pandoc 以启用文档导出功能***
 
 ### Resources
 
@@ -19,6 +21,7 @@ RAP2是在RAP1基础上重做的新项目，它包含两个组件(对应两个Gi
 * Node.js 8.9.4+
 * MySQL 5.7+
 * Redis 4.0+
+* pandoc 2.73 (供文档生成使用)
 
 ### 开发模式
 
@@ -26,6 +29,16 @@ RAP2是在RAP1基础上重做的新项目，它包含两个组件(对应两个Gi
 
 请自行查找搭建方法，mysql/redis配置在config.*.ts文件中，在不修改任何配置的情况下，
 redis会通过默认端口 + 本机即可正常访问，确保redis-server打开即可。
+
+注意：修改 cofig 文件后需要重新 `npm run build` 才能生效
+
+#### 安装 pandoc
+
+我们使用 pandoc 来生成 Rap 的离线文档，安装 Pandoc 最通用的办法是在 pandoc 的 [release 页面](https://github.com/jgm/pandoc/releases/tag/2.7.3)下载对应平台的二进制文件安装即可。
+
+其中 linux 版本最好放在`/usr/local/bin/pandoc` 让终端能直接找到，并执行 `chmod +x /usr/local/bin/pandoc` 给调用权限。
+
+测试在命令行执行命令 `pandoc -h` 有响应即可。
 
 #### 启动redis-server
 
@@ -110,8 +123,9 @@ npm start
 * 作者:
   * RAP2 2017/10前版本作者为[墨智(@Nuysoft)](https://github.com/nuysoft/), [mockjs](mockjs.com)的作者。
   * 2017/10之后版本开发者
-    * [霍雍(Bosn)](http://github.com/bosn/)，[RAP1](http://github.com/thx/RAP)作者，RAP最早的创始人。
-    * [承虎(alvarto)](http://github.com/alvarto/)
+    * [霍雍(Bosn)](https://github.com/bosn/)，[RAP1](https://github.com/thx/RAP)作者，RAP最早的创始人。
+    * [承虎(alvarto)](https://github.com/alvarto/)
+    * [池冰(bigfengyu)](https://github.com/bigfengyu)
 
 ### Tech Arch
 
