@@ -29,6 +29,9 @@ export default class Module extends Model<Module> {
         id = arr[1].id
       }
     }
+    if ((id as any) instanceof Array) {
+      id = (id as any)[0]
+    }
     if (id) {
       const mod = await Module.findByPk(id)
       await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, mod.repositoryId)
