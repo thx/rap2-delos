@@ -61,7 +61,7 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/kcors": "^2.2.3",
-    "@types/koa": "^2.0.48",
+    "@types/koa": "^2.0.51",
     "@types/koa-generic-session": "^1.0.2",
     "@types/koa-logger": "^3.1.1",
     "@types/koa-redis": "^3.0.2",
