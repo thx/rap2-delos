@@ -1,5 +1,6 @@
 import { Repository, Interface, Module, Property } from '../../models'
 import dedent from '../../helpers/dedent'
+import * as moment from 'moment'
 import { asTree } from 'treeify'
 
 const arrayToTree = (list: any[]): any => {
@@ -48,6 +49,8 @@ export default class PostmanService {
     ***本文档由 Rap2 (https://github.com/thx/rap2-delos) 生成***
 
     ***本项目仓库：[${origin}/repository/editor?id=${repositoryId}](${origin}/repository/editor?id=${repositoryId}) ***
+
+    ***生成日期：${moment().format('YYYY-MM-DD HH:mm:ss')}***
 
     # 仓库：${repo.name}
     ${repo.modules

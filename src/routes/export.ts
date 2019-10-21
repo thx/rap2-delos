@@ -3,6 +3,7 @@ import { COMMON_ERROR_RES } from './utils/const'
 import PostmanService from '../service/export/postman'
 import MarkdownService from '../service/export/markdown'
 // import PDFService from '../service/export/pdf'
+import * as moment from 'moment'
 import DocxService from '../service/export/docx'
 import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import { Repository } from '../models/'
@@ -22,7 +23,18 @@ router.get('/export/postman', async ctx => {
   if (!(repoId > 0)) {
     ctx.data = COMMON_ERROR_RES.ERROR_PARAMS
   }
+  const repository = await Repository.findByPk(repoId)
   ctx.body = await PostmanService.export(repoId)
+  ctx.set(
+    'Content-Disposition',
+    `attachment; filename="RAP-${encodeURI(
+      repository.name
+    )}-${repoId}-${encodeURI('POSTMAN')}-${moment().format('YYYYMMDDHHmmss')}.json"`
+  )
+  ctx.set(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  )
 })
 
 router.get('/export/markdown', async ctx => {
@@ -64,7 +76,7 @@ router.get('/export/docx', async ctx => {
     'Content-Disposition',
     `attachment; filename="RAP-${encodeURI(
       repository.name
-    )}-${repoId}-${encodeURI('接口文档')}.docx"`
+    )}-${repoId}-${encodeURI('接口文档')}-${moment().format('YYYYMMDDHHmmss')}.docx"`
   )
   ctx.set(
     'Content-type',
