@@ -533,47 +533,43 @@ router.get('/interface/list', async (ctx) => {
   }
 })
 router.get('/interface/get', async (ctx) => {
-  let { id, repositoryId, method, url } = ctx.query
+  let { id } = ctx.query
 
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, repositoryId)) {
+  if (id === undefined || id === '') {
+    ctx.body = {
+      isOk: false,
+      errMsg: '请输入参数id'
+    }
+    return
+  }
+
+  let itf = await Interface.findByPk(id, {
+    attributes: { exclude: [] },
+    include: [QueryInclude.Properties]
+  })
+
+  if (!itf) {
+    ctx.body = {
+      isOk: false,
+      errMsg: `没有找到 id 为 ${id} 的接口`
+    }
+  }
+
+  if (
+    !(await AccessUtils.canUserAccess(
+      ACCESS_TYPE.REPOSITORY,
+      ctx.session.id,
+      itf.repositoryId
+    ))
+  ) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
 
-  let itf: any
-  if (id) {
-    itf = await Interface.findByPk(id, {
-      attributes: { exclude: [] }
-    })
-  } else if (repositoryId && method && url) {
-    // 同 /app/mock/:repository/:method/:url
-    let urlWithoutPrefixSlash = /(\/)?(.*)/.exec(url)[2]
-    let repository = await Repository.findByPk(repositoryId)
-    let collaborators = await repository.$get('collaborators')
-
-    itf = await Interface.findOne({
-      attributes: { exclude: [] },
-      where: {
-        repositoryId: [repositoryId, ...(<Repository[]>collaborators).map(item => item.id)],
-        method,
-        url: [urlWithoutPrefixSlash, '/' + urlWithoutPrefixSlash],
-      },
-    })
-  }
-  itf = itf.toJSON()
-
-  let scopes = ['request', 'response']
-  for (let i = 0; i < scopes.length; i++) {
-    let properties: any = await Property.findAll({
-      attributes: { exclude: [] },
-      where: { interfaceId: itf.id, scope: scopes[i] },
-    })
-    properties = properties.map((item: any) => item.toJSON())
-    itf[scopes[i] + 'Properties'] = Tree.ArrayToTree(properties).children
-  }
+  const itfJSON: { [k: string]: any } = itf.toJSON()
 
   ctx.type = 'json'
-  ctx.body = Tree.stringifyWithFunctonAndRegExp({ data: itf })
+  ctx.body = Tree.stringifyWithFunctonAndRegExp({ data: itfJSON })
 })
 router.post('/interface/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
