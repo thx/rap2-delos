@@ -568,6 +568,7 @@ router.get('/interface/get', async (ctx) => {
 
   const itfJSON: { [k: string]: any } = itf.toJSON()
 
+  itfJSON['treeProperties'] = Tree.ArrayToTree(itf.properties).children
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp({ data: itfJSON })
 })
