@@ -9,12 +9,14 @@ services:
   dolores:
     image: rapteam/rap2-dolores:latest
     ports:
-      - 38081:38081
+      #冒号前可以自定义前端端口号，冒号后不要动
+      - 3000:38081
 
   # backend
   delos:
     image: rapteam/rap2-delos:latest
     ports:
+      # 这里的配置不要改哦
       - 38080:38080
     environment:
       - SERVE_PORT=38080
