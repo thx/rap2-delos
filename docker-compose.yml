@@ -1,29 +1,26 @@
 # mail@dongguochao.com
 # llitfkitfk@gmail.com
+# chibing.fy@alibaba-inc.com
 
 version: "3"
 
 services:
   # frontend
-  nginx:
+  dolores:
     # image: nginx:stable-alpine
-    build:
-      # will use image from the frontend repo in the future
-      context: docker/frontend
-    volumes:
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    image: rapcore/rap2-dolores:latest
     ports:
-      - 38080:38080
       - 38081:38081
 
   # backend
   delos:
     # build from ./Dockerfile
-    build: .
+    image: rapcore/rap2-delos:latest
+    ports:
+      - 38080:38080
     # build from images
-    # you can find last tag from https://hub.docker.com/r/blackdog1987/rap2-delos
-    # image: blackdog1987/rap2-delos:2.6.aa3be03
     environment:
+      - SERVE_PORT=38080
       # if you have your own mysql, config it here, and disable the 'mysql' config blow
       - MYSQL_URL=mysql # links will maintain /etc/hosts, just use 'container_name'
       - MYSQL_PORT=3306
