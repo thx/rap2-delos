@@ -7,18 +7,15 @@ version: "3"
 services:
   # frontend
   dolores:
-    # image: nginx:stable-alpine
-    image: rapcore/rap2-dolores:latest
+    image: rapteam/rap2-dolores:latest
     ports:
       - 38081:38081
 
   # backend
   delos:
-    # build from ./Dockerfile
-    image: rapcore/rap2-delos:latest
+    image: rapteam/rap2-delos:latest
     ports:
       - 38080:38080
-    # build from images
     environment:
       - SERVE_PORT=38080
       # if you have your own mysql, config it here, and disable the 'mysql' config blow
