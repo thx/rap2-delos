@@ -9,7 +9,8 @@ RUN yarn global add typescript
 WORKDIR /app
 # cache dependencies
 COPY package.json ./
-RUN yarn config set registry https://registry.npm.taobao.org/ && yarn install
+# 在国内打开下面一行加速
+#RUN yarn config set registry https://registry.npm.taobao.org/ && yarn install
 
 # build
 COPY . ./
