@@ -4,17 +4,21 @@ FROM node:lts-alpine AS builder
 # base on work of llitfkitfk@gmail.com 
 LABEL maintainer="chibing.fy@alibaba-inc.com"
 
-RUN yarn global add typescript
-
 WORKDIR /app
+
 # cache dependencies
 COPY package.json ./
+
 # 在国内打开下面一行加速
-#RUN yarn config set registry https://registry.npm.taobao.org/ && yarn install
+#RUN npm config set registry https://registry.npm.taobao.org/
+
+# instal dependencies
+RUN npm install typescript -g && \
+    npm install
 
 # build
 COPY . ./
-RUN yarn run build
+RUN npm run build
 
 # RUNNING
 FROM node:lts-alpine
