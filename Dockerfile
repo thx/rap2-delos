@@ -33,5 +33,6 @@ RUN wget http://q08gwzg9o.bkt.clouddn.com/pandoc-2.7.3-linux.tar.gz && \
     rm -rf pandoc-2.7.3-linux.tar.gz pandoc-2.7.3
     
 WORKDIR /app
+COPY --from=builder /app/public .
 COPY --from=builder /app/dist .
 COPY --from=builder /app/node_modules ./node_modules
