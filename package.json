@@ -1,6 +1,6 @@
 {
   "name": "rap2-delos",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "repository": {
     "url": "https://github.com/thx/rap2-delos"
   },
@@ -13,7 +13,7 @@
     "dev": "cross-env NODE_ENV=development nodemon --watch scripts --watch dist dist/scripts/dev.js",
     "create-db": "cross-env NODE_ENV=development node dist/scripts/init",
     "start": "cross-env NODE_ENV=production pm2 start dist/dispatch.js --name=rap-server-delos",
-    "lint": "echo \"TSLint checking...\" && tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'",
+    "lint": "echo \"TSLint checking...\" && tslint -c tslint.json --fix 'src/**/*.ts' 'src/**/*.tsx'",
     "start:redis": "pm2 start redis-server --name redis-server",
     "clean": "pm2 delete all",
     "build-docker": "docker build --rm -f \"Dockerfile\" -t rapteam/rap2-delos:latest ."
@@ -42,10 +42,11 @@
     "moment": "^2.24.0",
     "mysql": "^2.17.1",
     "mysql2": "^1.6.5",
+    "nanoid": "^2.1.6",
     "node-fetch": "^2.6.0",
     "node-print": "0.0.4",
-    "nodemailer": "^6.2.1",
     "node-schedule": "^1.3.2",
+    "nodemailer": "^6.2.1",
     "notevil": "^1.3.1",
     "path-to-regexp": "^3.0.0",
     "redis": "^2.8.0",
@@ -72,9 +73,10 @@
     "@types/md5": "^2.1.33",
     "@types/mocha": "^5.2.6",
     "@types/mockjs": "^1.0.2",
+    "@types/nanoid": "^2.1.0",
     "@types/node": "^12.0.3",
-    "@types/nodemailer": "^6.2.0",
     "@types/node-schedule": "^1.2.3",
+    "@types/nodemailer": "^6.2.0",
     "@types/redis": "^2.8.13",
     "@types/request": "^2.48.1",
     "@types/request-promise": "^4.1.44",

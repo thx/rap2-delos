@@ -11,7 +11,8 @@ import MigrateService from '../service/migrate'
 import { Op } from 'sequelize'
 import { isLoggedIn } from './base'
 
-const { initRepository, initModule } = require('./utils/helper')
+import { initRepository, initModule } from './utils/helper'
+import nanoid =  require('nanoid')
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -168,7 +169,12 @@ router.get('/repository/joined', isLoggedIn, async (ctx) => {
 })
 
 router.get('/repository/get', async (ctx) => {
-  const access = await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, ctx.query.id)
+  const access = await AccessUtils.canUserAccess(
+    ACCESS_TYPE.REPOSITORY,
+    ctx.session.id,
+    ctx.query.id,
+    ctx.query.token
+  )
   if (access === false) {
     ctx.body = {
       isOk: false,
@@ -191,19 +197,19 @@ router.get('/repository/get', async (ctx) => {
           QueryInclude.Locker,
           QueryInclude.Members,
           QueryInclude.Organization,
-          QueryInclude.Collaborators,
+          QueryInclude.Collaborators
         ]
       }),
       Repository.findByPk(ctx.query.id, {
         attributes: { exclude: [] },
         include: [QueryInclude.RepositoryHierarchy],
         order: [
-          [{ model: Module, as: 'modules' }, 'priority', 'asc'],
+          [{ model: Module, as: "modules" }, "priority", "asc"],
           [
-            { model: Module, as: 'modules' },
-            { model: Interface, as: 'interfaces' },
-            'priority',
-            'asc'
+            { model: Module, as: "modules" },
+            { model: Interface, as: "interfaces" },
+            "priority",
+            "asc"
           ]
         ]
       })
@@ -226,7 +232,11 @@ router.get('/repository/get', async (ctx) => {
 
 router.post('/repository/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
-  let body = Object.assign({}, ctx.request.body, { creatorId, ownerId: creatorId })
+  let body = Object.assign({}, ctx.request.body, {
+    creatorId,
+    ownerId: creatorId,
+    token: nanoid(32)
+  })
   let created = await Repository.create(body)
   if (body.memberIds) {
     let members = await User.findAll({ where: { id: body.memberIds } })

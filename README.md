@@ -49,6 +49,8 @@ http://localhost:38080 # 后端
 docker-compose down
 # 再重新运行
 docker-compose up -d
+# 如果 Sequelize 报错可能是数据库表发生了变化，运行下面命令同步
+docker-compose exec delos node scripts/updateSchema
 ```
 
 **⚠️注意：第一次运行后 rap 目录下会被自动创建一个 docker 目录，里面存有 rap 的数据库数据，可千万不要删除。**
