@@ -66,6 +66,8 @@ docker-compose pull
 docker-compose down
 # 重新构建并启动
 docker-compose up -d --build
+# 有时表结构会发生变化，执行下面命令同步
+docker-compose exec delos node scripts/updateSchema
 # 清空不被使用的虚悬镜像
 docker image prune -f
 ```
