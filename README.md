@@ -162,7 +162,7 @@ npm start
 ## 社区贡献
 
 - [rap2-javabean 自动从 Rap 接口生成 Java Bean](https://github.com/IndiraFinish/rap2-javabean)
-- [rap2-generator 把 Java Bean 生成到 Rap](https://github.com/kings1990/rap2-generator-demo)
+- [rap2-generator 把 Java Bean 生成到 Rap](https://github.com/kings1990/rap2-generator)
 
 ## Author
 
