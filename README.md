@@ -66,6 +66,8 @@ docker-compose pull
 docker-compose down
 # 重新构建并启动
 docker-compose up -d --build
+# 有时表结构会发生变化，执行下面命令同步
+docker-compose exec delos node scripts/updateSchema
 # 清空不被使用的虚悬镜像
 docker image prune -f
 ```
@@ -159,7 +161,7 @@ npm start
 ## 社区贡献
 
 - [rap2-javabean 自动从 Rap 接口生成 Java Bean](https://github.com/IndiraFinish/rap2-javabean)
-- [rap2-generator 把 Java Bean 生成到 Rap](https://github.com/kings1990/rap2-generator-demo)
+- [rap2-generator 把 Java Bean 生成到 Rap](https://github.com/kings1990/rap2-generator)
 
 ## Author
 
