@@ -20,11 +20,13 @@ const sequelize = new Sequelize({
   port: config.db.port,
   pool: config.db.pool,
   logging: config.db.logging ? logging : false,
+  dialectOptions: config.db.dialectOptions,
 })
 
 sequelize.addModels([__dirname + '/bo'])
 sequelize.authenticate()
   .then((/* err */) => {
+    sequelize.sync()
     console.log('----------------------------------------')
     console.log('DATABASE √')
     console.log('    HOST     %s', config.db.host)

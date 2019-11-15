@@ -1,5 +1,5 @@
 import router from './router'
-import { Repository, Interface, Property } from '../models'
+import { Repository, Interface, Property, DefaultVal } from '../models'
 import { QueryInclude } from '../models'
 import Tree from './utils/tree'
 import urlUtils from './utils/url'
@@ -269,10 +269,26 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   }
 
   let interfaceId = itf.id
-  let properties: any = await Property.findAll({
+  let properties = await Property.findAll({
     attributes,
     where: { interfaceId, scope: 'response' },
   })
+
+  // default values override
+  const defaultVals = await DefaultVal.findAll({ where: { repositoryId } })
+  const defaultValsMap: {[key: string]: DefaultVal} = {}
+  for (const dv of defaultVals) {
+    defaultValsMap[dv.name] = dv
+  }
+  for (const p of properties) {
+    const dv = defaultValsMap[p.name]
+    if (!p.value && !p.rule && dv) {
+      p.value = dv.value
+      p.rule = dv.rule
+    }
+  }
+
+
   // check required
   if (~['GET', 'POST'].indexOf(method)) {
     let requiredProperties = await Property.findAll({
@@ -310,7 +326,10 @@ router.all('/app/mock/:repositoryId(\\d+)/:url(.+)', async (ctx) => {
   requestProperties = requestProperties.map((item: any) => item.toJSON())
   let requestData = Tree.ArrayToTreeToTemplateToData(requestProperties)
   Object.assign(requestData, { ...ctx.params, ...ctx.query, ...ctx.body })
-  const data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
+  let data = Tree.ArrayToTreeToTemplateToData(properties, requestData)
+  if (data.__root__) {
+    data = data.__root__
+  }
   ctx.type = 'json'
   ctx.status = itf.status
   ctx.body = JSON.stringify(data, undefined, 2)

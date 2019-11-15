@@ -2,7 +2,7 @@
 import router from './router'
 import * as _ from 'underscore'
 import Pagination from './utils/pagination'
-import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger } from '../models'
+import { User, Organization, Repository, Module, Interface, Property, QueryInclude, Logger, DefaultVal } from '../models'
 import Tree from './utils/tree'
 import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import * as Consts from './utils/const'
@@ -132,6 +132,7 @@ router.get('/repository/owned', isLoggedIn, async (ctx) => {
     pagination: undefined,
   }
 })
+
 router.get('/repository/joined', isLoggedIn, async (ctx) => {
   let where: any = {}
   let { name } = ctx.query
@@ -269,6 +270,7 @@ router.post('/repository/create', isLoggedIn, async (ctx, next) => {
     repositoryId: ctx.body.data.id,
   })
 })
+
 router.post('/repository/update', isLoggedIn, async (ctx, next) => {
   const body = Object.assign({}, ctx.request.body)
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, body.id)) {
@@ -336,6 +338,7 @@ router.post('/repository/update', isLoggedIn, async (ctx, next) => {
     await Logger.create({ creatorId, userId, type: 'exit', repositoryId: id })
   }
 })
+
 router.post('/repository/transfer', isLoggedIn, async (ctx) => {
   let { id, ownerId, organizationId } = ctx.request.body
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
@@ -353,6 +356,7 @@ router.post('/repository/transfer', isLoggedIn, async (ctx) => {
     data: result[0],
   }
 })
+
 router.get('/repository/remove', isLoggedIn, async (ctx, next) => {
   const id = +ctx.query.id
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, id)) {
@@ -394,6 +398,7 @@ router.post('/repository/lock', isLoggedIn, async (ctx) => {
   })
   ctx.body = { data: result[0] }
 })
+
 router.post('/repository/unlock', async (ctx) => {
   if (!ctx.session.id) {
     ctx.body = { data: 0 }
@@ -413,6 +418,7 @@ router.get('/module/count', async (ctx) => {
     data: await Module.count(),
   }
 })
+
 router.get('/module/list', async (ctx) => {
   let where: any = {}
   let { repositoryId, name } = ctx.query
@@ -425,6 +431,7 @@ router.get('/module/list', async (ctx) => {
     }),
   }
 })
+
 router.get('/module/get', async (ctx) => {
   ctx.body = {
     data: await Module.findByPk(ctx.query.id, {
@@ -432,6 +439,7 @@ router.get('/module/get', async (ctx) => {
     })
   }
 })
+
 router.post('/module/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
@@ -451,6 +459,7 @@ router.post('/module/create', isLoggedIn, async (ctx, next) => {
     moduleId: mod.id,
   })
 })
+
 router.post('/module/update', isLoggedIn, async (ctx, next) => {
   const { id, name, description } = ctx.request.body
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, ctx.session.id, +id)) {
@@ -478,6 +487,7 @@ router.post('/module/update', isLoggedIn, async (ctx, next) => {
     moduleId: mod.id,
   })
 })
+
 router.get('/module/remove', isLoggedIn, async (ctx, next) => {
   let { id } = ctx.query
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, ctx.session.id, +id)) {
@@ -502,6 +512,7 @@ router.get('/module/remove', isLoggedIn, async (ctx, next) => {
     moduleId: mod.id,
   })
 })
+
 router.post('/module/sort', isLoggedIn, async (ctx) => {
   let { ids } = ctx.request.body
   let counter = 1
@@ -519,12 +530,12 @@ router.post('/module/sort', isLoggedIn, async (ctx) => {
   }
 })
 
-//
 router.get('/interface/count', async (ctx) => {
   ctx.body = {
     data: await Interface.count(),
   }
 })
+
 router.get('/interface/list', async (ctx) => {
   let where: any = {}
   let { repositoryId, moduleId, name } = ctx.query
@@ -542,6 +553,40 @@ router.get('/interface/list', async (ctx) => {
     }),
   }
 })
+
+router.get('/repository/defaultVal/get/:id', async (ctx) => {
+  const repositoryId: number = ctx.params.id
+  ctx.body = {
+    data: await DefaultVal.findAll({ where: { repositoryId } })
+  }
+})
+
+router.post('/repository/defaultVal/update/:id', async (ctx) => {
+  const repositoryId: number = ctx.params.id
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, repositoryId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+  const list = ctx.request.body.list
+  if (!(repositoryId > 0) || !list) {
+    ctx.body = Consts.COMMON_ERROR_RES.ERROR_PARAMS
+    return
+  }
+  await DefaultVal.destroy({
+    where: { repositoryId }
+  })
+  for (const item of list) {
+    await DefaultVal.create({
+      ...item,
+      repositoryId,
+    })
+  }
+
+  ctx.body = {
+    isOk: true,
+  }
+})
+
 router.get('/interface/get', async (ctx) => {
   let { id } = ctx.query
 
@@ -555,7 +600,6 @@ router.get('/interface/get', async (ctx) => {
 
   let itf = await Interface.findByPk(id, {
     attributes: { exclude: [] },
-    include: [QueryInclude.Properties]
   })
 
   if (!itf) {
@@ -563,6 +607,7 @@ router.get('/interface/get', async (ctx) => {
       isOk: false,
       errMsg: `没有找到 id 为 ${id} 的接口`
     }
+    return
   }
 
   if (
@@ -578,10 +623,20 @@ router.get('/interface/get', async (ctx) => {
 
   const itfJSON: { [k: string]: any } = itf.toJSON()
 
-  itfJSON['treeProperties'] = Tree.ArrayToTree(itf.properties).children
+  let scopes = ['request', 'response']
+  for (let i = 0; i < scopes.length; i++) {
+    let properties: any = await Property.findAll({
+      attributes: { exclude: [] },
+      where: { interfaceId: itf.id, scope: scopes[i] }
+    })
+    properties = properties.map((item: any) => item.toJSON())
+    itfJSON[scopes[i] + 'Properties'] = Tree.ArrayToTree(properties).children
+  }
+
   ctx.type = 'json'
   ctx.body = Tree.stringifyWithFunctonAndRegExp({ data: itfJSON })
 })
+
 router.post('/interface/create', isLoggedIn, async (ctx, next) => {
   let creatorId = ctx.session.id
   let body = Object.assign(ctx.request.body, { creatorId })
@@ -784,8 +839,8 @@ router.post('/interface/unlock', async (ctx) => {
     // tslint:disable-next-line:no-null-keyword
     lockerId: null,
   }, {
-      where: { id }
-    })
+    where: { id }
+  })
 
   ctx.body = {
     data: {
