@@ -2,7 +2,7 @@ import { IConfigOptions } from "../types"
 
 // 先从环境变量取配置
 let config: IConfigOptions =  {
-    version: '2.7.0',
+    version: '2.8.0',
     serve: {
         port: (process.env.SERVE_PORT && parseInt(process.env.SERVE_PORT)) || 8080,
         path: '',
