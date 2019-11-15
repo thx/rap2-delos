@@ -108,6 +108,10 @@ export default class Tree {
               })
             }
             break
+          case 'Null':
+              // tslint:disable-next-line: no-null-keyword
+              result[item.name + rule] = null
+              break
         }
       }
     }
