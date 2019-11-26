@@ -11,7 +11,7 @@ export default function pandoc(from: string, to: string, ...args: string[]) {
       console.error(err)
       console.error(pandoc.stderr)
     }
-    if (pandoc.stderr.length) {
+    if (pandoc.stderr && pandoc.stderr.length) {
       console.error(pandoc.output[2])
       throw new Error(pandoc.output[2].toString())
     }
