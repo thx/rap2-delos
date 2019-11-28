@@ -78,7 +78,7 @@ describe('Interface', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        validInterface(res.body.data, ['properties', 'treeProperties'])
+        validInterface(res.body.data, ['properties', 'treeProperties', 'requestProperties', 'responseProperties'])
         done()
       })
   })
