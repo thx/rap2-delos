@@ -15,7 +15,7 @@ const config: IConfigOptions = {
     host: process.env.MYSQL_URL ?? 'localhost',
     port: (process.env.MYSQL_PORT && parseInt(process.env.MYSQL_PORT)) || 3306,
     username: process.env.MYSQL_USERNAME ?? 'root',
-    password: process.env.MYSQL_PASSWD ?? '29837DF983(*&34kfjD(*3kjf(',
+    password: process.env.MYSQL_PASSWD ?? '',
     database: process.env.MYSQL_SCHEMA ?? 'RAP2_DELOS_APP',
     pool: {
       max: 5,
