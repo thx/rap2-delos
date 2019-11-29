@@ -26,7 +26,6 @@ const sequelize = new Sequelize({
 sequelize.addModels([__dirname + '/bo'])
 sequelize.authenticate()
   .then((/* err */) => {
-    sequelize.sync()
     console.log('----------------------------------------')
     console.log('DATABASE √')
     console.log('    HOST     %s', config.db.host)
