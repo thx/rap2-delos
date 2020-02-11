@@ -7,11 +7,11 @@ import { QueryInclude } from '../models'
 import { Op } from 'sequelize'
 import MailService from '../service/mail'
 import * as md5 from 'md5'
+import RedisService, { CACHE_KEY } from '../service/redis'
 import { isLoggedIn } from './base'
 import { AccessUtils } from './utils/access'
 import { COMMON_ERROR_RES } from './utils/const'
-
-
+import * as moment from 'moment'
 
 
 router.get('/app/get', async (ctx, next) => {
@@ -340,5 +340,78 @@ router.post('/account/reset', async (ctx) => {
         isOk: true,
       }
     }
+  }
+})
+
+router.post('/account/findpwd', async (ctx) => {
+  let { email, captcha } = ctx.request.body
+  let user, errMsg
+  if (process.env.TEST_MODE !== 'true' &&
+    (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase())) {
+    errMsg = '错误的验证码'
+  } else {
+    user = await User.findOne({
+      attributes: QueryInclude.User.attributes,
+      where: { email },
+    })
+    if (user) {
+      // 截取ID最后两位*日期字符串 作为返回链接的过期校验
+      let idstr = user.id.toString()
+      let timeCode = (parseInt(moment().add(60, 'minutes').format('YYMMDDHHmmss')) * parseInt(idstr.substr(idstr.length - 2))).toString()
+      let token = md5(user.email + user.id + timeCode + String(Math.floor(Math.random() * 99999999)))
+      await RedisService.setCache(CACHE_KEY.PWDRESETTOKEN_GET, token, user.id)
+      let link = `${ctx.headers.origin}/account/resetpwd?code=${timeCode}&email=${email}&token=${token}`
+      let content = MailService.mailFindpwdTemp.replace(/{=EMAIL=}/g, user.email).replace(/{=URL=}/g, link).replace(/{=NAME=}/g, user.fullname)
+      MailService.send(email, "RAP2：重新设置您的密码", content)
+    } else {
+      errMsg = '账号不存在'
+    }
+  }
+  ctx.body = {
+    data: !errMsg ? {isOk: true} : { isOk: false, errMsg }
+  }
+})
+
+router.post('/account/findpwd/reset', async (ctx) => {
+  let { code, email, captcha, token, password } = ctx.request.body
+  let user, errMsg
+  if (!code || !email || !captcha || !token || !password) {
+    errMsg = '参数错误'
+  }
+  else if (password.length < 6) {
+    errMsg = '密码长度过短'
+  }
+  else if (process.env.TEST_MODE !== 'true' &&
+    (!captcha || !ctx.session.captcha || captcha.trim().toLowerCase() !== ctx.session.captcha.toLowerCase())) {
+    errMsg = '错误的验证码'
+  } else {
+    user = await User.findOne({
+      attributes: QueryInclude.User.attributes,
+      where: { email },
+    })
+    if (!user) {
+      errMsg = '您的邮箱没被注册过，或用户已被锁定'
+    }
+    else {
+      const tokenCache = await RedisService.getCache(CACHE_KEY.PWDRESETTOKEN_GET, user.id)
+      if (!tokenCache || tokenCache !== token) {
+        errMsg = "参数错误"
+      }
+      else {
+        RedisService.delCache(CACHE_KEY.PWDRESETTOKEN_GET, user.id)
+        let idstr = user.id.toString()
+        let timespan = parseInt(code) / parseInt(idstr.substr(idstr.length - 2))
+        if (timespan < parseInt(moment().format('YYMMDDHHmmss'))) {
+          errMsg = "此链接已超时，请重新发送重置密码邮件"
+        }
+        else {
+          user.password = md5(md5(password))
+          await user.save()
+        }
+      }
+    }
+}
+  ctx.body = {
+    data: !errMsg ? {isOk: true} : { isOk: false, errMsg }
   }
 })
