@@ -188,3 +188,20 @@ npm start
   - MySQL
   - Server
   - server: node
+
+### 旧版本升级
+    
+    -数据库数据迁移  RAP2 2.4迁移到2.8
+      由于数据库表有主外键，按以下顺序插入数据
+      1.Users
+      2.Organizations
+      3.Repositories
+      4.repositories_members（备注：将createdAt、updatedAt两个字段必填去除）
+      5.organizations_members
+      6.Modules
+      7.Interfaces
+      8.Loggers
+      9.Properties（备注：将数据scope字段的所有''值替换成'String'）
+      default_val和repositories_collaborators表无数据无需处理
+      
+    
