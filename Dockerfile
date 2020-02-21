@@ -26,7 +26,7 @@ FROM node:lts-alpine
 # base on work of llitfkitfk@gmail.com
 LABEL maintainer="chibing.fy@alibaba-inc.com"
 # use China mirror of: https://github.com/jgm/pandoc/releases/download/2.7.3/pandoc-2.7.3-linux.tar.gz
-RUN wget http://rap2-taobao-org.oss-cn-beijing.aliyuncs.com/pandoc-2.7.3-linux.tar.gz?Expires=1582252106&OSSAccessKeyId=TMP.hj1o4zTDHufhSdzcAPX7FhDV9f53GNerVKW4ksYB1pPhJBgsLUDxiG33hFh7SWbg8VL7Q8NzJBZN8SM8b5ChKhNN33DZKADwXJHrEwVs7u8bhFrMqJDBrYqDmTyDaR.tmp&Signature=K%2BXgFRoWBjJBf7KhpgTk8aB99A8%3D && \
+RUN wget http://rap2-taobao-org.oss-cn-beijing.aliyuncs.com/pandoc-2.7.3-linux.tar.gz && \
     tar -xf pandoc-2.7.3-linux.tar.gz && \
     cp pandoc-2.7.3/bin/* /usr/bin/ && \
     pandoc -v && \
