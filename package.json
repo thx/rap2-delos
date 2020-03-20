@@ -16,7 +16,7 @@
     "lint": "echo \"TSLint checking...\" && tslint -c tslint.json --fix 'src/**/*.ts' 'src/**/*.tsx'",
     "start:redis": "pm2 start redis-server --name redis-server",
     "clean": "pm2 delete all",
-    "build-docker": "docker build --rm -f \"Dockerfile\" -t rapteam/rap2-delos:latest ."
+    "build-docker": "docker build --rm -f \"Dockerfile\" -t rapteam/rap2-delos:rap2org ."
   },
   "author": "bosn, nuysoft",
   "license": "ISC",
