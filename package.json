@@ -64,7 +64,6 @@
     "vm2": "^3.8.4"
   },
   "devDependencies": {
-    "@ali/keycenter": "^2.1.0",
     "@types/chai": "^4.2.10",
     "@types/json5": "^0.0.30",
     "@types/kcors": "^2.2.3",
