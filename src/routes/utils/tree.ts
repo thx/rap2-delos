@@ -1,12 +1,11 @@
 import { Property } from "../../models"
 import * as _ from 'underscore'
-const vm = require('vm')
+const { VM } = require('vm2')
 import * as Mock from 'mockjs'
 const { RE_KEY } = require('mockjs/src/mock/constant')
 
 
 export default class Tree {
-
   public static ArrayToTree(list: Property[]) {
     let result: any = {
       name: 'root',
@@ -44,12 +43,16 @@ export default class Tree {
 
   // TODO 2.x 和前端重复了
   public static TreeToTemplate(tree: any) {
+    const vm = new VM({
+      sandbox: {},
+      timeout: 1000
+    })
     function parse(item: any, result: any) {
       let rule = item.rule ? ('|' + item.rule) : ''
       let value = item.value
       if (item.value && item.value.indexOf('[') === 0 && item.value.substring(item.value.length - 1) === ']') {
         try {
-          result[item.name + rule] = eval(`(${item.value})`) // eslint-disable-line no-eval
+          result[item.name + rule] = vm.run(`(${item.value})`)
         } catch (e) {
           result[item.name + rule] = item.value
         }
@@ -74,7 +77,7 @@ export default class Tree {
           case 'Function':
           case 'RegExp':
             try {
-              result[item.name + rule] = eval('(' + item.value + ')') // eslint-disable-line no-eval
+              result[item.name + rule] = vm.run('(' + item.value + ')')
             } catch (e) {
               console.warn(`TreeToTemplate ${e.message}: ${item.type} { ${item.name}${rule}: ${item.value} }`) // TODO 2.2 怎么消除异常值？
               result[item.name + rule] = item.value
@@ -83,7 +86,7 @@ export default class Tree {
           case 'Object':
             if (item.value) {
               try {
-                result[item.name + rule] = eval(`(${item.value})`) // eslint-disable-line no-eval
+                result[item.name + rule] = vm.run(`(${item.value})`)
               } catch (e) {
                 result[item.name + rule] = item.value
               }
@@ -97,7 +100,7 @@ export default class Tree {
           case 'Array':
             if (item.value) {
               try {
-                result[item.name + rule] = eval(`(${item.value})`) // eslint-disable-line no-eval
+                result[item.name + rule] = vm.run(`(${item.value})`)
               } catch (e) {
                 result[item.name + rule] = item.value
               }
@@ -125,13 +128,12 @@ export default class Tree {
   public static TemplateToData(template: any) {
     // 数据模板 template 中可能含有攻击代码，例如死循环，所以在沙箱中生成最终数据
     // https://nodejs.org/dist/latest-v7.x/docs/api/vm.html
-    const sandbox = { Mock, template, data: {} }
-    const script = new vm.Script('data = Mock.mock(template)')
-    const context = new vm.createContext(sandbox) // eslint-disable-line new-cap
+    const vm = new VM({
+      sandbox: { mock: Mock.mock, template, },
+      timeout: 1000
+    })
     try {
-      script.runInContext(context, { timeout: 1000 }) // 每次 Mock.mock() 最多执行 1s
-      // DONE 2.1 __root__
-      let data: any = sandbox.data
+      let data: any = vm.run('mock(template)')
       let keys = Object.keys(data)
       if (keys.length === 1 && keys[0] === '__root__') data = data.__root__
       return data

@@ -59,7 +59,8 @@
     "svg-captcha": "^1.4.0",
     "treeify": "^1.1.0",
     "underscore": "^1.9.1",
-    "urllib": "^2.34.1"
+    "urllib": "^2.34.1",
+    "vm2": "^3.8.4"
   },
   "devDependencies": {
     "@types/chai": "^4.2.4",
