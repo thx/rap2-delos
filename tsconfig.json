@@ -12,11 +12,12 @@
     "baseUrl": "./src",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "skipLibCheck": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noImplicitUseStrict": true,
+    "suppressImplicitAnyIndexErrors": true,
     "rootDir": "./src",
     "paths": {
       "*": [

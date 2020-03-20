@@ -18,7 +18,7 @@ const config: IConfigOptions = {
     password: process.env.MYSQL_PASSWD ?? '',
     database: process.env.MYSQL_SCHEMA ?? 'RAP2_DELOS_APP',
     pool: {
-      max: 5,
+      max: 10,
       min: 0,
       idle: 10000
     },

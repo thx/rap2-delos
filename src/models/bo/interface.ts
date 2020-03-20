@@ -7,6 +7,11 @@ const Op = Sequelize.Op
 
 enum methods { GET = 'GET', POST = 'POST', PUT = 'PUT', DELETE = 'DELETE' }
 
+export enum MoveOp {
+  MOVE = 1,
+  COPY = 2
+}
+
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
 export default class Interface extends Model<Interface> {
 

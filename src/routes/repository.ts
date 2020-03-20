@@ -7,7 +7,9 @@ import Tree from './utils/tree'
 import { AccessUtils, ACCESS_TYPE } from './utils/access'
 import * as Consts from './utils/const'
 import RedisService, { CACHE_KEY } from '../service/redis'
+import RepositoryService from '../service/repository'
 import MigrateService from '../service/migrate'
+import OrganizationService from '../service/organization'
 import { Op } from 'sequelize'
 import { isLoggedIn } from './base'
 
@@ -277,10 +279,15 @@ router.post('/repository/update', isLoggedIn, async (ctx, next) => {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
+  if (
+    body.organizationId &&
+    !(await OrganizationService.canUserAccessOrganization(ctx.session.id, body.organizationId))
+  ) {
+    ctx.body = '没有团队的权限'
+    return
+  }
   delete body.creatorId
-  // DONE 2.2 支持转移仓库
-  // delete body.ownerId
-  delete body.organizationId
+
   let result = await Repository.update(body, { where: { id: body.id } })
   if (body.memberIds) {
     let reloaded = await Repository.findByPk(body.id, {
@@ -488,6 +495,24 @@ router.post('/module/update', isLoggedIn, async (ctx, next) => {
   })
 })
 
+router.post('/module/move', isLoggedIn, async ctx => {
+  const { modId, op } = ctx.request.body
+  const repositoryId = ctx.request.body.repositoryId
+
+  if (!(await RepositoryService.canUserMoveModule(ctx.session.id, modId, repositoryId))) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+
+  await RepositoryService.moveModule(op, modId, repositoryId)
+
+  ctx.body = {
+    data: {
+      isOk: true,
+    },
+  }
+})
+
 router.get('/module/remove', isLoggedIn, async (ctx, next) => {
   let { id } = ctx.query
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, ctx.session.id, +id)) {
@@ -687,61 +712,21 @@ router.post('/interface/update', isLoggedIn, async (ctx, next) => {
   })
 })
 
-router.post('/interface/move', isLoggedIn, async (ctx) => {
-  const OP_MOVE = 1
-  const OP_COPY = 2
+router.post('/interface/move', isLoggedIn, async ctx => {
   const { modId, itfId, op } = ctx.request.body
   const itf = await Interface.findByPk(itfId)
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, ctx.session.id, itfId)) {
+  const repositoryId = ctx.request.body.repositoryId || itf.repositoryId
+  if (!(await RepositoryService.canUserMoveInterface(ctx.session.id, itfId, repositoryId, modId))) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  if (op === OP_MOVE) {
-    itf.moduleId = modId
-    await Property.update({
-      moduleId: modId,
-    }, {
-        where: {
-          interfaceId: itf.id,
-        }
-      })
-    await itf.save()
-  } else if (op === OP_COPY) {
-    const { id, name, ...otherProps } = itf.toJSON() as Interface
-    const newItf = await Interface.create({
-      name: name + '副本',
-      ...otherProps,
-      moduleId: modId,
-    })
 
-    const properties = await Property.findAll({
-      where: {
-        interfaceId: itf.id,
-      },
-      order: [['parentId', 'asc']],
-    })
-    // 解决parentId丢失的问题
-    let idMap = {}
-    for (const property of properties) {
-      const { id, parentId, ...props } = property.toJSON() as Property
-      // @ts-ignore
-      const newParentId = idMap[parentId + ''] ? idMap[parentId + ''] : -1
-      const newProperty = await Property.create({
-        ...props,
-        interfaceId: newItf.id,
-        parentId: newParentId,
-        moduleId: modId,
-      })
+  await RepositoryService.moveInterface(op, itfId, repositoryId, modId)
 
-      // @ts-ignore
-      idMap[id + ''] = newProperty.id
-    }
-
-  }
   ctx.body = {
     data: {
       isOk: true,
-    }
+    },
   }
 })
 
@@ -963,6 +948,7 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
       interfaceId: itfId
     }
   })
+
   // 更新已存在的属性
   for (let item of existingProperties) {
     let affected = await Property.update(item, {
@@ -1041,4 +1027,49 @@ router.post('/repository/import', isLoggedIn, async (ctx) => {
       id: 1,
     }
   }
+})
+
+router.post('/repository/importswagger', isLoggedIn, async (ctx) => {
+  const { orgId, repositoryId, swagger, version = 1, mode = 'manual'} = ctx.request.body
+  // 权限判断
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, orgId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+
+  const result = await MigrateService.importRepoFromSwaggerDocUrl(orgId, ctx.session.id, swagger, version, mode, repositoryId)
+
+  ctx.body = {
+    isOk: result.code,
+    message: result.code === 'success' ? '导入成功' : '导入失败',
+    repository: {
+      id: 1,
+    }
+  }
+})
+
+router.post('/repository/importJSON', isLoggedIn , async ctx => {
+  const { data } = ctx.request.body
+
+  if (!(await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, ctx.session.id, data.id))) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+  try {
+    await MigrateService.importRepoFromJSON(data, ctx.session.id)
+    ctx.body = {
+      isOk: true,
+      repository: {
+        id: data.id,
+      },
+    }
+  } catch (error) {
+    ctx.body = {
+      isOk: false,
+      message: '服务器错误，导入失败'
+    }
+    throw(error)
+  }
+
+
 })

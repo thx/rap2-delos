@@ -5,7 +5,7 @@ import * as redisStore from 'koa-redis'
 import * as logger from 'koa-logger'
 import * as serve from 'koa-static'
 import * as cors from 'kcors'
-import * as bodyParser from 'koa-body'
+import * as body from 'koa-body'
 import router from '../routes'
 import config from '../config'
 import { startTask } from '../service/task'
@@ -16,6 +16,7 @@ appAny.counter = { users: {}, mock: 0 }
 
 app.keys = config.keys
 app.use(session({
+  // @ts-ignore
   store: redisStore(config.redis)
 }))
 if (process.env.NODE_ENV === 'development' && process.env.TEST_MODE !== 'true') app.use(logger())
@@ -51,8 +52,14 @@ app.use(async (ctx, next) => {
 
 app.use(serve('public'))
 app.use(serve('test'))
-app.use(bodyParser({ multipart: true }))
-
+app.use(
+  body({
+    multipart: true,
+    formLimit: '10mb',
+    textLimit: '10mb',
+    jsonLimit: '10mb',
+  }),
+)
 app.use(router.routes())
 
 startTask()

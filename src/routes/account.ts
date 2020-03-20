@@ -48,11 +48,10 @@ router.get('/account/list', isLoggedIn, async (ctx) => {
   let { name } = ctx.query
   if (name) {
     Object.assign(where, {
-      [Op.or]: [{
-        fullname: {
-          [Op.like]: `%${name}%`
-        },
-      }],
+      [Op.or]: [
+        { fullname: { [Op.like]: `%${name}%` } },
+        { email: name },
+      ],
     })
   }
   let options = { where }
