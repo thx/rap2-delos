@@ -5,6 +5,7 @@ import * as ioredis from 'ioredis'
 export enum CACHE_KEY {
   REPOSITORY_GET = 'REPOSITORY_GET',
   PWDRESETTOKEN_GET = 'PWDRESETTOKEN_GET',
+  REPOSITORY_GET_EXCLUDE_PROPERTY = 'REPOSITORY_GET_EXCLUDE_PROPERTY',
 }
 
 export default class RedisService {

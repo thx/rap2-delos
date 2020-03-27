@@ -185,9 +185,12 @@ router.get('/repository/get', async (ctx) => {
     }
     return
   }
-  const tryCache = await RedisService.getCache(CACHE_KEY.REPOSITORY_GET, ctx.query.id)
+  const excludeProperty = ctx.query.excludeProperty || false
+  const cacheKey = excludeProperty ? CACHE_KEY.REPOSITORY_GET_EXCLUDE_PROPERTY : CACHE_KEY.REPOSITORY_GET
+  const tryCache = await RedisService.getCache(cacheKey, ctx.query.id)
+
   let repository: Partial<Repository>
-  if (tryCache) {
+  if (tryCache && !excludeProperty) {
     repository = JSON.parse(tryCache)
   } else {
     // 分开查询减少
@@ -200,33 +203,36 @@ router.get('/repository/get', async (ctx) => {
           QueryInclude.Locker,
           QueryInclude.Members,
           QueryInclude.Organization,
-          QueryInclude.Collaborators
-        ]
+          QueryInclude.Collaborators,
+        ],
       }),
       Repository.findByPk(ctx.query.id, {
         attributes: { exclude: [] },
-        include: [QueryInclude.RepositoryHierarchy],
+        include: [
+          excludeProperty
+            ? QueryInclude.RepositoryHierarchyExcludeProperty
+            : QueryInclude.RepositoryHierarchy,
+        ],
         order: [
-          [{ model: Module, as: "modules" }, "priority", "asc"],
+          [{ model: Module, as: 'modules' }, 'priority', 'asc'],
           [
-            { model: Module, as: "modules" },
-            { model: Interface, as: "interfaces" },
-            "priority",
-            "asc"
-          ]
-        ]
-      })
+            { model: Module, as: 'modules' },
+            { model: Interface, as: 'interfaces' },
+            'priority',
+            'asc',
+          ],
+        ],
+      }),
     ])
     repository = {
       ...repositoryOmitModules.toJSON(),
       ...repositoryModules.toJSON()
     }
     await RedisService.setCache(
-      CACHE_KEY.REPOSITORY_GET,
+      cacheKey,
       JSON.stringify(repository),
       ctx.query.id
     )
-    await RedisService.setCache(CACHE_KEY.REPOSITORY_GET, JSON.stringify(repository), ctx.query.id)
   }
   ctx.body = {
     data: repository,
@@ -648,14 +654,20 @@ router.get('/interface/get', async (ctx) => {
 
   const itfJSON: { [k: string]: any } = itf.toJSON()
 
+  let properties: any[] = await Property.findAll({
+    attributes: { exclude: [] },
+    where: { interfaceId: itf.id },
+  })
+
+  properties = properties.map((item: any) => item.toJSON())
+  itfJSON['properties'] = properties
+
   let scopes = ['request', 'response']
   for (let i = 0; i < scopes.length; i++) {
-    let properties: any = await Property.findAll({
-      attributes: { exclude: [] },
-      where: { interfaceId: itf.id, scope: scopes[i] }
-    })
-    properties = properties.map((item: any) => item.toJSON())
-    itfJSON[scopes[i] + 'Properties'] = Tree.ArrayToTree(properties).children
+    let scopeProperties = properties
+      .filter(p => p.scope === scopes[i])
+      .map((item: any) => ({ ...item }))
+    itfJSON[scopes[i] + 'Properties'] = Tree.ArrayToTree(scopeProperties).children
   }
 
   ctx.type = 'json'
