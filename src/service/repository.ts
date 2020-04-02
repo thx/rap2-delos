@@ -13,7 +13,7 @@ export default class RepositoryService {
     const repo = await Repository.findByPk(repositoryId)
     if (token && repo.token === token) return true
     if (!repo) return false
-    if (repo.creatorId === userId || repo.ownerId === userId) return true
+    if (repo.ownerId === userId) return true
     const memberExistsNum = await RepositoriesMembers.count({
       where: {
         userId,
@@ -31,16 +31,16 @@ export default class RepositoryService {
     destModuleId: number,
   ) {
     return (
-      AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE, userId, itfId) &&
-      AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, userId, destRepoId) &&
-      AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, userId, destModuleId)
+      AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE_GET, userId, itfId) &&
+      AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY_SET, userId, destRepoId) &&
+      AccessUtils.canUserAccess(ACCESS_TYPE.MODULE_SET, userId, destModuleId)
     )
   }
 
   public static async canUserMoveModule(userId: number, modId: number, destRepoId: number) {
     return (
-      AccessUtils.canUserAccess(ACCESS_TYPE.MODULE, userId, modId) &&
-      AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY, userId, destRepoId)
+      AccessUtils.canUserAccess(ACCESS_TYPE.MODULE_GET, userId, modId) &&
+      AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY_SET, userId, destRepoId)
     )
   }
 

@@ -33,6 +33,13 @@ services:
 
       # production / development
       - NODE_ENV=production
+
+      # email 如果想让邮箱找回密码能力生效需要配置邮件发送
+      - MAIL_HOST=smtp.aliyun.com
+      - MAIL_PORT=465
+      - MAIL_USER=rap2org@service.alibaba.com
+      - MAIL_PASS=xxxxxx
+      - MAIL_SENDER=rap2org@service.alibaba.com
     ###### 'sleep 30 && node scripts/init' will drop the tables
     ###### RUN ONLY ONCE THEN REMOVE 'sleep 30 && node scripts/init'
     command: /bin/sh -c 'node dispatch.js'

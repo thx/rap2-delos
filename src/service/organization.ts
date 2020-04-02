@@ -7,7 +7,7 @@ export default class OrganizationService {
       SELECT COUNT(id) AS num FROM (
         SELECT o.id, o.name
         FROM Organizations o
-        WHERE visibility = ${1} OR creatorId = ${userId} OR ownerId = ${userId}
+        WHERE ownerId = ${userId}
         UNION
         SELECT o.id, o.name
         FROM Organizations o
@@ -31,7 +31,7 @@ export default class OrganizationService {
       SELECT id FROM (
         SELECT o.id, o.name
         FROM Organizations o
-        WHERE visibility = ${1} OR creatorId = ${curUserId} OR ownerId = ${curUserId}
+        WHERE visibility = ${1} OR ownerId = ${curUserId}
         UNION
         SELECT o.id, o.name
         FROM Organizations o
@@ -54,7 +54,7 @@ export default class OrganizationService {
       SELECT count(*) AS num FROM (
         SELECT o.id, o.name
         FROM Organizations o
-        WHERE visibility = ${1} OR creatorId = ${curUserId} OR ownerId = ${curUserId}
+        WHERE visibility = ${1} OR ownerId = ${curUserId}
         UNION
         SELECT o.id, o.name
         FROM Organizations o

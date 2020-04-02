@@ -113,7 +113,7 @@ router.get('/organization/joined', isLoggedIn, async (ctx) => {
 })
 router.get('/organization/get', async (ctx) => {
   const organizationId = +ctx.query.id
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION_GET, ctx.session.id, organizationId)) {
     ctx.body = COMMON_ERROR_RES.ACCESS_DENY
     return
   }
@@ -144,7 +144,7 @@ router.post('/organization/create', isLoggedIn, async (ctx) => {
 router.post('/organization/update', isLoggedIn, async (ctx, next) => {
   let body = Object.assign({}, ctx.request.body)
   const organizationId = +body.id
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION_SET, ctx.session.id, organizationId)) {
     ctx.body = COMMON_ERROR_RES.ACCESS_DENY
     return
   }
@@ -188,7 +188,7 @@ router.post('/organization/update', isLoggedIn, async (ctx, next) => {
 router.post('/organization/transfer',  isLoggedIn, async (ctx) => {
   let { id, ownerId } = ctx.request.body
   const organizationId = +id
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION_SET, ctx.session.id, organizationId)) {
     ctx.body = COMMON_ERROR_RES.ACCESS_DENY
     return
   }
@@ -201,7 +201,7 @@ router.post('/organization/transfer',  isLoggedIn, async (ctx) => {
 router.get('/organization/remove', isLoggedIn, async (ctx, next) => {
   let { id } = ctx.query
   const organizationId = +id
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION, ctx.session.id, organizationId)) {
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION_SET, ctx.session.id, organizationId)) {
     ctx.body = COMMON_ERROR_RES.ACCESS_DENY
     return
   }
