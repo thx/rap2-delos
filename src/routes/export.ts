@@ -12,7 +12,7 @@ router.get('/export/postman', async ctx => {
   const repoId = +ctx.query.id
   if (
     !(await AccessUtils.canUserAccess(
-      ACCESS_TYPE.REPOSITORY,
+      ACCESS_TYPE.REPOSITORY_GET,
       ctx.session.id,
       repoId
     ))
@@ -41,7 +41,7 @@ router.get('/export/markdown', async ctx => {
   const repoId = +ctx.query.id
   if (
     !(await AccessUtils.canUserAccess(
-      ACCESS_TYPE.REPOSITORY,
+      ACCESS_TYPE.REPOSITORY_GET,
       ctx.session.id,
       repoId
     ))
@@ -59,7 +59,7 @@ router.get('/export/docx', async ctx => {
   const repoId = +ctx.query.id
   if (
     !(await AccessUtils.canUserAccess(
-      ACCESS_TYPE.REPOSITORY,
+      ACCESS_TYPE.REPOSITORY_GET,
       ctx.session.id,
       repoId
     ))
