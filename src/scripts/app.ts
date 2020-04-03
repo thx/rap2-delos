@@ -15,10 +15,12 @@ let appAny: any = app
 appAny.counter = { users: {}, mock: 0 }
 
 app.keys = config.keys
-app.use(session({
-  // @ts-ignore
-  store: redisStore(config.redis)
-}))
+app.use(
+  session({
+    // @ts-ignore
+    store: redisStore(config.redis)
+  })
+)
 if (process.env.NODE_ENV === 'development' && process.env.TEST_MODE !== 'true') app.use(logger())
 app.use(async (ctx, next) => {
 

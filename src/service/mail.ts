@@ -153,7 +153,7 @@ export default class MailService {
   </style>
   </body>`
 
-  public static mailFindpwdTemp = `<head>
+public static mailFindpwdTemp = `<head>
 <base target="_blank" />
 </head>
 <body>

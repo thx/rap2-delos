@@ -300,13 +300,22 @@ router.post('/repository/update', isLoggedIn, async (ctx, next) => {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  if (
-    body.organizationId &&
-    !(await OrganizationService.canUserAccessOrganization(ctx.session.id, body.organizationId))
-  ) {
-    ctx.body = '没有团队的权限'
-    return
+  let repo = await Repository.findByPk(body.id)
+
+  // 更改团队需要校验是否有当前团队和目标团队的权限
+  if (body.organizationId != repo.organizationId) {
+
+    if (body.organizationId && !(await OrganizationService.canUserAccessOrganization(ctx.session.id, body.organizationId))) {
+      ctx.body = '没有当前团队的权限'
+      return
+    }
+
+    if (repo.organizationId && !(await OrganizationService.canUserAccessOrganization(ctx.session.id, repo.organizationId))) {
+      ctx.body = '没有目标团队的权限'
+      return
+    }
   }
+
   delete body.creatorId
 
   let result = await Repository.update(body, { where: { id: body.id } })
