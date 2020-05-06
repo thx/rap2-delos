@@ -671,7 +671,7 @@ export default class MigrateService {
       }
     }
 
-    let { tags = [], paths = {}, host = '' } = swagger
+    let { tags = [], paths = {} } = swagger
     let pathTag: SwaggerTag[] = []
 
     // 获取所有的TAG: 处理ROOT TAG中没有的情况
@@ -783,7 +783,7 @@ export default class MigrateService {
               moduleId: mod.id,
               name: `${apiObj.summary}`,
               description: apiObj.description,
-              url: `https//${host}${url.replace('-test', '')}`,
+              url: `${url.replace('-test', '')}`,
               priority: iCounter++,
               creatorId: curUserId,
               repositoryId: repositoryId,
@@ -806,7 +806,7 @@ export default class MigrateService {
                 moduleId: mod.id,
                 name: `${apiObj.summary}`,
                 description: apiObj.description,
-                url: `https//${host}${url.replace('-test', '')}`,
+                url: `${url.replace('-test', '')}`,
                 repositoryId: repositoryId,
                 method: method.toUpperCase(),
               },
