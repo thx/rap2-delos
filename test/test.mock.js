@@ -66,25 +66,24 @@ describe('Mock', () => {
         done()
       })
   })
-  /**
-  it('/app/get', done => {
-    request.get('/app/get')
-      .query({ user: 100000000, organization: 1, repository: 1, module: 1, interface: 1, property: 1 })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end((err, res) => {
-        should.not.exist(err)
-        let { user, organization, repository, property } = res.body.data
-        let mod = res.body.data.module
-        let itf = res.body.data.interface
-        user.should.be.a('object')
-        organization.should.be.a('object')
-        repository.should.be.a('object')
-        mod.should.be.a('object')
-        itf.should.be.a('object')
-        property.should.be.a('object')
-        done()
-      })
-  })
-  */
+  // it('/app/get', done => {
+  //   request.get('/app/get')
+  //     .query({ user: 100000000, organization: 1, repository: 1, module: 1, interface: 1, property: 1 })
+  //     .expect('Content-Type', /json/)
+  //     .expect(200)
+  //     .end((err, res) => {
+  //       console.log(res.body.data)
+  //       should.not.exist(err)
+  //       let { user, organization, repository, property } = res.body.data
+  //       let mod = res.body.data.module
+  //       let itf = res.body.data.interface
+  //       user.should.be.a('object')
+  //       organization.should.be.a('object')
+  //       repository.should.be.a('object')
+  //       mod.should.be.a('object')
+  //       itf.should.be.a('object')
+  //       property.should.be.a('object')
+  //       done()
+  //     })
+  // })
 })

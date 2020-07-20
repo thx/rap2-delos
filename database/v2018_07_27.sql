@@ -1,2 +1,0 @@
-ALTER TABLE Interfaces
-  MODIFY COLUMN `method` VARCHAR(256) NOT NULL;

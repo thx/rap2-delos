@@ -34,8 +34,9 @@ sequelize.authenticate()
     console.log('----------------------------------------')
     MigrateService.checkAndFix()
   })
+  // sequelize.sync()
   .catch(err => {
     console.log('Unable to connect to the database:', err)
   })
 
-  export default sequelize
+export default sequelize

@@ -7,7 +7,7 @@ let config: IConfigOptions = {
     port: (process.env.SERVE_PORT && parseInt(process.env.SERVE_PORT)) || 8080,
     path: '',
   },
-  keys: ['some secret hurr'],
+  keys: ["some secret hurr"],
   session: {
     key: 'rap2:sess',
   },
@@ -39,7 +39,7 @@ let config: IConfigOptions = {
       pass: process.env.MAIL_PASS ?? '',
     },
   },
-  mailSender: process.env.MAIL_SENDER ?? 'rap2org@service.alibaba.com',
+  mailSender: process.env.MAIL_SENDER ?? "rap2org@service.alibaba.com"
 }
 
 export default config

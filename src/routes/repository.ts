@@ -14,7 +14,10 @@ import { Op } from 'sequelize'
 import { isLoggedIn } from './base'
 
 import { initRepository, initModule } from './utils/helper'
-import nanoid =  require('nanoid')
+import nanoid = require('nanoid')
+import { LOG_SEPERATOR, LOG_SUB_SEPERATOR } from '../models/bo/historyLog'
+import { ENTITY_TYPE } from './utils/const'
+import { IPager } from '../types'
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -24,6 +27,7 @@ router.get('/app/get', async (ctx, next) => {
     module: Module,
     interface: Interface,
     property: Property,
+    user: User,
   }
   for (let name in hooks) {
     if (!query[name]) continue
@@ -504,7 +508,7 @@ router.post('/module/update', isLoggedIn, async (ctx, next) => {
     return
   }
   let mod = await Module.findByPk(id)
-  await mod.update({name, description})
+  await mod.update({ name, description })
   ctx.request.body.repositoryId = mod.repositoryId
   ctx.body = {
     data: {
@@ -654,6 +658,7 @@ router.get('/interface/get', async (ctx) => {
   }
 
   let itf = await Interface.findByPk(id, {
+    include: [QueryInclude.Locker],
     attributes: { exclude: [] },
   })
 
@@ -722,17 +727,28 @@ router.post('/interface/create', isLoggedIn, async (ctx, next) => {
 })
 
 router.post('/interface/update', isLoggedIn, async (ctx, next) => {
-  let body = ctx.request.body
-  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE_SET, ctx.session.id, +body.id)) {
+  let summary = ctx.request.body
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE_SET, ctx.session.id, +summary.id)) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  await Interface.update(body, {
-    where: { id: body.id }
+  const itf = await Interface.findByPk(summary.id)
+  const itfChangeLog: string[] = []
+  itf.name !== summary.name && itfChangeLog.push(`接口名 \`${itf.name}\` => \`${summary.name}\``)
+  itf.url !== summary.url && itfChangeLog.push(`URL \`${itf.url || '空URL'}\` => \`${summary.url}\``)
+  itf.method !== summary.method && itfChangeLog.push(`METHOD \`${itf.method}\` => \`${summary.method}\``)
+  itfChangeLog.length && await RepositoryService.addHistoryLog({
+    entityId: itf.id,
+    entityType: Consts.ENTITY_TYPE.INTERFACE,
+    changeLog: `接口${itf.name}(${itf.url || '空URL'}) 变更${itfChangeLog.join(LOG_SEPERATOR)}`,
+    userId: ctx.session.id,
+  })
+  await Interface.update(summary, {
+    where: { id: summary.id }
   })
   ctx.body = {
     data: {
-      itf: await Interface.findByPk(body.id),
+      itf: await Interface.findByPk(summary.id),
     }
   }
   return next()
@@ -772,6 +788,15 @@ router.get('/interface/remove', async (ctx, next) => {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
+  const itf = await Interface.findByPk(id)
+  const properties = await Property.findAll({ where: { interfaceId: id } })
+  await RepositoryService.addHistoryLog({
+    entityId: itf.repositoryId,
+    entityType: Consts.ENTITY_TYPE.REPOSITORY,
+    changeLog: `接口 ${itf.name} (${itf.url}) 被删除，数据已备份。`,
+    userId: ctx.session.id,
+    relatedJSONData: JSON.stringify({ "itf": itf, "properties": properties })
+  })
   let result = await Interface.destroy({ where: { id } })
   await Property.destroy({ where: { interfaceId: id } })
   ctx.body = {
@@ -939,7 +964,7 @@ router.post('/property/update', isLoggedIn, async (ctx) => {
 
 router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   const itfId = +ctx.query.itf
-  let { properties, summary } = ctx.request.body // JSON.parse(ctx.request.body)
+  let { properties } = ctx.request.body as { properties: Property[], summary: Interface }
   properties = Array.isArray(properties) ? properties : [properties]
 
   let itf = await Interface.findByPk(itfId)
@@ -948,20 +973,8 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
     return
   }
 
-  if (summary.name) {
-    itf.name = summary.name
-  }
-  if (summary.url) {
-    itf.url = summary.url
-  }
-  if (summary.method) {
-    itf.method = summary.method
-  }
-  if (summary.description) {
-    itf.description = summary.description
-  }
 
-  await itf.save()
+  const itfPropertiesChangeLog: string[] = []
 
   // 删除不在更新列表中的属性
   // DONE 2.2 清除幽灵属性：子属性的父属性不存在（原因：前端删除父属性后，没有一并删除后代属性，依然传给了后端）
@@ -977,7 +990,22 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
           ) as p
         )
   */
-  let existingProperties = properties.filter((item: any) => !item.memory)
+
+  const pLog = (p: Property, title: string) => `\`${title}\`${p.scope === 'request' ? '请求' : '响应'}参数\`${p.name}\`${p.description ? '(' + p.description + ')' : ''}`
+
+  const existingProperties = properties.filter((item: any) => !item.memory)
+  const existingPropertyIds = existingProperties.map(x => x.id)
+
+  const originalProperties = await Property.findAll({ where: { interfaceId: itfId } })
+
+  const deletedProperties = originalProperties.filter(x => existingPropertyIds.indexOf(x.id) === -1)
+
+  const deletedPropertyLog: string[] = []
+  for (const deletedProperty of deletedProperties) {
+    deletedPropertyLog.push(pLog(deletedProperty, '删除了'))
+  }
+  deletedPropertyLog.length && itfPropertiesChangeLog.push(deletedPropertyLog.join(LOG_SUB_SEPERATOR))
+
   let result = await Property.destroy({
     where: {
       id: { [Op.notIn]: existingProperties.map((item: any) => item.id) },
@@ -985,26 +1013,43 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
     }
   })
 
+  const updatedPropertyLog: string[] = []
   // 更新已存在的属性
   for (let item of existingProperties) {
+    const changed: string[] = []
+    const o = originalProperties.filter(x => x.id === item.id)[0]
+    if (o) {
+      if (o.name !== item.name) {
+        changed.push(`变量名${o.name} => ${item.name}`)
+      }
+      // mock rules 不记入日志
+      if (o.type !== item.type) {
+        changed.push(`类型${o.type} => ${item.type}`)
+      }
+      changed.length && updatedPropertyLog.push(`${pLog(item, '更新了')} ${changed.join(' ')}`)
+    }
     let affected = await Property.update(item, {
       where: { id: item.id },
     })
     result += affected[0]
   }
+  updatedPropertyLog.length && itfPropertiesChangeLog.push(updatedPropertyLog.join(LOG_SUB_SEPERATOR))
   // 插入新增加的属性
   let newProperties = properties.filter((item: any) => item.memory)
   let memoryIdsMap: any = {}
+  const addedPropertyLog: string[] = []
   for (let item of newProperties) {
     let created = await Property.create(Object.assign({}, item, {
       id: undefined,
       parentId: -1,
       priority: item.priority || Date.now()
     }))
+    addedPropertyLog.push(pLog(item, '新增了'))
     memoryIdsMap[item.id] = created.id
     item.id = created.id
     result += 1
   }
+  addedPropertyLog.length && itfPropertiesChangeLog.push(addedPropertyLog.join(LOG_SUB_SEPERATOR))
   // 同步 parentId
   for (let item of newProperties) {
     let parentId = memoryIdsMap[item.parentId] || item.parentId
@@ -1015,6 +1060,16 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   itf = await Interface.findByPk(itfId, {
     include: (QueryInclude.RepositoryHierarchy as any).include[0].include,
   })
+
+  if (itfPropertiesChangeLog.length) {
+    await RepositoryService.addHistoryLog({
+      entityId: itf.id,
+      entityType: Consts.ENTITY_TYPE.INTERFACE,
+      changeLog: `接口 ${itf.name}(${itf.url}) 参数变更： ${itfPropertiesChangeLog.join(LOG_SEPERATOR)}`,
+      userId: ctx.session.id,
+    })
+  }
+
   ctx.body = {
     data: {
       result,
@@ -1050,12 +1105,12 @@ router.get('/property/remove', isLoggedIn, async (ctx) => {
 })
 
 router.post('/repository/import', isLoggedIn, async (ctx) => {
-  const { docUrl, orgId } = ctx.request.body
+  const { docUrl, orgId, version, projectData } = ctx.request.body
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.ORGANIZATION_SET, ctx.session.id, orgId)) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  const result = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl)
+  const result = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl, +version, projectData)
   ctx.body = {
     isOk: result,
     message: result ? '导入成功' : '导入失败',
@@ -1066,7 +1121,7 @@ router.post('/repository/import', isLoggedIn, async (ctx) => {
 })
 
 router.post('/repository/importswagger', isLoggedIn, async (ctx) => {
-  const { orgId, repositoryId, swagger, version = 1, mode = 'manual'} = ctx.request.body
+  const { orgId, repositoryId, swagger, version = 1, mode = 'manual' } = ctx.request.body
   // 权限判断
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY_SET, ctx.session.id, repositoryId)) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
@@ -1084,7 +1139,7 @@ router.post('/repository/importswagger', isLoggedIn, async (ctx) => {
   }
 })
 
-router.post('/repository/importJSON', isLoggedIn , async ctx => {
+router.post('/repository/importJSON', isLoggedIn, async ctx => {
   const { data } = ctx.request.body
 
   if (!(await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY_SET, ctx.session.id, data.id))) {
@@ -1104,8 +1159,38 @@ router.post('/repository/importJSON', isLoggedIn , async ctx => {
       isOk: false,
       message: '服务器错误，导入失败'
     }
-    throw(error)
+    throw (error)
   }
 
 
+})
+
+router.get('/:type/history/:itfId', isLoggedIn, async ctx => {
+  const pager: IPager = {
+    limit: +ctx.query.limit || 10,
+    offset: +ctx.query.offset || 0,
+  }
+  let type: ENTITY_TYPE
+  if (ctx.params.type === 'interface') {
+    type = ENTITY_TYPE.INTERFACE
+  } else if (ctx.params.type === 'repository') {
+    type = ENTITY_TYPE.REPOSITORY
+  } else {
+    ctx.body = {
+      isOk: false,
+      errMsg: 'error path',
+    }
+    return
+  }
+  ctx.body = {
+    isOk: true,
+    data: await RepositoryService.getHistoryLog(+ctx.params.itfId, type, pager)
+  }
+})
+
+router.get('/interface/history/JSONData/:id', isLoggedIn, async ctx => {
+  const historyLogId = +ctx.params.id
+  ctx.set('Content-disposition', `attachment; filename=history_log_detail_data_${historyLogId}`)
+  ctx.set('Content-type', 'text/html; charset=UTF-8')
+  ctx.body = await RepositoryService.getHistoryLogJSONData(historyLogId)
 })

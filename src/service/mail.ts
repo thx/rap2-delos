@@ -2,7 +2,9 @@ import * as nodemailer from 'nodemailer'
 import config from '../config'
 
 export default class MailService {
-  public static async sendMail(mailOptions: nodemailer.SendMailOptions) {
+
+  public static async sendMail(mailOptions: any) {
+
     const transporter = nodemailer.createTransport(config.mail)
 
     return new Promise((resolve, reject) => {
@@ -23,6 +25,7 @@ export default class MailService {
   }
 
   public static send(to: string | string[], subject: string, html: string) {
+
     const transporter = nodemailer.createTransport(config.mail)
 
     const mailOptions = {

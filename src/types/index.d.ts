@@ -21,9 +21,17 @@ declare interface IConfigOptions {
   session: {
     key: string
   },
-  keycenter?: string | boolean
-  db: ISequelizeConfig
-  redis: RedisAndClusterOptions
-  mail: SMTPTransport
-  mailSender: string
+  keycenter?: string | boolean,
+  db: ISequelizeConfig,
+  redis: any,
+  mail: SMTPTransport,
+  mailSender: string,
+}
+
+declare interface IPager {
+  offset: number
+  limit: number
+  order?: TOrder
+  orderBy?: string
+  query?: string
 }

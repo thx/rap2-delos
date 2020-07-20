@@ -7,11 +7,13 @@ import { QueryInclude } from '../models'
 import { Op } from 'sequelize'
 import MailService from '../service/mail'
 import * as md5 from 'md5'
-import RedisService, { CACHE_KEY } from '../service/redis'
 import { isLoggedIn } from './base'
 import { AccessUtils } from './utils/access'
 import { COMMON_ERROR_RES } from './utils/const'
 import * as moment from 'moment'
+import RedisService, { CACHE_KEY, DEFAULT_CACHE_VAL } from '../service/redis'
+
+
 
 
 router.get('/app/get', async (ctx, next) => {
@@ -59,16 +61,15 @@ router.get('/account/list', isLoggedIn, async (ctx) => {
   let limit = Math.min(ctx.query.limit ?? 10, 100)
   let pagination = new Pagination(total, ctx.query.cursor || 1, limit)
   ctx.body = {
-    //@ts-ignore
-    data: await User.findAll(Object.assign(options, {
-      attributes: ['id', 'fullname', 'email'],
-      offset: pagination.start,
-      limit: pagination.limit,
-      order: [
-        ['id', 'DESC'],
-      ],
-    })),
-    pagination: pagination,
+    data: await User.findAll({
+      ...options, ...{
+        attributes: ['id', 'fullname', 'email'],
+        offset: pagination.start,
+        limit: pagination.limit,
+        order: [['id', 'DESC']],
+      }
+    }),
+    pagination: pagination
   }
 })
 
@@ -211,6 +212,37 @@ router.get('/account/setting', async (ctx) => {
 router.post('/account/setting', async (ctx) => {
   ctx.body = {
     data: {},
+  }
+})
+
+router.post('/account/fetchUserSettings', isLoggedIn, async (ctx) => {
+  const keys: CACHE_KEY[] = ctx.request.body.keys
+  if (!keys || !keys.length) {
+    ctx.body = {
+      isOk: false,
+      errMsg: 'error'
+    }
+    return
+  }
+
+  const data: { [key: string]: string } = {}
+
+  for (const key of keys) {
+    data[key] = await RedisService.getCache(key, ctx.session.id) || DEFAULT_CACHE_VAL[key]
+  }
+
+  ctx.body = {
+    isOk: true,
+    data,
+  }
+})
+
+router.post('/account/updateUserSetting/:key', isLoggedIn, async (ctx) => {
+  const key: CACHE_KEY = ctx.params.key as CACHE_KEY
+  const value: string = ctx.request.body.value
+  await RedisService.setCache(key, value, ctx.session.id, 10 * 365 * 24 * 60 * 60)
+  ctx.body = {
+    isOk: true,
   }
 })
 

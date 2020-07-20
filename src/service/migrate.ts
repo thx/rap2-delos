@@ -1,4 +1,4 @@
-import { Repository, Module, Interface, Property, User, QueryInclude } from '../models'
+import { Repository, Module, Interface, Property, QueryInclude, User } from '../models'
 import { SCOPES } from '../models/bo/property'
 import Tree from '../routes/utils/tree'
 import * as JSON5 from 'json5'
@@ -8,8 +8,12 @@ import { Op } from 'sequelize'
 import RedisService, { CACHE_KEY } from './redis'
 import MailService from './mail'
 import * as md5 from 'md5'
-const isMd5 = require('is-md5')
+// import DingPushService from './ding.push'
+// import sequelize from '../models/sequelize'
 import * as _ from 'lodash'
+const isMd5 = require('is-md5')
+
+const safeEval = require('notevil')
 
 const SWAGGER_VERSION = {
   1: '2.0',
@@ -425,6 +429,7 @@ export default class MigrateService {
             let description = []
             if (p.name) description.push(p.name)
             if (p.remark && remarkWithoutMock) description.push(remarkWithoutMock)
+
             const pCreated = await Property.create({
               scope,
               name,
@@ -474,22 +479,28 @@ export default class MigrateService {
     orgId: number,
     curUserId: number,
     docUrl: string,
+    version: number,
+    projectDataJSON: string
   ): Promise<boolean> {
-    const { projectId } = querystring.parse(docUrl.substring(docUrl.indexOf('?') + 1))
-    let domain = docUrl
-    if (domain.indexOf('http') === -1) {
-      domain = 'http://' + domain
-    }
-    domain = domain.substring(0, domain.indexOf('/', domain.indexOf('.')))
-    let result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
-      json: false,
-    })
-    result = JSON.parse(result)
+    let result: any = null
+    if (version === 1) {
+      const { projectId } = querystring.parse(docUrl.substring(docUrl.indexOf('?') + 1))
+      let domain = docUrl
+      if (domain.indexOf('http') === -1) {
+        domain = 'http://' + domain
+      }
+      domain = domain.substring(0, domain.indexOf('/', domain.indexOf('.')))
+      let result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
+        json: false,
+      })
+      result = JSON.parse(result)
 
-    // result =  unescape(result.modelJSON)
-    result = result.modelJSON
-    const safeEval = require('notevil')
-    result = safeEval('(' + result + ')')
+      // result =  unescape(result.modelJSON)
+      result = result.modelJSON
+      result = safeEval('(' + result + ')')
+    } else if (version === 2) {
+      result = safeEval('(' + projectDataJSON + ')')
+    }
     return await this.importRepoFromRAP1ProjectData(orgId, curUserId, result)
   }
 
@@ -623,7 +634,7 @@ export default class MigrateService {
     swagger: SwaggerData,
   ): Promise<boolean> {
     checkSwaggerResult = []
-    if (!swagger.paths || !swagger.swagger || !swagger.host) return false
+    if (!swagger.paths || !swagger.swagger) return false
 
     let mCounter = 1 // 模块优先级顺序
     let iCounter = 1 // 接口优先级顺序
@@ -647,7 +658,7 @@ export default class MigrateService {
       const { rule, value, type, description } = transformRapParams(p)
       const joinDescription = `${p.description || ''}${
         (p.description || '') && (description || '') ? '|' : ''
-      }${description || ''}`
+        }${description || ''}`
       const pCreated = await Property.create({
         scope,
         name: p.name,
@@ -728,6 +739,7 @@ export default class MigrateService {
       } else {
         mod = repository.modules[findIndex]
       }
+
       for (const action in paths) {
         const apiObj = paths[action][Object.keys(paths[action])[0]]
         const method = Object.keys(paths[action])[0]
@@ -783,7 +795,7 @@ export default class MigrateService {
               moduleId: mod.id,
               name: `${apiObj.summary}`,
               description: apiObj.description,
-              url: `https//${host}${url.replace('-test', '')}`,
+              url: `${host ? `https://${host}` : ''}${url.replace('-test', '')}`,
               priority: iCounter++,
               creatorId: curUserId,
               repositoryId: repositoryId,
@@ -806,7 +818,7 @@ export default class MigrateService {
                 moduleId: mod.id,
                 name: `${apiObj.summary}`,
                 description: apiObj.description,
-                url: `https//${host}${url.replace('-test', '')}`,
+                url: `${host ? `https://${host}` : ''}${url.replace('-test', '')}`,
                 repositoryId: repositoryId,
                 method: method.toUpperCase(),
               },
@@ -880,7 +892,7 @@ export default class MigrateService {
                 const { type, description, rule, value } = transformRapParams(bValue)
                 const joinDescription = `${bValue.description || ''}${
                   (bValue.description || '') && (description || '') ? '|' : ''
-                }${description || ''}`
+                  }${description || ''}`
 
                 if (index >= 0) {
                   // 属性存在 ---修改：类型；是否必填；属性说明；不修改规则和默认值(前端可能正在mock)
@@ -903,7 +915,7 @@ export default class MigrateService {
                     // 描述信息变更
                     changeTip = `${changeTip}<br/>接口名称：${apiObj.summary} [更新属性：${
                       A_ExistsProperties[index].name
-                    }属性简介由“${A_ExistsProperties[index].description ||
+                      }属性简介由“${A_ExistsProperties[index].description ||
                       '无'}”变更为“${joinDescription}”]`
                   }
 
@@ -924,9 +936,9 @@ export default class MigrateService {
                 } else {
                   changeTip = `${changeTip}<br/>接口名称：${apiObj.summary} [属性添加：${
                     bValue.name
-                  }；类型：${type} ；简介: ${bValue.description || ''}${
+                    }；类型：${type} ；简介: ${bValue.description || ''}${
                     bValue.description || '' ? '|' : ''
-                  }${description || ''} ]`
+                    }${description || ''} ]`
                   // 属性不存在
                   if (depth === 0) {
                     properties.push({
@@ -1004,9 +1016,9 @@ export default class MigrateService {
                   // A 存在，B不存在
                   changeTip = `${changeTip} <br/> 接口名称：${apiObj.summary} [属性删除：${
                     aValue.name
-                  }；类型：${type} ；简介: ${aValue.description || ''} ${
+                    }；类型：${type} ；简介: ${aValue.description || ''} ${
                     description ? `${aValue.description ? '|' : ''}${description}` : ''
-                  } ]`
+                    } ]`
                 }
               }
             }
@@ -1133,8 +1145,8 @@ export default class MigrateService {
                 `仓库：${mailRepositoryName}(${mailRepositoryId})接口更新同步`,
                 sendMailTemplate(changeTip),
               )
-                .then(() => {})
-                .catch(() => {})
+                .then(() => { })
+                .catch(() => { })
 
               // 钉钉消息发送
               // const dingMsg = {

@@ -153,6 +153,7 @@ export class MockService {
         }
       } else if (listMatched.length === 0) {
         ctx.body = { isOk: false, errMsg: '未匹配到任何接口，请检查请求类型是否一致。' }
+        ctx.status = 404
         return
       } else {
         loadDataId = listMatched[0].id
@@ -200,11 +201,10 @@ export class MockService {
         }
       }
       if (!passed) {
-        ctx.body = {
-          isOk: false,
-          errMsg: `必选参数${pFailed.name}未传值。 Required parameter ${pFailed.name} has no value.`,
-        }
-        return
+        ctx.set(
+          'X-RAP-WARNING',
+          `Required parameter ${pFailed.name} has not be passed in.`,
+        )
       }
     }
 

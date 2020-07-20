@@ -23,6 +23,12 @@ export default class UrlUtils {
     return url
   }
 
+  // 把 /pet/{id}/ 转换成 /pet/:id/
+  // https://regexr.com/537jp
+  public static convertBracePatternRestfulUrl(url: string) {
+    return url.replace(/\/{([^}]+)}/g, '/:$1')
+  }
+
   public static urlMatchesPattern = (url: string, pattern: string) => {
     url = UrlUtils.getRelative(url)
     pattern = UrlUtils.getRelative(pattern)
@@ -32,6 +38,7 @@ export default class UrlUtils {
 
   public static getUrlPattern = (pattern: string) => {
     pattern = UrlUtils.getRelative(pattern)
+    pattern = UrlUtils.convertBracePatternRestfulUrl(pattern)
     return pathToRegexp(pattern)
   }
 

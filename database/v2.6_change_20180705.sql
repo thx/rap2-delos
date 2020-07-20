@@ -1,5 +1,0 @@
-ALTER TABLE `properties`
-  ADD COLUMN `pos` INT(10) NULL DEFAULT 2;
-
-ALTER TABLE `interfaces`
-  ADD COLUMN `status` INT(10) NULL DEFAULT 200;

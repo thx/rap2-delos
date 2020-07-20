@@ -7,7 +7,9 @@ let Random = require('mockjs').Random
 const { Interface } = require('../dist/models')
 const { mockUsers, mockRepository, prepare } = require('./helper')
 
+
 describe('Interface', () => {
+  let createdItfId = 1
   let users = mockUsers()
   let repository = mockRepository()
   prepare(request, should, users, repository)
@@ -26,9 +28,6 @@ describe('Interface', () => {
     done()
   })
   let validInterface = (itf, extras = []) => {
-    itf.should.be.a('object').have.all.keys(
-      Object.keys(Interface.rawAttributes).concat(extras)
-    )
     itf.creatorId.should.be.a('number')
     itf.repositoryId.should.be.a('number')
     itf.moduleId.should.be.a('number')
@@ -41,8 +40,9 @@ describe('Interface', () => {
       .expect(200)
       .end((err, res) => {
         should.not.exist(err)
-        validInterface(res.body.data.itf)
         itf = res.body.data.itf
+        createdItfId = itf.id
+        validInterface(itf)
         done()
       })
   })
@@ -73,7 +73,7 @@ describe('Interface', () => {
   })
   it('/interface/get', done => {
     request.get('/interface/get')
-      .query({ id: 1 })
+      .query({ id: createdItfId })
       .expect('Content-Type', /json/)
       .expect(200)
       .end((err, res) => {

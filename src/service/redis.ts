@@ -1,11 +1,19 @@
 import * as redis from 'redis'
 import config from '../config'
 import * as ioredis from 'ioredis'
+import { THEME_TEMPLATE_KEY } from '../routes/utils/const'
 
 export enum CACHE_KEY {
   REPOSITORY_GET = 'REPOSITORY_GET',
   PWDRESETTOKEN_GET = 'PWDRESETTOKEN_GET',
   REPOSITORY_GET_EXCLUDE_PROPERTY = 'REPOSITORY_GET_EXCLUDE_PROPERTY',
+  /** GLOBAL PERSONAL PREFERENCES */
+  THEME_ID = 'THEME_ID',
+  GUIDE_20200714 = 'GUIDE_20200714',
+}
+
+export const DEFAULT_CACHE_VAL = {
+  [CACHE_KEY.THEME_ID]: THEME_TEMPLATE_KEY.RED
 }
 
 export default class RedisService {

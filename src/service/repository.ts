@@ -1,8 +1,11 @@
-import { Repository, RepositoriesMembers, Interface, Property, Module } from '../models'
+import { Repository, RepositoriesMembers, Interface, Property, Module, HistoryLog, User } from '../models'
 import { MoveOp } from '../models/bo/interface'
 import RedisService, { CACHE_KEY } from '../service/redis'
 import { AccessUtils, ACCESS_TYPE } from '../routes/utils/access'
 import OrganizationService from './organization'
+import { ENTITY_TYPE } from '../routes/utils/const'
+import { Op, col, fn } from 'sequelize'
+import { IPager } from '../types'
 
 export default class RepositoryService {
   public static async canUserAccessRepository(
@@ -151,5 +154,43 @@ export default class RepositoryService {
       RedisService.delCache(CACHE_KEY.REPOSITORY_GET, fromRepoId),
       RedisService.delCache(CACHE_KEY.REPOSITORY_GET, destRepoId),
     ])
+  }
+
+  public static async addHistoryLog(log: Partial<HistoryLog>) {
+    await HistoryLog.create(log)
+  }
+
+  public static async getHistoryLog(entityId: number, entityType: ENTITY_TYPE.INTERFACE | ENTITY_TYPE.REPOSITORY, pager: IPager) {
+    const { offset, limit } = pager
+    const baseCon = { entityType: entityType, entityId: entityId }
+    const isRepo = entityType === ENTITY_TYPE.REPOSITORY
+    let relatedInterfaceIds: number[] = []
+    if (isRepo) {
+      const interfaces = await Interface.findAll({ attributes: ['id'], where: { repositoryId: entityId } })
+      relatedInterfaceIds = interfaces.map(x => x.id)
+    }
+    return (await HistoryLog.findAndCountAll({
+      attributes: ['id', 'changeLog', 'entityId', 'entityType', 'userId', 'createdAt', [fn('isnull', col('relatedJSONData')), 'jsonDataIsNull']],
+      where: {
+        ...relatedInterfaceIds.length === 0 ? baseCon : {
+          [Op.or]: [baseCon, {
+            entityType: ENTITY_TYPE.INTERFACE,
+            entityId: { [Op.in]: relatedInterfaceIds },
+          }]
+        },
+      },
+      include: [{
+        attributes: ['id', 'fullname', 'empId'],
+        model: User,
+        as: 'user',
+      }],
+      order: [['id', 'desc']],
+      offset,
+      limit,
+    }))
+  }
+
+  public static async getHistoryLogJSONData(id: number) {
+    return (await HistoryLog.findByPk(id))?.relatedJSONData
   }
 }

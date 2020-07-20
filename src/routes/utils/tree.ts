@@ -46,7 +46,7 @@ export default class Tree {
   public static TreeToTemplate(tree: any) {
     const vm = new VM({
       sandbox: {},
-      timeout: 1000
+      timeout: 3000
     })
     function parse(item: any, result: any) {
       let rule = item.rule ? '|' + item.rule : ''
@@ -137,7 +137,7 @@ export default class Tree {
     // https://nodejs.org/dist/latest-v7.x/docs/api/vm.html
     const vm = new VM({
       sandbox: { mock: Mock.mock, template, },
-      timeout: 1000
+      timeout: 3000
     })
     try {
       let data: any = vm.run('mock(template)')

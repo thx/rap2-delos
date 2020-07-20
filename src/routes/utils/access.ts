@@ -29,6 +29,18 @@ export class AccessUtils {
     if (inTestMode) {
       return true
     }
+    // 内网全可读
+    const {
+      ORGANIZATION_GET,
+      REPOSITORY_GET,
+      MODULE_GET,
+      INTERFACE_GET,
+      PROPERTY_GET,
+    } = ACCESS_TYPE
+    const GET_TYPES = [ORGANIZATION_GET, REPOSITORY_GET, MODULE_GET, INTERFACE_GET, PROPERTY_GET]
+    if (GET_TYPES.includes(accessType)) {
+      return true
+    }
 
     // 无 session 且无 toeken 时拒绝访问
     if (!curUserId && !token) {
