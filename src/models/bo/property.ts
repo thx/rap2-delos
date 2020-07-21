@@ -1,13 +1,15 @@
 import { Table, Column, Model, AutoIncrement, PrimaryKey, AllowNull, DataType, Default, BelongsTo, ForeignKey } from 'sequelize-typescript'
 import { User, Interface, Module, Repository } from '../'
 
-export enum SCOPES { REQUEST = 'request', RESPONSE = 'response' }
+export enum SCOPES { REQUEST = 'request', RESPONSE = 'response', SCRIPT = 'script' }
 export enum TYPES { STRING = 'String', NUMBER = 'Number', BOOLEAN = 'Boolean', OBJECT = 'Object', ARRAY = 'Array', FUNCTION = 'Function', REGEXP = 'RegExp', Null = 'Null' }
 
 export enum REQUEST_PARAMS_TYPE {
   HEADERS = 1,
   QUERY_PARAMS = 2,
   BODY_PARAMS = 3,
+  PRE_REQUEST_SCRIPT = 4,
+  TESTS = 5
 }
 
 @Table({ paranoid: true, freezeTableName: false, timestamps: true })
