@@ -2,6 +2,7 @@ import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, Da
 import { User, Module, Repository, Property } from '../'
 import RedisService, { CACHE_KEY } from '../../service/redis'
 import * as Sequelize from 'sequelize'
+import { BODY_OPTION } from '../../routes/utils/const'
 
 const Op = Sequelize.Op
 
@@ -67,6 +68,9 @@ export default class Interface extends Model<Interface> {
   @AllowNull(false)
   @Column({ comment: 'API method' })
   method: string
+
+  @Column({ type: DataType.STRING(255) })
+  bodyOption?: BODY_OPTION
 
   @Column(DataType.TEXT)
   description: string

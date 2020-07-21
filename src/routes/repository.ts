@@ -626,7 +626,7 @@ router.post('/repository/defaultVal/update/:id', async (ctx) => {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  const list = ctx.request.body.list
+  const list = ctx.request.body.list.map(x => { const { id, ...y } = x; return y })
   if (!(repositoryId > 0) || !list) {
     ctx.body = Consts.COMMON_ERROR_RES.ERROR_PARAMS
     return
@@ -964,13 +964,18 @@ router.post('/property/update', isLoggedIn, async (ctx) => {
 
 router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   const itfId = +ctx.query.itf
-  let { properties } = ctx.request.body as { properties: Property[], summary: Interface }
+  let { properties, summary } = ctx.request.body as { properties: Property[], summary: Interface }
   properties = Array.isArray(properties) ? properties : [properties]
 
   let itf = await Interface.findByPk(itfId)
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE_SET, ctx.session.id, itfId)) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
+  }
+
+  if (summary.bodyOption) {
+    itf.bodyOption = summary.bodyOption
+    await itf.save()
   }
 
 

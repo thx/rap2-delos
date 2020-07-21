@@ -34,3 +34,10 @@ export enum THEME_TEMPLATE_KEY {
   PURPLE = 'PURPLE',
   CYAN = 'CYAN',
 }
+
+export enum BODY_OPTION {
+  FORM_DATA = 'FORM_DATA',
+  FORM_URLENCODED = 'FORM_URLENCODED',
+  RAW = 'RAW',
+  BINARY = 'BINARY',
+}
