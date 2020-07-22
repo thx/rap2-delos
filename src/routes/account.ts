@@ -401,7 +401,7 @@ router.post('/account/findpwd', async (ctx) => {
     }
   }
   ctx.body = {
-    data: !errMsg ? {isOk: true} : { isOk: false, errMsg }
+    data: !errMsg ? { isOk: true } : { isOk: false, errMsg }
   }
 })
 
@@ -443,8 +443,33 @@ router.post('/account/findpwd/reset', async (ctx) => {
         }
       }
     }
-}
+  }
   ctx.body = {
-    data: !errMsg ? {isOk: true} : { isOk: false, errMsg }
+    data: !errMsg ? { isOk: true } : { isOk: false, errMsg }
+  }
+})
+
+router.post('/account/updateAccount', async ctx => {
+  try {
+    const { password, fullname } = ctx.request.body as { password: string, fullname: string }
+    if (!ctx.session?.id) {
+      throw new Error('需先登录才能操作')
+    }
+    const user = await User.findByPk(ctx.session.id)
+    if (password) {
+      user.password = md5(md5(password))
+    }
+    if (fullname) {
+      user.fullname = fullname
+    }
+    await user.save()
+    ctx.body = {
+      isOk: true
+    }
+  } catch (ex) {
+    ctx.body = {
+      isOk: false,
+      errMsg: ex.message,
+    }
   }
 })
