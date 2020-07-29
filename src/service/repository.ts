@@ -180,7 +180,7 @@ export default class RepositoryService {
         },
       },
       include: [{
-        attributes: ['id', 'fullname', 'empId'],
+        attributes: ['id', 'fullname'],
         model: User,
         as: 'user',
       }],
