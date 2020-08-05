@@ -1,4 +1,4 @@
-import { Repository, Module, Interface, Property, QueryInclude, User } from '../models'
+import { Repository, Module, Interface, Property, User, QueryInclude } from '../models'
 import { SCOPES } from '../models/bo/property'
 import Tree from '../routes/utils/tree'
 import * as JSON5 from 'json5'
@@ -8,10 +8,8 @@ import { Op } from 'sequelize'
 import RedisService, { CACHE_KEY } from './redis'
 import MailService from './mail'
 import * as md5 from 'md5'
-// import DingPushService from './ding.push'
-// import sequelize from '../models/sequelize'
-import * as _ from 'lodash'
 const isMd5 = require('is-md5')
+import * as _ from 'lodash'
 
 const safeEval = require('notevil')
 
@@ -429,7 +427,6 @@ export default class MigrateService {
             let description = []
             if (p.name) description.push(p.name)
             if (p.remark && remarkWithoutMock) description.push(remarkWithoutMock)
-
             const pCreated = await Property.create({
               scope,
               name,
@@ -739,7 +736,6 @@ export default class MigrateService {
       } else {
         mod = repository.modules[findIndex]
       }
-
       for (const action in paths) {
         const apiObj = paths[action][Object.keys(paths[action])[0]]
         const method = Object.keys(paths[action])[0]
@@ -1176,7 +1172,7 @@ export default class MigrateService {
   }
 
   /** 可以直接让用户把自己本地的 data 数据导入到 RAP 中 */
-  public static async importRepoFromJSON(data: JsonData, curUserId: number) {
+  public static async importRepoFromJSON(data: JsonData, curUserId: number, createRepo: boolean = false, orgId?: number) {
     function parseJSON(str: string) {
       try {
         const data = JSON5.parse(str)
@@ -1184,6 +1180,21 @@ export default class MigrateService {
       } catch (error) {
         return {}
       }
+    }
+
+    if (createRepo) {
+      if (orgId === undefined) {
+        throw new Error("orgId is essential while createRepo = true")
+      }
+      const repo = await Repository.create({
+          name: data.name,
+          description: data.description,
+          visibility: true,
+          ownerId: curUserId,
+          creatorId: curUserId,
+          organizationId: orgId,
+      })
+      data.id = repo.id
     }
 
     const repositoryId = data.id
@@ -1248,6 +1259,7 @@ export default class MigrateService {
                   value: pData.value,
                   type: pData.type,
                   description: pData.description,
+                  pos: pData.pos,
                   priority: index + 1,
                   interfaceId: itf.id,
                   creatorId: curUserId,
@@ -1304,6 +1316,8 @@ interface JsonData {
    * 要导入的目标 repo id 名
    */
   id: number
+  name?: string
+  description?: string
   modules: {
     name: string
     description?: string

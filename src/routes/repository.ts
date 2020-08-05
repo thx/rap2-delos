@@ -18,6 +18,7 @@ import nanoid = require('nanoid')
 import { LOG_SEPERATOR, LOG_SUB_SEPERATOR } from '../models/bo/historyLog'
 import { ENTITY_TYPE } from './utils/const'
 import { IPager } from '../types'
+import * as JSON5 from 'json5'
 
 router.get('/app/get', async (ctx, next) => {
   let data: any = {}
@@ -1115,13 +1116,22 @@ router.post('/repository/import', isLoggedIn, async (ctx) => {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  const result = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl, +version, projectData)
-  ctx.body = {
-    isOk: result,
-    message: result ? '导入成功' : '导入失败',
-    repository: {
-      id: 1,
+  let success = false
+  let message = ''
+  try {
+    if (+version === 3) {
+      await MigrateService.importRepoFromJSON(JSON5.parse(projectData).data, ctx.session.id, true, orgId)
+      success = true
+    } else {
+      success = await MigrateService.importRepoFromRAP1DocUrl(orgId, ctx.session.id, docUrl, +version, projectData)
     }
+  } catch (ex) {
+    success = false
+    message = ex.message
+  }
+  ctx.body = {
+    isOk: success,
+    message: success ? '导入成功' : `导入失败：${message}`,
   }
 })
 
