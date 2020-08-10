@@ -8,7 +8,7 @@ const start = () => {
   let open = false
   console.log('----------------------------------------')
   app.listen(port, () => {
-    console.log(`rap2-dolores is running as ${url}`)
+    console.log(`rap2-delos is running as ${url}`)
     if (!open) return
     try {
       execSync(`osascript openChrome.applescript ${url}`, { cwd: __dirname, stdio: 'ignore' })
