@@ -487,10 +487,10 @@ export default class MigrateService {
         domain = 'http://' + domain
       }
       domain = domain.substring(0, domain.indexOf('/', domain.indexOf('.')))
-      let result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
+      let response = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
         json: false,
       })
-      result = JSON.parse(result)
+      result = JSON.parse(response)
 
       // result =  unescape(result.modelJSON)
       result = result.modelJSON
