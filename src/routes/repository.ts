@@ -965,6 +965,8 @@ router.post('/property/update', isLoggedIn, async (ctx) => {
 
 router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   const itfId = +ctx.query.itf
+  let needBackup = false
+  let changeCount = 0
   let { properties, summary } = ctx.request.body as { properties: Property[], summary: Interface }
   properties = Array.isArray(properties) ? properties : [properties]
 
@@ -1010,6 +1012,7 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   for (const deletedProperty of deletedProperties) {
     deletedPropertyLog.push(pLog(deletedProperty, '删除了'))
   }
+  changeCount += deletedProperties.length
   deletedPropertyLog.length && itfPropertiesChangeLog.push(deletedPropertyLog.join(LOG_SUB_SEPERATOR))
 
   let result = await Property.destroy({
@@ -1033,6 +1036,7 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
         changed.push(`类型${o.type} => ${item.type}`)
       }
       changed.length && updatedPropertyLog.push(`${pLog(item, '更新了')} ${changed.join(' ')}`)
+      changeCount += changed.length
     }
     let affected = await Property.update(item, {
       where: { id: item.id },
@@ -1055,6 +1059,7 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
     item.id = created.id
     result += 1
   }
+  changeCount += newProperties.length
   addedPropertyLog.length && itfPropertiesChangeLog.push(addedPropertyLog.join(LOG_SUB_SEPERATOR))
   // 同步 parentId
   for (let item of newProperties) {
@@ -1067,12 +1072,17 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
     include: (QueryInclude.RepositoryHierarchy as any).include[0].include,
   })
 
+  if (changeCount >= 5) {
+    needBackup = true
+  }
+
   if (itfPropertiesChangeLog.length) {
     await RepositoryService.addHistoryLog({
       entityId: itf.id,
       entityType: Consts.ENTITY_TYPE.INTERFACE,
-      changeLog: `接口 ${itf.name}(${itf.url}) 参数变更： ${itfPropertiesChangeLog.join(LOG_SEPERATOR)}`,
+      changeLog: `接口 ${itf.name}(${itf.url}) 参数变更： ${itfPropertiesChangeLog.join(LOG_SEPERATOR)}${needBackup ? ', 改动较大已备份数据。' : ''}`,
       userId: ctx.session.id,
+      ...needBackup ? { relatedJSONData: JSON.stringify({ "itf": itf, "properties": properties }) } : {},
     })
   }
 
@@ -1150,6 +1160,31 @@ router.post('/repository/importswagger', isLoggedIn, async (ctx) => {
     message: result.code === 'success' ? '导入成功' : '导入失败',
     repository: {
       id: 1,
+    }
+  }
+})
+
+router.post('/repository/importRAP2Backup', isLoggedIn, async (ctx) => {
+  const { repositoryId, swagger, modId } = ctx.request.body
+  // 权限判断
+  if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY_SET, ctx.session.id, repositoryId)) {
+    ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
+    return
+  }
+
+  try {
+    await MigrateService.importInterfaceFromJSON(swagger, ctx.session.id, repositoryId, modId)
+    ctx.body = {
+      isOk: 'success',
+      message: '导入成功',
+      repository: {
+        id: 1,
+      }
+    }
+  } catch (ex) {
+    ctx.body = {
+      isOk: 'failure',
+      message: `导入失败: ${ex.message}`,
     }
   }
 })

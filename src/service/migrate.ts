@@ -1171,6 +1171,67 @@ export default class MigrateService {
     }
   }
 
+  public static async importInterfaceFromJSON(data: any, curUserId: number, repositoryId: number, modId: number) {
+
+    let itfData = data.itf
+    let properties = data.properties
+
+    const itf = await Interface.create({
+      moduleId: modId,
+      name: itfData.name,
+      description: itfData.description || '',
+      url: itfData.url,
+      priority: 1,
+      creatorId: curUserId,
+      repositoryId,
+      method: itfData.method,
+    })
+
+    if (!properties) {
+      properties = []
+    }
+
+    const idMaps: any = {}
+
+    await Promise.all(
+      properties.map(async (pData, index) => {
+        const property = await Property.create({
+          scope: pData.scope,
+          name: pData.name,
+          rule: pData.rule,
+          value: pData.value,
+          type: pData.type,
+          description: pData.description,
+          pos: pData.pos,
+          priority: 1 + index,
+          interfaceId: itf.id,
+          creatorId: curUserId,
+          moduleId: modId,
+          repositoryId,
+          parentId: -1,
+        })
+        idMaps[pData.id] = property.id
+      }),
+    )
+
+    await Promise.all(
+      properties.map(async pData => {
+        const newId = idMaps[pData.id]
+        const newParentId = idMaps[pData.parentId]
+        await Property.update(
+          {
+            parentId: newParentId,
+          },
+          {
+            where: {
+              id: newId,
+            },
+          },
+        )
+      }),
+    )
+    await RedisService.delCache(CACHE_KEY.REPOSITORY_GET, repositoryId)
+  }
   /** 可以直接让用户把自己本地的 data 数据导入到 RAP 中 */
   public static async importRepoFromJSON(data: JsonData, curUserId: number, createRepo: boolean = false, orgId?: number) {
     function parseJSON(str: string) {
@@ -1187,12 +1248,12 @@ export default class MigrateService {
         throw new Error("orgId is essential while createRepo = true")
       }
       const repo = await Repository.create({
-          name: data.name,
-          description: data.description,
-          visibility: true,
-          ownerId: curUserId,
-          creatorId: curUserId,
-          organizationId: orgId,
+        name: data.name,
+        description: data.description,
+        visibility: true,
+        ownerId: curUserId,
+        creatorId: curUserId,
+        organizationId: orgId,
       })
       data.id = repo.id
     }
