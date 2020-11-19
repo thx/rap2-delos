@@ -25,7 +25,8 @@ export enum ENTITY_TYPE {
 }
 
 export enum THEME_TEMPLATE_KEY {
-  RED = 'RED', // DEFAULT
+  INDIGO = 'INDIGO', // DEFAULT
+  RED = 'RED',
   BLACK = 'BLACK',
   BLUE = 'BLUE',
   GREEN = 'GREEN',

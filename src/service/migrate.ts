@@ -781,7 +781,7 @@ export default class MigrateService {
           const index = repository.modules.findIndex(item => {
             return (
               item.id === mod.id &&
-              item.interfaces.findIndex(it => (it.url || '').indexOf(url) >= 0) >= 0
+              item.interfaces.findIndex(it => (it.url || '') === url) >= 0
             ) // 已经存在接口
           })
 

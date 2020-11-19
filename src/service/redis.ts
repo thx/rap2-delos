@@ -13,7 +13,7 @@ export enum CACHE_KEY {
 }
 
 export const DEFAULT_CACHE_VAL = {
-  [CACHE_KEY.THEME_ID]: THEME_TEMPLATE_KEY.RED
+  [CACHE_KEY.THEME_ID]: THEME_TEMPLATE_KEY.INDIGO
 }
 
 export default class RedisService {

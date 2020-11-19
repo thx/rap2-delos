@@ -971,6 +971,7 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   properties = Array.isArray(properties) ? properties : [properties]
 
   let itf = await Interface.findByPk(itfId)
+
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.INTERFACE_SET, ctx.session.id, itfId)) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
@@ -1005,6 +1006,8 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
   const existingPropertyIds = existingProperties.map(x => x.id)
 
   const originalProperties = await Property.findAll({ where: { interfaceId: itfId } })
+
+  const backupJSON = JSON.stringify({ "itf": itf, "properties": originalProperties })
 
   const deletedProperties = originalProperties.filter(x => existingPropertyIds.indexOf(x.id) === -1)
 
@@ -1082,7 +1085,7 @@ router.post('/properties/update', isLoggedIn, async (ctx, next) => {
       entityType: Consts.ENTITY_TYPE.INTERFACE,
       changeLog: `接口 ${itf.name}(${itf.url}) 参数变更： ${itfPropertiesChangeLog.join(LOG_SEPERATOR)}${needBackup ? ', 改动较大已备份数据。' : ''}`,
       userId: ctx.session.id,
-      ...needBackup ? { relatedJSONData: JSON.stringify({ "itf": itf, "properties": properties }) } : {},
+      ...needBackup ? { relatedJSONData: backupJSON } : {},
     })
   }
 
