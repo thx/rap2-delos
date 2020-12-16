@@ -287,6 +287,11 @@ const transformRapParams = p => {
     if (orderArgs) value = `[${orderArgs[1]}]`
   }
 
+  if (['String', 'Number', 'Boolean', 'Object', 'Array', 'Function', 'RegExp', 'Null'].indexOf(type) === -1) {
+    /** File暂时不支持，用Null代替 */
+    type = 'Null'
+  }
+
   return {
     type,
     rule,
@@ -584,7 +589,7 @@ export default class MigrateService {
     if (!successObj) return []
 
     const { schema } = successObj
-    if (!schema.$ref) {
+    if (!schema?.$ref) {
       // 没有按照接口规范返回数据结构,默认都是对象
       return []
     }
@@ -766,7 +771,7 @@ export default class MigrateService {
 
           const request = await this.swaggerToModelRequest(
             swagger,
-            apiObj.parameters || {},
+            apiObj.parameters || [],
             method,
             { url, summary },
           )
