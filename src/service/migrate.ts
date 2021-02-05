@@ -517,7 +517,7 @@ export default class MigrateService {
     const result = []
     definitions = JSON.parse(JSON.stringify(definitions)) // 防止接口之间数据处理相互影响
 
-    if (method === 'get' || method === 'GET') {
+    if (Array.isArray(parameters) && method === 'get' || method === 'GET') {
       parse(
         parameters.filter(item => item.in !== 'body') || [],
         'root',
