@@ -54,7 +54,8 @@ export default class Tree {
       if (
         item.value &&
         item.value.indexOf('[') === 0 &&
-        item.value.substring(item.value.length - 1) === ']'
+        item.value.substring(item.value.length - 1) === ']' &&
+        !!rule
       ) {
         try {
           result[item.name + rule] = vm.run(`(${item.value})`)

@@ -1178,8 +1178,8 @@ export default class MigrateService {
 
   public static async importInterfaceFromJSON(data: any, curUserId: number, repositoryId: number, modId: number) {
 
-    let itfData = data.itf
-    let properties = data.properties
+    let itfData = data.itf ? data.itf : data
+    let properties = data.itf ? data.properties : itfData?.properties
 
     const itf = await Interface.create({
       moduleId: modId,

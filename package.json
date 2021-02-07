@@ -106,7 +106,6 @@
     "typescript": "^3.8.3"
   },
   "pre-commit": [
-    "check",
-    "test"
+    "check"
   ]
 }

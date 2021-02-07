@@ -29,6 +29,7 @@ let config: IConfigOptions = {
   redis: {
     host: process.env.REDIS_URL || 'localhost',
     port: (process.env.REDIS_PORT && parseInt(process.env.REDIS_PORT)) || 6379,
+    password: process.env.REDIS_PWD || undefined,
   },
   mail: {
     host: process.env.MAIL_HOST ?? 'smtp.aliyun.com',

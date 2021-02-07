@@ -38,7 +38,7 @@ app.use(cors({
 }))
 app.use(async (ctx, next) => {
   await next()
-  if (typeof ctx.body === 'object' && ctx.body.data !== undefined) {
+  if (typeof ctx.body === 'object' && ctx.body?.data !== undefined) {
     ctx.type = 'json'
     ctx.body = JSON.stringify(ctx.body, undefined, 2)
   }

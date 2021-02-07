@@ -7,7 +7,7 @@ const arrayToTree = (list: any[]): any => {
   const getValue = (parent: any) => {
     const children = list.filter((item: any) => item.parentId === parent.id)
     if (!children.length) {
-      return `${parent.type} ${parent.description ? `(${parent.description})` : ''}`
+      return `${parent.type} ${parent.required ? '(必选)' : ''} ${parent.description ? `(${parent.description})` : ''}`
     }
     const obj: { [k: string]: any } = {}
     children.forEach((e: any) => {
