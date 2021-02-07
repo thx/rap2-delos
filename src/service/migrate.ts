@@ -513,7 +513,7 @@ export default class MigrateService {
     method: string,
     apiInfo: any,
   ): Promise<any> {
-    let { definitions } = swagger
+    let { definitions = {} } = swagger
     const result = []
     definitions = JSON.parse(JSON.stringify(definitions)) // 防止接口之间数据处理相互影响
 
