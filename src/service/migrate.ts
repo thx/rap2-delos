@@ -492,10 +492,10 @@ export default class MigrateService {
         domain = 'http://' + domain
       }
       domain = domain.substring(0, domain.indexOf('/', domain.indexOf('.')))
-      let result = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
+      const response = await rp(`${domain}/api/queryRAPModel.do?projectId=${projectId}`, {
         json: false,
       })
-      result = JSON.parse(result)
+      result = JSON.parse(response)
 
       // result =  unescape(result.modelJSON)
       result = result.modelJSON
@@ -513,11 +513,11 @@ export default class MigrateService {
     method: string,
     apiInfo: any,
   ): Promise<any> {
-    let { definitions } = swagger
+    let { definitions = {} } = swagger
     const result = []
     definitions = JSON.parse(JSON.stringify(definitions)) // 防止接口之间数据处理相互影响
 
-    if (method === 'get' || method === 'GET') {
+    if (Array.isArray(parameters) && method === 'get' || method === 'GET') {
       parse(
         parameters.filter(item => item.in !== 'body') || [],
         'root',
