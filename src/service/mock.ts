@@ -210,7 +210,7 @@ export class MockService {
 
     properties = properties.map((item: any) => item.toJSON())
 
-    // DONE 2.2 支持引用请求参数
+    // 支持引用请求参数
     let requestProperties: any = await Property.findAll({
       attributes,
       where: { interfaceId, scope: 'request' },

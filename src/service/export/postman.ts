@@ -59,7 +59,7 @@ export default class PostmanService {
             url: {
               raw: `{{url}}${relativeUrl}`,
               host: '{{url}}',
-              port: parseResult.port || '',
+              port: parseResult.port || null,
               hash: parseResult.hash,
               path: [parseResult.path],
               query: getQuery(requestParams),

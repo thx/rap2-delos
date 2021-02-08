@@ -169,29 +169,36 @@ export default class Tree {
       // DONE 2.2 支持引用请求参数
       let keys = Object.keys(template).map(item => item.replace(RE_KEY, '$1'))
       let extraKeys = _.difference(Object.keys(extra), keys)
-      let scopedData = Tree.TemplateToData(
-        Object.assign({}, _.pick(extra, extraKeys), template),
-      )
-      for (const key in scopedData) {
-        if (!scopedData.hasOwnProperty(key)) continue
-        let data = scopedData[key]
-        for (const eKey in extra) {
-          if (!extra.hasOwnProperty(eKey)) continue
-          const pattern = new RegExp(`\\$${eKey}\\$`, 'g')
-          if (data && pattern.test(data)) {
-            let result = data.replace(pattern, extra[eKey])
-            const p = propertyMap[key]
-            if (p) {
-              if (p.type === 'Number') {
-                result = +result || 1
-              } else if (p.type === 'Boolean') {
-                result = result === 'true' || !!+result
+      let scopedData = Tree.TemplateToData(Object.assign({}, _.pick(extra, extraKeys), template))
+
+      const recursivelyFillData = (node: any) => {
+        for (const key in node) {
+          if (!node.hasOwnProperty(key)) continue
+          let data = node[key]
+          if (_.isObject(data)) {
+            recursivelyFillData(data)
+            continue
+          }
+          for (const eKey in extra) {
+            if (!extra.hasOwnProperty(eKey)) continue
+            const pattern = new RegExp(`\\$${eKey}\\$`, 'g')
+            if (data && pattern.test(data)) {
+              let result = data.replace(pattern, extra[eKey])
+              const p = propertyMap[key]
+              if (p) {
+                if (p.type === 'Number') {
+                  result = +result || 1
+                } else if (p.type === 'Boolean') {
+                  result = result === 'true' || !!+result
+                }
               }
+              data = node[key] = result
             }
-            data = scopedData[key] = result
           }
         }
       }
+
+      recursivelyFillData(scopedData)
       data = _.pick(scopedData, keys)
     } else {
       data = Tree.TemplateToData(template)
