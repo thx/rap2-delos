@@ -1247,3 +1247,10 @@ router.get('/interface/history/JSONData/:id', isLoggedIn, async ctx => {
   ctx.set('Content-type', 'text/html; charset=UTF-8')
   ctx.body = await RepositoryService.getHistoryLogJSONData(historyLogId)
 })
+
+router.get('/interface/backup/JSONData/:id', isLoggedIn, async ctx => {
+  const itfId = +ctx.params.id
+  ctx.set('Content-disposition', `attachment; filename=interface_backup_${itfId}`)
+  ctx.set('Content-type', 'text/html; charset=UTF-8')
+  ctx.body = await RepositoryService.getInterfaceJSONData(itfId)
+})

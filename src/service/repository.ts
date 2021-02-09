@@ -193,4 +193,10 @@ export default class RepositoryService {
   public static async getHistoryLogJSONData(id: number) {
     return (await HistoryLog.findByPk(id))?.relatedJSONData
   }
+
+  public static async getInterfaceJSONData(id: number) {
+    const itf = await Interface.findByPk(id)
+    const properties = await Property.findAll({ where: { interfaceId: id } })
+    return JSON.stringify({ "itf": itf, "properties": properties })
+  }
 }
