@@ -28,7 +28,8 @@ router.get('/test/test.status', (ctx) => {
 // proxy
 router.get('/proxy', async(ctx) => {
   let { target } = ctx.query
-  let json = await fetch(target).then(res => res.json())
+  console.log(`      <=> ${target}`)
+  let json = await fetch(target as string).then(res => res.json())
   ctx.type = 'json'
   ctx.body = json
 })

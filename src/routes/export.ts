@@ -52,7 +52,7 @@ router.get('/export/markdown', async ctx => {
   if (!(repoId > 0)) {
     ctx.data = COMMON_ERROR_RES.ERROR_PARAMS
   }
-  ctx.body = await MarkdownService.export(repoId, ctx.query.origin)
+  ctx.body = await MarkdownService.export(repoId, ctx.query.origin as string)
 })
 
 router.get('/export/docx', async ctx => {
@@ -71,7 +71,7 @@ router.get('/export/docx', async ctx => {
     ctx.data = COMMON_ERROR_RES.ERROR_PARAMS
   }
   const repository = await Repository.findByPk(repoId)
-  ctx.body = await DocxService.export(repoId, ctx.query.origin)
+  ctx.body = await DocxService.export(repoId, ctx.query.origin as string)
   ctx.set(
     'Content-Disposition',
     `attachment; filename="RAP-${encodeURI(
