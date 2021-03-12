@@ -1,6 +1,6 @@
 # RAP2-DELOS 开源社区版本 (后端 API 服务器)
 
-[![Build Status](https://travis-ci.org/thx/rap2-delos.svg?branch=master)](https://travis-ci.org/thx/rap2-delos)
+阿里妈妈 THX 团队新项目 GoGoCode：https://github.com/thx/gogocode 给批量修改项目代码减轻痛苦！
 
 RAP2 是在 RAP1 基础上重做的新项目，它能给你提供方便的接口文档管理、Mock、导出等功能，包含两个组件(对应两个 Github Repository)。
 
