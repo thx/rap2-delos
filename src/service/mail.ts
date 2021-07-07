@@ -14,7 +14,7 @@ export default class MailService {
             if (error) {
               reject(error)
             } else {
-              resolve(info.response)
+              resolve(info.messageId)
             }
           })
         }
@@ -41,7 +41,7 @@ export default class MailService {
             if (error) {
               reject(error)
             } else {
-              resolve(info.response)
+              resolve(info.messageId)
             }
           })
         }

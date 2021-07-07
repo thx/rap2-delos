@@ -615,14 +615,14 @@ router.get('/interface/list', async (ctx) => {
 })
 
 router.get('/repository/defaultVal/get/:id', async (ctx) => {
-  const repositoryId: number = ctx.params.id
+  const repositoryId: number = +ctx.params.id
   ctx.body = {
     data: await DefaultVal.findAll({ where: { repositoryId } })
   }
 })
 
 router.post('/repository/defaultVal/update/:id', async (ctx) => {
-  const repositoryId: number = ctx.params.id
+  const repositoryId: number = +ctx.params.id
   if (!await AccessUtils.canUserAccess(ACCESS_TYPE.REPOSITORY_SET, ctx.session.id, repositoryId)) {
     ctx.body = Consts.COMMON_ERROR_RES.ACCESS_DENY
     return
