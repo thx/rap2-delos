@@ -8,7 +8,7 @@ RAP2 是在 RAP1 基础上重做的新项目，它能给你提供方便的接口
 - rap2-dolores: 前端静态资源，基于 React [link](http://github.com/thx/rap2-dolores)
 
 
-**因为RAP原作者Bosn已离职，so未来Bosn维护的版本将在新仓库迭代
+**因为RAP原作者Bosn已离职，so未来Bosn维护的版本将在新仓库迭代**
 
 - 现有仓库，由阿里的同事继续维护，感谢Alimama，最棒的一流的FE Team！
 - 新仓库 [client](https://github.com/infra-fe/rap-client) [server](https://github.com/infra-fe/rap-server) 欢迎大家Star & Fork，会有专项人力持续迭代改进哦！
