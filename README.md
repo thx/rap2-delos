@@ -165,6 +165,7 @@ npm start
 - [rap2-javabean 自动从 Rap 接口生成 Java Bean](https://github.com/IndiraFinish/rap2-javabean)
 - [rap2-generator 把 Java Bean 生成到 Rap](https://github.com/kings1990/rap2-generator)
 - [yapix 一键生成接口文档, 上传到yapi, rap2, eolinker等](https://github.com/jetplugins/yapix)
+- [@antmjs/rapper **本地维护ts类型**同步mock到rap文档/rap文档同步到本地ts类型以及生成请求函数](https://github.com/AntmJS/antm/tree/main/packages/rapper)
 
 ## Author
 
