@@ -53,6 +53,7 @@ services:
     # expose 33306 to client (navicat)
     #ports:
     #   - 33306:3306
+    # 下面MYSQL_USER 如果使用root会有 MYSQL_USER="root", MYSQL_PASSWORD cannot be used for the root user 错误导致mysql无法启动，改成“user”可以正常启动！
     volumes:
       # change './docker/mysql/volume' to your own path
       # WARNING: without this line, your data will be lost.
@@ -61,5 +62,5 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: "rap2"
-      MYSQL_USER: "root"
+      MYSQL_USER: "name"
       MYSQL_PASSWORD: ""
