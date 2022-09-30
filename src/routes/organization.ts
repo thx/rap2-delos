@@ -39,7 +39,7 @@ router.get('/organization/list', async (ctx) => {
   const { name } = ctx.query
   const total = await OrganizationService.getAllOrganizationIdListNum(curUserId)
   const pagination = new Pagination(total, ctx.query.cursor || 1, ctx.query.limit || 100)
-  const organizationIds = await OrganizationService.getAllOrganizationIdList(curUserId, pagination, name)
+  const organizationIds = await OrganizationService.getAllOrganizationIdList(curUserId, pagination, name as string)
   const options: FindOptions = {
     where: {
       id: {
@@ -117,7 +117,7 @@ router.get('/organization/get', async (ctx) => {
     ctx.body = COMMON_ERROR_RES.ACCESS_DENY
     return
   }
-  const organization = await Organization.findByPk(ctx.query.id, {
+  const organization = await Organization.findByPk(+ctx.query.id, {
     attributes: { exclude: [] },
     include: [QueryInclude.Creator, QueryInclude.Owner, QueryInclude.Members],
   } as any)
