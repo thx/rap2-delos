@@ -782,11 +782,13 @@ export default class MigrateService {
           // 处理完每个接口请求参数后，如果-遇到第一个存在接口不符合规范就全部返回
           if (checkSwaggerResult.length > 0) break
 
+          const realUrl = `${host ? `https://${host}` : ''}${url.replace('-test', '')}`
+
           // 判断对应模块是否存在该接口
           const index = repository.modules.findIndex(item => {
             return (
               item.id === mod.id &&
-              item.interfaces.findIndex(it => (it.url || '') === url) >= 0
+              item.interfaces.findIndex(it => (it.url || '') === realUrl) >= 0
             ) // 已经存在接口
           })
 
@@ -796,7 +798,7 @@ export default class MigrateService {
               moduleId: mod.id,
               name: `${apiObj.summary}`,
               description: apiObj.description,
-              url: `${host ? `https://${host}` : ''}${url.replace('-test', '')}`,
+              url: realUrl,
               priority: iCounter++,
               creatorId: curUserId,
               repositoryId: repositoryId,
@@ -819,7 +821,7 @@ export default class MigrateService {
                 moduleId: mod.id,
                 name: `${apiObj.summary}`,
                 description: apiObj.description,
-                url: `${host ? `https://${host}` : ''}${url.replace('-test', '')}`,
+                url: realUrl,
                 repositoryId: repositoryId,
                 method: method.toUpperCase(),
               },
