@@ -61,5 +61,6 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: "rap2"
-      MYSQL_USER: "root"
+  #   新版docker可能需要注释掉这个选项，否则无法启动 见 https://stackoverflow.com/questions/66831863/mysql-docker-container-keeps-restarting
+  #    MYSQL_USER: "root"
       MYSQL_PASSWORD: ""
